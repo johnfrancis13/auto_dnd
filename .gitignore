@@ -1,0 +1,8 @@
+data/backgrounds.json
+data/classes.json
+data/items.json
+data/monsters.json
+data/species.json
+data/spells.json
+
+src/__pycache__/

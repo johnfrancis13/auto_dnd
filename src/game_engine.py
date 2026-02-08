@@ -1,0 +1,189 @@
+# import random as random
+# from abc import ABC, abstractmethod
+# from typing import Optional, Dict
+# from dataclasses import dataclass
+
+# class Dice:
+#     @staticmethod
+#     def roll(sides=20):
+#         return random.randint(1, sides)
+    
+# @dataclass
+# class DiceRequest:
+#     roll_type: str               # attack, damage, save, check
+#     dice: str                    # "1d20", "2d6"
+#     modifier: int
+#     advantage: Optional[str] = None  # advantage / disadvantage
+#     description: str = ""
+
+
+# class Action(ABC):
+#     name: str
+
+#     @abstractmethod
+#     def request_roll(self, user, target) -> DiceRequest:
+#         pass
+
+#     @abstractmethod
+#     def apply_roll(self, user, target, roll_total: int):
+#         pass
+
+# @dataclass
+# class Weapon:
+#     name: str
+#     damage_die: str          # e.g. "1d8"
+#     damage_type: str         # slashing, piercing
+#     properties: list        # finesse, heavy, etc.
+#     ability: str             # STR or DEX
+#     proficient_group: str   # martial, simple
+
+# class AttackContext:
+#     def __init__(self, attacker, target, weapon):
+#         self.attacker = attacker
+#         self.target = target
+#         self.weapon = weapon
+
+#         self.attack_bonus = 0
+#         self.damage_bonus = 0
+#         self.advantage = False
+#         self.disadvantage = False
+
+# class AttackResolver:
+#     @staticmethod
+#     def resolve(attacker, target, weapon):
+#         ctx = AttackContext(attacker, target, weapon)
+
+#         AbilityRules.apply(ctx)
+#         ProficiencyRules.apply(ctx)
+#         EquipmentRules.apply(ctx)
+#         FeatureRules.apply(ctx)
+#         ConditionRules.apply(ctx)
+
+#         roll = Dice.roll_d20(ctx)
+#         total = roll + ctx.attack_bonus
+
+#         if total >= target.armor_class:
+#             DamageResolver.resolve(ctx)
+
+
+
+# class WeaponAttackAction(Action):
+#     def __init__(self, weapon):
+#         self.weapon = weapon
+#         self.name = f"Attack with {weapon.name}"
+#         self._pending_damage = False
+
+#     def request_roll(self, user, target):
+#         if not self._pending_damage:
+#             ability_mod = user.ability_mods[self.weapon.ability]
+#             proficient = self.weapon.proficient_group in user.proficiencies
+#             mod = ability_mod + (user.proficiency_bonus if proficient else 0)
+
+#             return DiceRequest(
+#                 roll_type="attack",
+#                 dice="1d20",
+#                 modifier=mod,
+#                 description=f"Attack roll vs AC {target.armor_class}"
+#             )
+
+#         # damage roll
+#         return DiceRequest(
+#             roll_type="damage",
+#             dice=self.weapon.damage_die,
+#             modifier=user.ability_mods[self.weapon.ability],
+#             description=f"{self.weapon.damage_type} damage"
+#         )
+
+#     def apply_roll(self, user, target, roll_total: int):
+#         if not self._pending_damage:
+#             if roll_total >= target.armor_class:
+#                 self._pending_damage = True
+#                 return {"hit": True, "next": "roll_damage"}
+#             return {"hit": False}
+
+#         target.take_damage(roll_total)
+#         self._pending_damage = False
+#         return {"damage": roll_total}
+
+# class Equipment:
+#     def __init__(self):
+#         self.weapon: Optional[Weapon] = None
+
+#     def actions(self):
+#         actions = []
+#         if self.weapon:
+#             actions.append(WeaponAttackAction(self.weapon))
+#         return actions
+
+# @dataclass
+# class Spell:
+#     name: str
+#     level: int
+#     school: str
+#     casting_time: str
+#     save_ability: Optional[str] = None
+#     attack_spell: bool = False
+#     damage: Optional[str] = None
+
+# class Spellcasting:
+#     def __init__(self, ability: str):
+#         self.ability = ability
+#         self.spell_slots = {1: 0, 2: 0, 3: 0}
+#         self.spells_known: list[Spell] = []
+#         self.prepared_spells: list[Spell] = []
+
+#     def spell_attack_bonus(self, character):
+#         return (
+#             character.ability_mods[self.ability]
+#             + character.proficiency_bonus
+#         )
+
+#     def spell_save_dc(self, character):
+#         return 8 + self.spell_attack_bonus(character)
+
+#     def actions(self):
+#         return [
+#             CastSpellAction(spell)
+#             for spell in self.prepared_spells
+#         ]
+
+# class CastSpellAction(Action):
+#     def __init__(self, spell):
+#         self.spell = spell
+#         self.name = f"Cast {spell.name}"
+
+#     def request_roll(self, user, target):
+#         if self.spell.attack_spell:
+#             return DiceRequest(
+#                 roll_type="spell_attack",
+#                 dice="1d20",
+#                 modifier=user.spellcasting.spell_attack_bonus(user),
+#                 description="Spell attack roll"
+#             )
+
+#         return DiceRequest(
+#             roll_type="saving_throw",
+#             dice="1d20",
+#             modifier=0,
+#             description=f"Target makes a {self.spell.save_ability} save"
+#         )
+
+#     def apply_roll(self, user, target, roll_total):
+#         return {"roll": roll_total}
+
+
+
+# @dataclass
+# class GameState:
+#     location: str
+#     time: str
+
+#     party: Dict[str, PC]
+#     npcs: Dict[str, PC]
+
+#     world_flags: Dict[str, bool]
+#     quest_state: Dict[str, str]
+
+#     relationships: Dict[str, Dict[str, int]]
+
+#     recent_events: List[str]
