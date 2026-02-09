@@ -1,8 +1,5 @@
-data/backgrounds.json
-data/classes.json
-data/items.json
-data/monsters.json
-data/species.json
-data/spells.json
+data/woc_monsters.csv
 
 src/__pycache__/
+
+data/local/

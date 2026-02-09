@@ -1,13 +1,85 @@
-# import random as random
-# from abc import ABC, abstractmethod
-# from typing import Optional, Dict
-# from dataclasses import dataclass
+import random as random
+from abc import ABC, abstractmethod
+from typing import Optional, Dict
+from dataclasses import dataclass
+        
+class Dice:
+    @staticmethod
+    def roll(sides=20, count=1,advantage=None):
+        if advantage is None:
+            results = [random.randint(1, sides) for _ in range(count)]
+            print(f"Individual rolls: {results}")
+            total = sum(results)
+            print(f"Total: {total}")
+            return {"total":total,
+                        "dice":results}
+        if advantage=="adv":
+            if (count!=1 or sides!=20):
+                raise ValueError("advantage must be for a one d20 roll")
+            else:
+                r1 = random.randint(1, sides)
+                r2 = random.randint(1, sides)
+                print(f"Rolled: {r1} and {r2} -> taking {'highest' if advantage=="adv" else 'lowest'}: {max(r1, r2)}")
+                return {"total":max(r1, r2),
+                        "dice":[r1,r2]}
+        elif advantage=="dis":
+            if (count!=1 or sides!=20):
+                raise ValueError("advantage must be for a one d20 roll")
+            else:
+                r1 = random.randint(1, sides)
+                r2 = random.randint(1, sides)
+                print(f"Rolled: {r1} and {r2} -> taking {'highest' if advantage=="adv" else 'lowest'}: {min(r1, r2)}")
+                return {"total":min(r1, r2),
+                        "dice":[r1,r2]}
+        else:
+            raise ValueError("advantage must be one of adv or dis")
 
-# class Dice:
-#     @staticmethod
-#     def roll(sides=20):
-#         return random.randint(1, sides)
-    
+
+class DiceHandler:
+    """
+    Handles rolling dice with multiple dice specs, modifiers, and additional features.
+    Advantage/disadvantage is handled inside the Dice class, so no extra logic needed here.
+    """
+
+    def __init__(self):
+        pass
+
+    def roll(self, dice_specs, modifiers=0, features=None, advantage=None):
+        """
+        dice_specs: list of tuples [(sides, count), ...]
+        modifiers: int (flat bonuses)
+        features: list of callables (rolls, total) -> new rolls, new total
+        advantage: passed through to Dice.roll() if needed
+
+        Returns: dict with rolls and final total
+        """
+        all_rolls = []
+
+        for sides, count in dice_specs:
+            # Call Dice.roll() with count, sides, and advantage
+            result = Dice.roll(sides=sides, count=count, advantage=advantage)
+            all_rolls.extend(result["dice"])
+
+        total = sum(all_rolls)
+
+        
+        # Apply any features - these should only affect the dice?
+        if features:
+            for feature in features:
+                all_rolls, total = feature(all_rolls, total)
+
+        # Apply modifiers
+        total += modifiers        
+        
+        # Print debug info
+        if len(all_rolls) > 1 or advantage:
+            print(f"Final rolls: {all_rolls}")
+        print(f"Total after modifiers/features: {total}")
+
+        return {"total": total, "dice": all_rolls}
+
+
+
 # @dataclass
 # class DiceRequest:
 #     roll_type: str               # attack, damage, save, check

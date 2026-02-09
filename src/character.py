@@ -10,6 +10,7 @@ from conditions import ConditionManager
 from effects import EffectsManager
 from spellcasting import Spellcasting
 from classes import CharClass
+from items import Item
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 
@@ -23,7 +24,7 @@ def proficiency_bonus(level: int) -> int:
 
 # Each of the races applies a certain set of bonuses that we can auto add in
 
-
+# Main factory to create PCs
 class PCFactory:
     @staticmethod
     def create_basic(name, # str
@@ -59,7 +60,7 @@ class PCFactory:
             if set(ability_score_assignment) != expected:
                 raise ValueError(f"Keys must be exactly {expected}, got {ability_score_assignment}")
 
-        pc.ability_scores = AbilityScores(dict(zip(ability_score_assignment, ability_score_values)))
+        pc.ability_scores = AbilityScores(dict(zip(ability_score_assignment, sorted(ability_score_values, reverse=True))))
         
         # Apply race bonuses
         if pc.identity.race:
@@ -78,15 +79,7 @@ class PCFactory:
 
         return pc
 
-    
-def create_pc(name:str,
-              char_class:str,
-              level:int,
-              race:str):
-    
-    return PC_new
-
-
+# Main PC class
 class PC:
     def __init__(self, name, race, background):
         self.identity = Identity(name, race, background)
@@ -104,7 +97,7 @@ class PC:
 
 
         # Generate skill scores
-        self.skills = self.update_skills()
+        #self.skills = self.update_skills()
 
 
     def update_skills(self):
@@ -169,7 +162,7 @@ class ProficiencyManager:
         }
         self.proficiency_bonus = 1
     
-    def update_proficiency_bonus(level: int) -> int:
+    def update_proficiency_bonus(self, level: int) -> int:
         self.proficiency_bonus = 2 + (level - 1) // 4
         return self.proficiency_bonus
     
@@ -254,25 +247,35 @@ class ClassProgression:
         class_level_to_add = sum([1 for val in self.classes if val==char_class])
 
         # Add in the relevant info for the new class to the pc
-        new_class.apply(class_level_to_add, pc)
+        # new_class.apply(class_level_to_add, pc)
 
 
-
-        
 
 class ResourcePool:
     def __init__(self):
-        self.hit_points = HitPoints()
-        self.hit_die = HitPoints()
+        self.max_hit_points = 0
+        self.current_hit_points = 0
+        self.hit_die = {}
         self.death_saves = {"success":0,
                             "failure":0,}
-        self.spell_slots = SpellSlots()
+        self.spell_slots = {}
         self.class_resources = {}
 
 class Inventory:
     def __init__(self):
-        self.items = []
-        self.equipment = Equipment()
+        self.items = {}  # {Item: quantity}
+
+    def add_item(self, item, quantity=1):
+        self.items[item] = self.items.get(item, 0) + quantity
+
+    def remove_item(self, item, quantity=1):
+        if item not in self.items:
+            raise ValueError("Item not in inventory")
+
+        self.items[item] -= quantity
+        if self.items[item] <= 0:
+            del self.items[item]
+
 
 
 # Look up values from db
@@ -286,10 +289,11 @@ class Race:
 
 
     def apply(self, character):
-        character.ability_scores.apply_bonuses(self.ability_bonuses)
+        pass
+        # character.ability_scores.apply_bonuses(self.ability_bonuses)
 
-        for feature in self.features:
-            character.features.add(feature)
+        # for feature in self.features:
+        #     character.features.add(feature)
 
 
 class Background:
@@ -302,10 +306,11 @@ class Background:
 
 
     def apply(self, character):
-        character.ability_scores.apply_bonuses(self.ability_bonuses)
+        pass
+        # character.ability_scores.apply_bonuses(self.ability_bonuses)
 
-        for feature in self.features:
-            character.features.add(feature)
+        # for feature in self.features:
+        #     character.features.add(feature)
 
 
 
@@ -325,57 +330,57 @@ class ArmorClassContext:
 class ComputedStats:
     def __init__(self, pc):
         self.pc = pc
-        self._ac_cache = self.armor_class()
+    #     self._ac_cache = self.armor_class()
 
-    def armor_class(self):
+    # def armor_class(self):
+    #     pass
+    #     ctx = ArmorClassContext(self.pc)
+
+    #     # # Armor & shields
+    #     # self.pc.inventory.modify_armor_class(ctx)
+
+    #     # # Class & racial features
+    #     # self.pc.features.modify_armor_class(ctx)
+
+    #     # # Conditions (haste, restrained, etc.)
+    #     # self.pc.conditions.modify_armor_class(ctx)
+
+    #     # dex_mod = self.pc.ability_scores.modifier("dex")
+    #     if ctx.dex_cap is not None:
+    #         dex_mod = min(dex_mod, ctx.dex_cap)
+
+    #     return ctx.base + dex_mod + ctx.bonus
+    
+    # def total_level(self):
+    #     # Simple sum of all classes in ClassProgression
+
+    #     return  len(self.pc.classes.classes)
+    
+    # def initiative(self):
+    #     # Baseline based on ability, modified by any features, items, spells, etc.
+
+    #     return total_level
+    
+    # def speed(self):
+    #     # Baseline based on race, modified by any features, items, spells, etc.
+    #     speed = self.pc.race.get_speed()
+
+    #     speed += self.pc.features.modify_speed()
+    #     speed += self.pc.inventory.modify_speed()
+    #     speed += self.pc.inventory.modify_speed()
+
+    #     return total_level
+    
+    # def passive_perception(self):
+    #     # Baseline based on ability, modified by any features, items, spells, etc.
         
-        ctx = ArmorClassContext(self.pc)
 
-        # Armor & shields
-        self.pc.inventory.modify_armor_class(ctx)
-
-        # Class & racial features
-        self.pc.features.modify_armor_class(ctx)
-
-        # Conditions (haste, restrained, etc.)
-        self.pc.conditions.modify_armor_class(ctx)
-
-        dex_mod = self.pc.ability_scores.modifier("dex")
-        if ctx.dex_cap is not None:
-            dex_mod = min(dex_mod, ctx.dex_cap)
-
-        return ctx.base + dex_mod + ctx.bonus
+    #     return total_level
     
-    def total_level(self):
-        # Simple sum of all classes in ClassProgression
+    # def spell_save_dc(self):
+    #     # Baseline based on class, ability, modified by any features, items, spells, etc.
 
-        return  len(self.pc.classes.classes)
-    
-    def initiative(self):
-        # Baseline based on ability, modified by any features, items, spells, etc.
-
-        return total_level
-    
-    def speed(self):
-        # Baseline based on race, modified by any features, items, spells, etc.
-        speed = self.pc.race.get_speed()
-
-        speed += self.pc.features.modify_speed()
-        speed += self.pc.inventory.modify_speed()
-        speed += self.pc.inventory.modify_speed()
-
-        return total_level
-    
-    def passive_perception(self):
-        # Baseline based on ability, modified by any features, items, spells, etc.
-        
-
-        return total_level
-    
-    def spell_save_dc(self):
-        # Baseline based on class, ability, modified by any features, items, spells, etc.
-
-        return total_level
+    #     return total_level
 
 
 # A class to check if a pc is a valid 5e character
