@@ -13,6 +13,8 @@ from classes import CharClass
 from proficiency import ProficiencyManager
 from races import Race
 from items import Item
+from resources import ResourcePool
+from actions import ActionManager
 import ast
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
@@ -96,6 +98,7 @@ class PC:
         self.effects = EffectsManager()
 
         self.stats = ComputedStats(self)
+        self.actions = ActionManager()
 
 
         # Generate skill scores
@@ -225,19 +228,7 @@ class ClassProgression:
 
 
 
-class ResourcePool:
-    def __init__(self):
-        self.max_hit_points = 0
-        self.current_hit_points = 0
-        self.hit_die = {}
-        self.death_saves = {"success":0,
-                            "failure":0,}
-        self.spell_slots = {}
-        self.class_resources = {}
-        self.unique_resources = {}
-    
-    def add(self,resource):
-        self.unique_resources[resource[0]] = resource[1]
+
 
 class Inventory:
     def __init__(self):
