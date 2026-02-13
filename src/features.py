@@ -1,7 +1,177 @@
+from game_engine import Dice
+from proficiency import ProficiencyType
 class FeatureManager:
     def __init__(self):
-        self.features = []
+        self._features = []
+
+    def add_feature(self, feature, engine):
+        # First check if in Feature registry
+        if feature["name"] not in FEATURE_REGISTRY:
+            print("Feature does not exist or has not yet been implemented in the feature registry")
+            return None # make this an error later
+            #raise ValueError("Feature does not exist or has not yet been implemented in the feature registry")
+
+        
+        feature_class = FEATURE_REGISTRY[feature["name"]]
+        if feature_class not in self._features:
+            self._features.append(feature_class)
+            feature_class.on_attach(engine) # add permanent character level changes
+
+    def remove_feature(self, feature, engine):
+        if feature in self._features:
+            feature.on_detach(engine)
+            self._features.remove(feature) # remove permanent character level changes
+
+    def dispatch(self, engine, hook_name, *args, **kwargs):
+        """
+        Generic hook dispatcher.
+        """
+        result = None
+
+        for feature in self._features:
+            hook = getattr(feature, hook_name, None)
+            if callable(hook):
+                value = hook(engine, *args, **kwargs)
+                if value is not None:
+                    result = value
+
+        return result
+
 
 class Feature:
-    def apply(self, character):
+    def __init__(self, name, source=None):
+        self.name = name
+        self.source = source  # race, class, item, feat
+
+    # =========================
+    # Lifecycle
+    # =========================
+
+    def on_attach(self, engine):
+        """Called when feature is added to a character engine."""
         pass
+
+    def on_detach(self, engine):
+        """Called when feature is removed."""
+        pass
+
+    # =========================
+    # Passive Modifiers
+    # =========================
+
+    def modify_stat(self, engine, stat_name, value):
+        return value
+
+    def modify_speed(self, engine, speed):
+        return speed
+
+    def modify_ac(self, engine, ac):
+        return ac
+
+    def grant_proficiencies(self, engine):
+        return []
+
+    # =========================
+    # Roll Hooks
+    # =========================
+
+    def on_d20_roll(self, rolls, total):
+        pass
+
+    def on_attack_roll(self, rolls, total):
+        pass
+
+    def on_damage_roll(self, rolls, total):
+        pass
+
+    def on_ability_check(self, rolls, total):
+        pass
+
+    def on_saving_throw(self, rolls, total):
+        pass
+
+    def on_initiative(self, rolls, total):
+        pass
+
+    # =========================
+    # Combat Events
+    # =========================
+
+    def on_turn_start(self, engine):
+        pass
+
+    def on_turn_end(self, engine):
+        pass
+
+    def on_combat_start(self, engine):
+        pass
+
+    def on_combat_end(self, engine):
+        pass
+
+    def on_take_damage(self, engine, damage_context):
+        return damage_context
+
+    def on_deal_damage(self, engine, damage_context):
+        return damage_context
+
+    # =========================
+    # Activation
+    # =========================
+
+    def can_activate(self, engine):
+        """Override if feature is activatable."""
+        return False
+
+    def activate(self, engine, **kwargs):
+        """Override for active abilities."""
+        pass
+
+
+
+    
+# Features that affect dice rolls need to take rolls, total as input and output new rolls and new totals
+class HalflingLuck(Feature):
+    def on_d20_roll(self,rolls, total):
+        # reroll any 1s or 2s
+        new_rolls = [r if r > 1 else Dice.roll(sides=20, count=1)["dice"][0] for r in rolls]
+        new_total = sum(new_rolls)
+        return new_rolls, new_total
+    
+class FelineAgility(Feature):
+    def __init__(self):
+        super().__init__("Feline Agility", source="race")
+
+    def on_attach(self, engine):
+        engine.resources.add("feline_agility", 1)
+
+    def can_activate(self, engine):
+        return engine.resources.available("feline_agility") > 0
+
+    def activate(self, engine, **kwargs):
+        if engine.resources.spend("feline_agility"):
+            engine.add_condition("double_speed_until_end_of_turn")
+
+class Claws(Feature):
+    def on_attach(self, character):
+        character.climb_speed = 20
+        character.natural_weapons.append({
+            "name": "Claws",
+            "damage": "1d4",
+            "type": "slashing"
+        })
+
+class Talent(Feature):
+    def on_attach(self, character):
+        skill_additions = {ProficiencyType.SKILL: set(["Perception","Stealth"])}
+        character.proficiencies.add_proficiencies(skill_additions)
+
+
+FEATURE_REGISTRY = {
+    "Feline Agility": FelineAgility,
+    "Claws": Claws,
+    "Talent": Talent,
+    "Halfling Luck": HalflingLuck,
+}
+
+

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 import math
 import random as random
-from enum import Enum, auto
+
 import pandas as pd
 
 from features import FeatureManager
@@ -10,7 +10,10 @@ from conditions import ConditionManager
 from effects import EffectsManager
 from spellcasting import Spellcasting
 from classes import CharClass
+from proficiency import ProficiencyManager
+from races import Race
 from items import Item
+import ast
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 
@@ -19,8 +22,7 @@ def ability_modifier(score: int) -> int:
     return math.floor((score - 10) / 2)
 
 
-def proficiency_bonus(level: int) -> int:
-    return 2 + ((level - 1) // 4)
+
 
 # Each of the races applies a certain set of bonuses that we can auto add in
 
@@ -137,41 +139,6 @@ class Identity:
         self.background = background
     
 
-# Types of proficiencies one could have
-class ProficiencyType(Enum):
-    ARMOR = auto()
-    WEAPON = auto()
-    TOOL = auto()
-    SKILL = auto()
-    ABILITY = auto()
-    LANGUAGE = auto()
-    SAVE = auto()
-    
-
-# Manager class to deal with proficiency
-class ProficiencyManager:
-    def __init__(self):
-        self.proficiencies = {
-            ProficiencyType.ARMOR: set(),
-            ProficiencyType.WEAPON: set(),
-            ProficiencyType.TOOL: set(),
-            ProficiencyType.SKILL: set(),
-            ProficiencyType.ABILITY: set(),
-            ProficiencyType.LANGUAGE: set(),
-            ProficiencyType.SAVE: set(),
-        }
-        self.proficiency_bonus = 1
-    
-    def update_proficiency_bonus(self, level: int) -> int:
-        self.proficiency_bonus = 2 + (level - 1) // 4
-        return self.proficiency_bonus
-    
-    def add_proficiencies(self, source_proficiencies):
-        for prof_type, values in source_proficiencies.items():
-            self.proficiencies[prof_type].update(values)
-
-    def has_proficiency(self, prof_type, value):
-        return value in self.proficiencies[prof_type]
 
 class AbilityScoreGenerator:
     @staticmethod
@@ -227,9 +194,16 @@ class AbilityScores:
                      "CHA": 10,
                  }):
         self.scores = scores
+        self.ability_names = ["STR","DEX","CON","INT","WIS","CHA"]
 
     def modifier(self, stat):
         return (self.scores[stat] - 10) // 2
+    
+    def apply_bonuses(self, bonus_dict):
+        for key in bonus_dict:
+            if key in self.ability_names:
+                self.scores[key] = self.scores[key] + bonus_dict[key]
+                print(key,"updated by", bonus_dict[key])
 
 
 
@@ -260,6 +234,10 @@ class ResourcePool:
                             "failure":0,}
         self.spell_slots = {}
         self.class_resources = {}
+        self.unique_resources = {}
+    
+    def add(self,resource):
+        self.unique_resources[resource[0]] = resource[1]
 
 class Inventory:
     def __init__(self):
@@ -276,24 +254,6 @@ class Inventory:
         if self.items[item] <= 0:
             del self.items[item]
 
-
-
-# Look up values from db
-class Race:
-    def __init__(self, id):
-        df = pd.read_csv("../data/woc_races.csv")
-        self.id = id
-        if id not in df["name"].values:
-            raise ValueError(f"{id} not a valid race.")
-        self.racial_data=df[df["name"]==id].iloc[0].to_dict()
-
-
-    def apply(self, character):
-        pass
-        # character.ability_scores.apply_bonuses(self.ability_bonuses)
-
-        # for feature in self.features:
-        #     character.features.add(feature)
 
 
 class Background:
@@ -369,7 +329,25 @@ class ComputedStats:
     #     speed += self.pc.inventory.modify_speed()
     #     speed += self.pc.inventory.modify_speed()
 
-    #     return total_level
+    #     return speed
+    # def size(self):
+    #     # Baseline based on race, modified by any features, items, spells, etc.
+    #     size = self.pc.race.get_size()
+
+    #     size = self.pc.features.modify_speed()
+    #     size = self.pc.inventory.modify_speed()
+    #     size = self.pc.inventory.modify_speed()
+
+    #     return size
+    # def creature_type(self):
+    #     # Baseline based on race, modified by any features, items, spells, etc.
+    #     creature_type = self.pc.race.get_creature_type()
+
+    #     creature_type = self.pc.features.modify_creature_type()
+    #     creature_type = self.pc.inventory.modify_creature_type()
+    #     creature_type = self.pc.inventory.modify_creature_type()
+
+    #     return creature_type
     
     # def passive_perception(self):
     #     # Baseline based on ability, modified by any features, items, spells, etc.
