@@ -2,6 +2,7 @@ import random as random
 from abc import ABC, abstractmethod
 from typing import Optional, Dict
 from dataclasses import dataclass
+from proficiency import ProficiencyType
         
 class Dice:
     @staticmethod
@@ -77,6 +78,59 @@ class DiceHandler:
         print(f"Total after modifiers/features: {total}")
 
         return {"total": total, "dice": all_rolls}
+    
+
+    def roll_attack(self, action,source,target,  advantage=None):
+        """
+        action: Attack action object
+        target: Any creature/object with an AC value
+        features: list of callables (rolls, total) -> new rolls, new total
+        advantage: passed through to Dice.roll() if needed
+
+        Returns: dict with rolls and final total
+        """
+        all_rolls = []
+        
+        result = Dice.roll(sides=20, count=1, advantage=advantage)
+        all_rolls.extend(result["dice"])
+
+        total = sum(all_rolls)
+
+        # Apply any features - these should only affect the dice?
+        if source.features:
+            for feature in source.features:
+                all_rolls, total = feature(all_rolls, total)
+
+        # Apply modifiers
+        if source.proficency.has_proficiency( ProficiencyType.WEAPON,action.attack_roll["porficiency_type"]):
+            prof = source.proficency.proficiency_bonus
+        else:
+            prof = 0
+        total += source.ability_scores.modifier(action.attack_roll["ability"]) + action.attack_roll["bonus"] + prof     
+        
+        if total>= target.stats.armor_class():
+            dmg_dict = dict()
+            for val in action.damage:
+                result = Dice.roll(sides=val["dice_type"], count=val["dice_amt"])
+                all_rolls = [result["dice"]]
+                total = sum(all_rolls)
+                 # Apply any features - these should only affect the dice?
+                if source.features:
+                    for feature in source.features:
+                        all_rolls, total = feature(all_rolls, total)
+                final = total + val["bonus"] + source.ability_scores.modifier(val["ability"]) 
+                dmg_dict[val["dmg_type"]] = final
+
+            return{"result":"success",
+                   "total": total, 
+                   "dice": all_rolls,
+                   "damage":dmg_dict}
+        else:
+            return{"result":"failure",
+                   "total": total, 
+                   "dice": all_rolls,
+                   "damage":None}
+
 
 
 

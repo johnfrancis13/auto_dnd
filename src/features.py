@@ -169,11 +169,19 @@ class Claws(Feature):
         super().__init__("Claws", source="race")
     def on_attach(self, character):
         character.climb_speed = 20
-        character.actions.add(actions.Action("claw_attack",
-                                              "Claw Attack",
-                                               actions.ActionType.ACTION ,
-                                              "Tabaxi",
-                                               Dice.roll(sides=4, count=1)["dice"][0]))
+        character.actions.add(actions.Action(id="claw_attack",
+                                              name="Claw Attack",
+                                               action_type=actions.ActionType.ACTION ,
+                                              source = "Tabaxi",
+                                               attack_roll= {"ability":"DEX",
+                                                             "bonus":0 ,
+                                                             "proficiency_type":"simple melee"},
+                                               damage_roll=[{"dmg_type" : "slashing",
+                                                             "dice_type": 4,
+                                                             "dice_amount":1,
+                                                             "ability":"DEX",
+                                                             "bonus":0}]))
+
 
 class Talent(Feature):
     def __init__(self):

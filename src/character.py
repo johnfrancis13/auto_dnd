@@ -10,7 +10,7 @@ from conditions import ConditionManager
 from effects import EffectsManager
 from spellcasting import Spellcasting
 from classes import CharClass
-from proficiency import ProficiencyManager
+from proficiency import ProficiencyManager, ProficiencyType
 from races import Race
 from items import Item
 from resources import ResourcePool
@@ -102,7 +102,7 @@ class PC:
 
 
         # Generate skill scores
-        #self.skills = self.update_skills()
+        self.skills = self.update_skills()
 
 
     def update_skills(self):
@@ -128,7 +128,12 @@ class PC:
         }
         
         # Apply the ability score + proficiency bonus
-        self.proficiencies.skill_proficiencies
+        self.skill_scores = dict()
+        for skill in skills:
+            if skill in self.proficiencies.proficiencies[ProficiencyType.SKILL]:
+                self.skills_scores[skill] = self.ability_scores.modifier(skills[skill]) + self.proficiencies.proficiency_bonus
+            else:
+                self.skills_scores[skill] = self.ability_scores.modifier(skills[skill])
 
 
 
@@ -199,9 +204,11 @@ class AbilityScores:
         self.scores = scores
         self.ability_names = ["STR","DEX","CON","INT","WIS","CHA"]
 
+    # Retrieves the bonus for the names base ability
     def modifier(self, stat):
         return (self.scores[stat] - 10) // 2
     
+    # increases the stored scores using a provided dictionary
     def apply_bonuses(self, bonus_dict):
         for key in bonus_dict:
             if key in self.ability_names:
