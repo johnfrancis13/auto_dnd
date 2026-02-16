@@ -102,6 +102,7 @@ class PC:
 
 
         # Generate skill scores
+        self.skill_scores = dict()
         self.skills = self.update_skills()
 
 
@@ -128,12 +129,11 @@ class PC:
         }
         
         # Apply the ability score + proficiency bonus
-        self.skill_scores = dict()
         for skill in skills:
             if skill in self.proficiencies.proficiencies[ProficiencyType.SKILL]:
-                self.skills_scores[skill] = self.ability_scores.modifier(skills[skill]) + self.proficiencies.proficiency_bonus
+                self.skill_scores[skill] = self.ability_scores.modifier(skills[skill]) + self.proficiencies.proficiency_bonus
             else:
-                self.skills_scores[skill] = self.ability_scores.modifier(skills[skill])
+                self.skill_scores[skill] = self.ability_scores.modifier(skills[skill])
 
 
 
@@ -290,24 +290,24 @@ class ComputedStats:
         self.pc = pc
     #     self._ac_cache = self.armor_class()
 
-    # def armor_class(self):
-    #     pass
-    #     ctx = ArmorClassContext(self.pc)
+    def armor_class(self):
+        return 10
+        ctx = ArmorClassContext(self.pc)
 
-    #     # # Armor & shields
-    #     # self.pc.inventory.modify_armor_class(ctx)
+        # # Armor & shields
+        # self.pc.inventory.modify_armor_class(ctx)
 
-    #     # # Class & racial features
-    #     # self.pc.features.modify_armor_class(ctx)
+        # # Class & racial features
+        # self.pc.features.modify_armor_class(ctx)
 
-    #     # # Conditions (haste, restrained, etc.)
-    #     # self.pc.conditions.modify_armor_class(ctx)
+        # # Conditions (haste, restrained, etc.)
+        # self.pc.conditions.modify_armor_class(ctx)
 
-    #     # dex_mod = self.pc.ability_scores.modifier("dex")
-    #     if ctx.dex_cap is not None:
-    #         dex_mod = min(dex_mod, ctx.dex_cap)
+        # dex_mod = self.pc.ability_scores.modifier("dex")
+        if ctx.dex_cap is not None:
+            dex_mod = min(dex_mod, ctx.dex_cap)
 
-    #     return ctx.base + dex_mod + ctx.bonus
+        return ctx.base + dex_mod + ctx.bonus
     
     # def total_level(self):
     #     # Simple sum of all classes in ClassProgression

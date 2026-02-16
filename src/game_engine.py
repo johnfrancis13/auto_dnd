@@ -1,19 +1,105 @@
 import random as random
 from abc import ABC, abstractmethod
-from typing import Optional, Dict
-from dataclasses import dataclass
+from typing import Optional, Dict, List
+from dataclasses import dataclass, field
 from proficiency import ProficiencyType
-        
+from enum import Enum, auto
+
+
+
+# Types of proficiencies one could have
+class DamageType(Enum):
+    SLASHING = auto()
+    PIERCING = auto()
+    BLUDGEONING = auto()
+    MAGICAL_SLASHING = auto()
+    MAGICAL_PIERCING = auto()
+    MAGICAL_BLUDGEONING = auto()
+    RADIANT = auto()
+    NECROTIC = auto()
+    FIRE = auto()
+    COLD = auto()
+    THUNDER = auto()
+    LIGHTNING = auto()
+    FORCE = auto()
+    ACID = auto()
+    POISON = auto()
+    PSYCHIC = auto()
+
+@dataclass
+class RollResult:
+    dice: List[int]
+    base_total: int
+    modifiers: int = 0
+    advantage: Optional[str] = None
+    is_critical: bool = False
+    metadata: Dict = field(default_factory=dict)
+    
+    @property
+    def total(self) -> int:
+        return self.base_total + self.modifiers
+
+    def add_modifier(self, value: int):
+        self.modifiers += value
+
+    def add_metadata(self, key, value):
+        self.metadata[key] = value
+
+    def add_roll(self,roll_result):
+        self.dice.append(roll_result.dice)
+        self.base_total += roll_result.base_total
+
+@dataclass
+class AttackResult:
+    attack_roll: RollResult
+    hit: bool = False
+    is_critical: bool = False
+    damage: Optional[Dict[str, RollResult]] = None
+
+@dataclass
+class DamageResult:
+    damage: Dict["DamageType", List["RollResult"]] = field(default_factory=dict)
+
+    @property
+    def total(self) -> int:
+        """Return the total of all rolls for all damage types."""
+        return sum(
+            subroll.total
+            for rolls in self.damage.values()
+            for subroll in rolls
+        )
+
+    def breakdown(self) -> Dict["DamageType", int]:
+        """Return a subtotal for each damage type."""
+        return {
+            dt: sum(subroll.total for subroll in rolls)
+            for dt, rolls in self.damage.items()
+        }
+
+    def add_damage(self, dmg_type: "DamageType", roll_result: "RollResult"):
+        """Add a roll result to a specific damage type."""
+        if dmg_type not in self.damage:
+            self.damage[dmg_type] = []
+        self.damage[dmg_type].append(roll_result)
+
+
+
 class Dice:
     @staticmethod
     def roll(sides=20, count=1,advantage=None):
         if advantage is None:
             results = [random.randint(1, sides) for _ in range(count)]
             print(f"Individual rolls: {results}")
-            total = sum(results)
-            print(f"Total: {total}")
-            return {"total":total,
-                        "dice":results}
+            print(f"Total: {sum(results)}")
+            if (len(results)==1 and results[0]==20):
+                crit=True
+            else:
+                crit=False
+            return RollResult(
+                dice=results,
+                base_total=sum(results),
+                is_critical=crit)
+            
         if advantage=="adv":
             if (count!=1 or sides!=20):
                 raise ValueError("advantage must be for a one d20 roll")
@@ -21,8 +107,16 @@ class Dice:
                 r1 = random.randint(1, sides)
                 r2 = random.randint(1, sides)
                 print(f"Rolled: {r1} and {r2} -> taking {'highest' if advantage=="adv" else 'lowest'}: {max(r1, r2)}")
-                return {"total":max(r1, r2),
-                        "dice":[r1,r2]}
+                if max(r1, r2)==20:
+                    crit=True
+                else:
+                    crit=False
+                return  RollResult(
+                    dice=[r1,r2],
+                    base_total=max(r1, r2),
+                    advantage="adv",
+                    is_critical=crit)
+            
         elif advantage=="dis":
             if (count!=1 or sides!=20):
                 raise ValueError("advantage must be for a one d20 roll")
@@ -30,8 +124,18 @@ class Dice:
                 r1 = random.randint(1, sides)
                 r2 = random.randint(1, sides)
                 print(f"Rolled: {r1} and {r2} -> taking {'highest' if advantage=="adv" else 'lowest'}: {min(r1, r2)}")
-                return {"total":min(r1, r2),
-                        "dice":[r1,r2]}
+
+                if min(r1, r2)==20:
+                    crit=True
+                else:
+                    crit=False
+
+                return RollResult(
+                    dice=[r1,r2],
+                    base_total=min(r1, r2),
+                    advantage="dis",
+                    is_critical=crit) 
+            
         else:
             raise ValueError("advantage must be one of adv or dis")
 
@@ -54,30 +158,31 @@ class DiceHandler:
 
         Returns: dict with rolls and final total
         """
-        all_rolls = []
 
+        counter = 0
         for sides, count in dice_specs:
             # Call Dice.roll() with count, sides, and advantage
-            result = Dice.roll(sides=sides, count=count, advantage=advantage)
-            all_rolls.extend(result["dice"])
+            if counter==0:
+                result = Dice.roll(sides=sides, count=count, advantage=advantage)
+            else:
+                result.add_roll(Dice.roll(sides=sides, count=count, advantage=advantage))
+            counter +=1
 
-        total = sum(all_rolls)
 
         
         # Apply any features - these should only affect the dice?
         if features:
             for feature in features:
-                all_rolls, total = feature(all_rolls, total)
-
+                if getattr(feature, "feature_type", None) == "affects_rolls":
+                    result = feature(result)
         # Apply modifiers
-        total += modifiers        
+        result.add_modifier(modifiers)        
         
         # Print debug info
-        if len(all_rolls) > 1 or advantage:
-            print(f"Final rolls: {all_rolls}")
-        print(f"Total after modifiers/features: {total}")
+        print(f"Final rolls: {result.dice}")
+        print(f"Total after modifiers/features: {result.total}")
 
-        return {"total": total, "dice": all_rolls}
+        return result
     
 
     def roll_attack(self, action,source,target,  advantage=None):
@@ -89,49 +194,44 @@ class DiceHandler:
 
         Returns: dict with rolls and final total
         """
-        all_rolls = []
-        
-        result = Dice.roll(sides=20, count=1, advantage=advantage)
-        all_rolls.extend(result["dice"])
 
-        total = sum(all_rolls)
+        attack_result = Dice.roll(sides=20, count=1, advantage=advantage)
+
 
         # Apply any features - these should only affect the dice?
-        if source.features:
-            for feature in source.features:
-                all_rolls, total = feature(all_rolls, total)
+        if source.features._features:
+            for feature in source.features._features:
+                if getattr(feature, "feature_type", None) == "affects_rolls":
+                    attack_result = feature(attack_result)
 
         # Apply modifiers
-        if source.proficency.has_proficiency( ProficiencyType.WEAPON,action.attack_roll["porficiency_type"]):
-            prof = source.proficency.proficiency_bonus
+        if source.proficiencies.has_proficiency( ProficiencyType.WEAPON,action.proficiency_type):
+            prof = source.proficiencies.proficiency_bonus
         else:
             prof = 0
-        total += source.ability_scores.modifier(action.attack_roll["ability"]) + action.attack_roll["bonus"] + prof     
-        
-        if total>= target.stats.armor_class():
-            dmg_dict = dict()
-            for val in action.damage:
-                result = Dice.roll(sides=val["dice_type"], count=val["dice_amt"])
-                all_rolls = [result["dice"]]
-                total = sum(all_rolls)
+
+        attack_result.add_modifier(source.ability_scores.modifier(action.attack_roll["ability"]) + action.attack_roll["bonus"] + prof )
+        if attack_result.total>= target.stats.armor_class():
+            dmg_result = DamageResult()
+            for val in action.damage_roll:
+                temp_dmg_result = Dice.roll(sides=val["dice_type"], count=val["dice_amount"])
                  # Apply any features - these should only affect the dice?
-                if source.features:
-                    for feature in source.features:
-                        all_rolls, total = feature(all_rolls, total)
-                final = total + val["bonus"] + source.ability_scores.modifier(val["ability"]) 
-                dmg_dict[val["dmg_type"]] = final
+                if source.features._features:
+                    for feature in source.features._features:
+                        if getattr(feature, "feature_type", None) == "affects_rolls":
+                            temp_dmg_result = feature(temp_dmg_result) 
+                temp_dmg_result.add_modifier(val["bonus"] + source.ability_scores.modifier(val["ability"]))
+                dmg_result.add_damage(val["dmg_type"],temp_dmg_result)
 
-            return{"result":"success",
-                   "total": total, 
-                   "dice": all_rolls,
-                   "damage":dmg_dict}
+            return AttackResult(attack_roll=attack_result,
+                                hit=True,
+                                is_critical=attack_result.is_critical,
+                                damage=dmg_result)
         else:
-            return{"result":"failure",
-                   "total": total, 
-                   "dice": all_rolls,
-                   "damage":None}
-
-
+            return AttackResult(attack_roll=attack_result,
+                                hit=False,
+                                is_critical=attack_result.is_critical,
+                                damage=None)
 
 
 # @dataclass

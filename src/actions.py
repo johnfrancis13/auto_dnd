@@ -23,6 +23,7 @@ class Action:
     attack_roll: Optional[Callable] = None # add any modifiers
     damage_roll: Optional[dict] = None # each damage type needs its own dice
     effects: Optional[dict] = None # each effect should be listed separately
+    proficiency_type: Optional[ProficiencyType] = None
     resource_cost: Optional[dict] = None
 
 class ActionManager:
@@ -41,22 +42,22 @@ class ActionManager:
     def available(self):
         return list(self._actions.values())
 
-    def execute(self, action_id, pc, target=None):
+    def execute(self, action_id, source, target=None):
         action = self.get(action_id)
         if action.execute:
-            return action.execute(pc, target)
+            return action.execute(source, target)
     
-    def attack_roll(self, action_id, pc, target=None):
+    def attack_roll(self, action_id, source, target=None):
         action = self.get(action_id)
         if action.attack_roll:
-            return {"attack_roll":action.attack_roll(pc, target),
-                    "damage":action.damage_roll(pc, target)}
+            attack_result = DiceHandler().roll_attack(action,source,target) # roll attack, determine if success, roll damage
+            return attack_result
     
-    def request_save(self, action_id, pc, target=None):
+    def request_save(self, action_id, source, target=None):
         action = self.get(action_id)
         if action.request_save:
-            return {"save_request":action.request_save(pc, target),
-                    "damage":action.damage_roll(pc, target)}
+            return {"save_request":action.request_save(source, target),
+                    "damage":action.damage_roll(source, target)}
 
 
 

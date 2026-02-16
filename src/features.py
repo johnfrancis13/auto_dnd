@@ -3,6 +3,7 @@ from proficiency import ProficiencyType
 import resources
 import actions
 from typing import Optional, Callable, Dict
+import random
 
 class FeatureManager:
     def __init__(self):
@@ -43,9 +44,10 @@ class FeatureManager:
 
 
 class Feature:
-    def __init__(self, name, source=None):
+    def __init__(self, name, source=None,feature_type=None):
         self.name = name
         self.source = source  # race, class, item, feat
+        self.feature_type = feature_type
 
     # =========================
     # Lifecycle
@@ -137,13 +139,13 @@ class Feature:
 # Features that affect dice rolls need to take rolls, total as input and output new rolls and new totals
 class HalflingLuck(Feature):
     def __init__(self):
-        super().__init__("Halfling Luck", source="race")
+        super().__init__("Halfling Luck", source="race",feature_type="affects_rolls")
 
-    def on_d20_roll(self,rolls, total):
-        # reroll any 1s or 2s
-        new_rolls = [r if r > 1 else Dice.roll(sides=20, count=1)["dice"][0] for r in rolls]
-        new_total = sum(new_rolls)
-        return new_rolls, new_total
+    def on_d20_roll(self,roll_result):
+        # reroll any 1s 
+        roll_result.dice = [r if r > 1 else random.randint(2, 20) for r in roll_result.dice]
+        roll_result.total()
+        return roll_result
     
 class FelineAgility(Feature):
     def __init__(self):
