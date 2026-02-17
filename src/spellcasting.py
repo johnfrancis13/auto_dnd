@@ -1,4 +1,6 @@
-import pandas as pd
+import json
+from collections import defaultdict
+from helper_functions import normalize_fg, clean_item_description, extract_link_text
 
 class Spellcasting:
     def __init__(self):
@@ -8,22 +10,63 @@ class Spellcasting:
 
 class Spell:
     def __init__(self, data):
-        self.name = data["name"]
-        self.description = data["description"]
-        self.level = data["Level"]
-        self.school = data["School"]
-        self.components = data["Components"]
-        self.dmg_type = data["DamageType"]
-        self.cast_time = data["CastingTime"]
-        self.range = data["Range"]
-        self.save = data["Save"]
+        self.name = data["name"].replace(" (Copy)", "").strip()
+        self.description = clean_item_description(data.get("description", ""))
+        self.level = int(data["level"])
+        self.duration = data["duration"]
+        self.school = data["school"]
+        self.components = data["components"]
+        #self.dmg_type = data["DamageType"]
+        self.cast_time = data["castingtime"]
+        self.range = data["range"]
+        self.ritual =  data.get("ritual", None) 
+        self.source = data.get("source", None) 
+        self.links = extract_link_text(data)
+        #self.save = data["Save"]
 
 
-def load_spells():
-    df = pd.read_csv("../data/woc_spells.csv")
 
-    SPELLS = {
-        data["name"]: Spell(data)
-        for spell_id, data in  df.to_dict(orient="index").items()
-        }
-    return SPELLS
+class SpellRepository:
+    def __init__(self, path="../data/spell.json"):
+        with open(path, "r", encoding="utf-8") as f:
+            raw_data = normalize_fg(json.load(f))
+
+        # Create objects
+        self.all_spells = [Spell(item) for item in raw_data]
+
+        # Primary index (fast lookup by name)
+        self.by_name = {item.name: item for item in self.all_spells}
+
+        # Secondary indexes (fast filtering)
+        self.by_level = defaultdict(list)
+        self.by_source = defaultdict(list)
+
+        for item in self.all_spells:
+            # by level
+            self.by_level[item.level].append(item)
+
+            # by individual source
+            if item.source:
+                sources = [s.strip() for s in item.source.split(",")]
+                for s in sources:
+                    self.by_source[s].append(item)
+            # ---- Retrieval Methods ----
+
+    def get(self, name):
+        return self.by_name.get(name)
+
+    def get_many(self, names):
+        return [self.by_name[n] for n in names if n in self.by_name]
+
+    def filter_by_level(self, spell_level):
+        return self.by_level.get(spell_level, [])
+
+    def filter_by_source(self, source):
+        return self.by_source.get(source, [])
+
+    def search(self, keyword):
+        keyword = keyword.lower()
+        return [
+            item for item in self.all_spells
+            if keyword in item.name.lower()
+        ]

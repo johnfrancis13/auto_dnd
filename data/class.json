@@ -1,0 +1,4951 @@
+[
+  {
+    "abilities": null,
+    "equipment": {
+      "standard": {
+        "group": {
+          "@type": "string",
+          "#text": "standard"
+        }
+      }
+    },
+    "features": {
+      "abilityscoreimprovement12": {
+        "level": {
+          "@type": "number",
+          "#text": "12"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement16": {
+        "level": {
+          "@type": "number",
+          "#text": "16"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement19": {
+        "level": {
+          "@type": "number",
+          "#text": "19"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement4": {
+        "level": {
+          "@type": "number",
+          "#text": "4"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "additionalwizardspells_option_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Additional Wizard Spells (Option)"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level wizard feature"
+            },
+            {
+              "i": [
+                "Player's Handbook.",
+                "Player's Handbook,",
+                "Xanathar's Guide to Everything"
+              ],
+              "#text": "The spells in the following list expand the wizard spell list in the The list is organized by spell level, not character level. A spell's school of magic is noted, and if a spell can be cast as a ritual, the ritual tag appears after the spell's name. Each spell is in the unless it has an asterisk (a spell in chapter 3). also offers more spells."
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.wizard@DD Tashas Cauldron of Everything - Players",
+              "b": "Optional:",
+              "#text": "Wizards Spells"
+            }
+          }
+        }
+      },
+      "arcanerecovery1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Arcane Recovery"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "You have learned to regain some of your magical energy by studying your spellbook. Once per day when you finish a short rest, you can choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your wizard level (rounded up), and none of the slots can be 6th level or higher.",
+            "For example, if you're a 4th-level wizard, you can recover up to two levels worth of spell slots. You can recover either a 2nd-level spell slot or two 1st-level spell slots."
+          ]
+        }
+      },
+      "arcanetradition2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Arcane Tradition"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "The study of wizardry is ancient, stretching back to the earliest mortal discoveries of magic. It is firmly established in the worlds of D&D, with various traditions dedicated to its complex study.",
+            "The most common arcane traditions in the multiverse revolve around the schools of magic. Wizards through the ages have cataloged thousands of spells, grouping them into eight categories called schools. In some places, these traditions are literally schools. In other institutions, the schools are more like academic departments, with rival faculties competing for students and funding. Even wizards who train apprentices in the solitude of their own towers use the division of magic into schools as a learning device, since the spells of each school require mastery of different techniques.",
+            "When you reach 2nd level, you choose an arcane tradition, shaping your practice of magic through one of eight schools, such as Evocation.",
+            "Your choice grants you features at 2nd level and again at 6th, 10th, and 14th level."
+          ]
+        }
+      },
+      "awakenedspellbook2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Awakened Spellbook"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order of Scribes"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Order of Scribes feature"
+            },
+            "Using specially prepared inks and ancient incantations passed down by your wizardly order, you have awakened an arcane sentience within your spellbook.",
+            "While you are holding the book, it grants you the following benefits:",
+            "If necessary, you can replace the book over the course of a short rest by using your Wizardly Quill to write arcane sigils in a blank book or a magic spellbook to which you're attuned. At the end of the rest, your spellbook's consciousness is summoned into the new book, which the consciousness transforms into your spellbook, along with all its spells. If the previous book still existed somewhere, all the spells vanish from its pages."
+          ],
+          "list": {
+            "li": [
+              "You can use the book as a spellcasting focus for your wizard spells.",
+              "When you cast a wizard spell with a spell slot, you can temporarily replace its damage type with a type that appears in another spell in your spellbook, which magically alters the spell's formula for this casting only. The latter spell must be of the same level as the spell slot you expend.",
+              "When you cast a wizard spell as a ritual, you can use the spell's normal casting time, rather than adding 10 minutes to it. Once you use this benefit, you can't do so again until you finish a long rest."
+            ]
+          }
+        }
+      },
+      "bladesong2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Bladesong"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Bladesinging"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Bladesinging feature"
+            },
+            "You can invoke an elven magic called the Bladesong, provided that you aren't wearing medium or heavy armor or using a shield. It graces you with supernatural speed, agility, and focus.",
+            "You can use a bonus action to start the Bladesong, which lasts for 1 minute. It ends early if you are incapacitated, if you don medium or heavy armor or a shield, or if you use two hands to make an attack with a weapon. You can also dismiss the Bladesong at any time (no action required).",
+            "While your Bladesong is active, you gain the following benefits:",
+            "You can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses of it when you finish a long rest."
+          ],
+          "list": {
+            "li": [
+              "You gain a bonus to your AC equal to your Intelligence modifier (minimum of +1).",
+              "Your walking speed increases by 10 feet.",
+              "You have advantage on Dexterity (Acrobatics) checks.",
+              "You gain a bonus to any Constitution saving throw you make to maintain your concentration on a spell. The bonus equals your Intelligence modifier (minimum of +1)."
+            ]
+          }
+        }
+      },
+      "cantripformulas_option_3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Cantrip Formulas (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "3rd-level wizard feature"
+            },
+            "You have scribed a set of arcane formulas in your spellbook that you can use to formulate a cantrip in your mind. Whenever you finish a long rest and consult those formulas in your spellbook, you can replace one wizard cantrip you know with another cantrip from the wizard spell list."
+          ]
+        }
+      },
+      "extraattack6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Extra Attack"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Bladesinging"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Bladesinging feature"
+            },
+            "You can attack twice, instead of once, whenever you take the Attack action on your turn. Moreover, you can cast one of your cantrips in place of one of those attacks."
+          ]
+        }
+      },
+      "manifestmind6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Manifest Mind"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order of Scribes"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Order of Scribes feature"
+            },
+            "You can conjure forth the mind of your Awakened Spellbook. As a bonus action while the book is on your person, you can cause the mind to manifest as a Tiny spectral object, hovering in an unoccupied space of your choice within 60 feet of you. The spectral mind is intangible and doesn't occupy its space, and it sheds dim light in a 10-foot radius. It looks like a ghostly tome, a cascade of text, or a scholar from the past (your choice).",
+            "While manifested, the spectral mind can hear and see, and it has darkvision with a range of 60 feet. The mind can telepathically share with you what it sees and hears (no action required).",
+            "Whenever you cast a wizard spell on your turn, you can cast it as if you were in the spectral mind's space, instead of your own, using its senses. You can do so a number of times per day equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.",
+            "As a bonus action, you can cause the spectral mind to hover up to 30 feet to an unoccupied space that you or it can see. It can pass through creatures but not objects.",
+            "The spectral mind stops manifesting if it is ever more than 300 feet away from you, if someone casts dispel magic on it, if the Awakened Spellbook is destroyed, if you die, or if you dismiss the spectral mind as a bonus action.",
+            "Once you conjure the mind, you can't do so again until you finish a long rest, unless you expend a spell slot of any level to conjure it again."
+          ]
+        }
+      },
+      "masterscrivener10": {
+        "level": {
+          "@type": "number",
+          "#text": "10"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Master Scrivener"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order of Scribes"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "10th-level Order of Scribes feature"
+            },
+            "Whenever you finish a long rest, you can create one magic scroll by touching your Wizardly Quill to a blank piece of paper or parchment and causing one spell from your Awakened Spellbook to be copied onto the scroll. The spellbook must be within 5 feet of you when you make the scroll.",
+            "The chosen spell must be of 1st or 2nd level and must have a casting time of 1 action. Once in the scroll, the spell's power is enhanced, counting as one level higher than normal. You can cast the spell from the scroll by reading it as an action. The scroll is unintelligible to anyone else, and the spell vanishes from the scroll when you cast it or when you finish your next long rest.",
+            "You are also adept at crafting spell scrolls, which are described in the treasure chapter of the Dungeon Master's Guide. The gold and time you must spend to make such a scroll are halved if you use your Wizardly Quill."
+          ]
+        }
+      },
+      "onewiththeword14": {
+        "level": {
+          "@type": "number",
+          "#text": "14"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "One with the Word"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order of Scribes"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "14th-level Order of Scribes feature"
+            },
+            "Your connection to your Awakened Spellbook has become so profound that your soul has become entwined with it. While the book is on your person, you have advantage on all Intelligence (Arcana) checks, as the spellbook helps you remember magical lore.",
+            "Moreover, if you take damage while your spellbook's mind is manifested, you can prevent all of that damage to you by using your reaction to dismiss the spectral mind, using its magic to save yourself. Then roll 3d6. The spellbook temporarily loses spells of your choice that have a combined spell level equal to that roll or higher. For example, if the roll's total is 9, spells vanish from the book that have a combined level of at least 9, which could mean one 9th-level spell, three 3rd-level spells, or some other combination. If there aren't enough spells in the book to cover this cost, you drop to 0 hit points.",
+            "Until you finish 1d6 long rests, you are incapable of casting the lost spells, even if you find them on a scroll or in another spellbook. After you finish the required number of rests, the spells reappear in the spellbook.",
+            "Once you use this reaction, you can't do so again until you finish a long rest."
+          ]
+        }
+      },
+      "signaturespells20": {
+        "level": {
+          "@type": "number",
+          "#text": "20"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Signature Spells"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "When you reach 20th level, you gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot. When you do so, you can't do so again until you finish a short or long rest.",
+            "If you want to cast either spell at a higher level, you must expend a spell slot as normal."
+          ]
+        }
+      },
+      "songofdefense10": {
+        "level": {
+          "@type": "number",
+          "#text": "10"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Song of Defense"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Bladesinging"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "10th-level Bladesinging feature"
+            },
+            "You can direct your magic to absorb damage while your Bladesong is active. When you take damage, you can use your reaction to expend one spell slot and reduce that damage to you by an amount equal to five times the spell slot's level."
+          ]
+        }
+      },
+      "songofvictory14": {
+        "level": {
+          "@type": "number",
+          "#text": "14"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Song of Victory"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Bladesinging"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "14th-level Bladesinging feature"
+            },
+            "You can add your Intelligence modifier (minimum of +1) to the damage of your melee weapon attacks while your Bladesong is active."
+          ]
+        }
+      },
+      "spellcasting1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Spellcasting"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "As a student of arcane magic, you have a spellbook containing spells that show the first glimmerings of your true power.",
+            {
+              "b": "Cantrips"
+            },
+            "At 1st level, you know three cantrips of your choice from the wizard spell list. You learn additional wizard cantrips of your choice at higher levels, as shown in the Cantrips Known column of the Wizard table.",
+            {
+              "b": "Spellbook"
+            },
+            "At 1st level, you have a spellbook containing six 1st-level wizard spells of your choice. Your spellbook is the repository of the wizard spells you know, except your cantrips, which are fixed in your mind.",
+            {
+              "b": "Preparing and Casting Spells"
+            },
+            "The Wizard table shows how many spell slots you have to cast your spells of 1st level and higher. To cast one of these spells, you must expend a slot of the spell's level or higher. You regain all expended spell slots when you finish a long rest.",
+            "You prepare the list of wizard spells that are available for you to cast. To do so, choose a number of wizard spells from your spellbook equal to your Intelligence modifier + your wizard level (minimum of one spell). The spells must be of a level for which you have spell slots.",
+            "For example, if you're a 3rd-level wizard, you have four 1st-level and two 2nd-level spell slots. With an Intelligence of 16, your list of prepared spells can include six spells of 1st or 2nd level, in any combination, chosen from your spellbook. If you prepare the 1st-level spell magic missile, you can cast it using a 1st-level or a 2nd-level slot. Casting the spell doesn't remove it from your list of prepared spells.",
+            "You can change your list of prepared spells when you finish a long rest. Preparing a new list of wizard spells requires time spent studying your spellbook and memorizing the incantations and gestures you must make to cast the spell: at least 1 minute per spell level for each spell on your list.",
+            {
+              "b": "Spellcasting Ability"
+            },
+            "Intelligence is your spellcasting ability for your wizard spells, since you learn your spells through dedicated study and memorization. You use your Intelligence whenever a spell refers to your spellcasting ability.",
+            "In addition, you use your Intelligence modifier when setting the saving throw DC for a wizard spell you cast and when making an attack roll with one.",
+            {
+              "b": "Spell save DC",
+              "#text": "= 8 + your proficiency bonus + your Intelligence modifier"
+            },
+            {
+              "b": "Spell attack modifier",
+              "#text": "= your proficiency bonus + your Intelligence modifier"
+            },
+            {
+              "b": "Ritual Casting"
+            },
+            "You can cast a wizard spell as a ritual if that spell has the ritual tag and you have the spell in your spellbook. You don't need to have the spell prepared.",
+            {
+              "b": "Spellcasting Focus"
+            },
+            "You can use an arcane focus as a spellcasting focus for your wizard spells.",
+            {
+              "b": "Learning Spells of 1st Level and Higher"
+            },
+            "Each time you gain a wizard level, you can add two wizard spells of your choice to your spellbook. Each of these spells must be of a level for which you have spell slots, as shown on the Wizard table. On your adventures, you might find other spells that you can add to your spellbook (see the \"Your Spellbook\" sidebar).",
+            "The spells that you add to your spellbook as you gain levels reflect the arcane research you conduct on your own, as well as intellectual breakthroughs you have had about the nature of the multiverse. You might find other spells during your adventures. You could discover a spell recorded on a scroll in an evil wizard's chest, for example, or in a dusty tome in an ancient library.",
+            {
+              "b": {
+                "i": "Copying a Spell into the book."
+              },
+              "#text": "When you find a wizard spell of 1st level or higher, you can add it to your spellbook if it is of a level for which you have spell slots and if you can spare the time to decipher and copy it. The spells copied into a spellbook must be of a spell level the wizard can prepare."
+            },
+            "Copying a spell into your spellbook involves reproducing the basic form of the spell, then deciphering the unique system of notation used by the wizard who wrote it. You must practice the spell until you understand the sounds or gestures required, then transcribe it into your spellbook using your own notation.",
+            "For each level of the spell, the process takes 2 hours and costs 50gp. The cost represents material components you expend as you experiment with the spell to master it, as well as the fine inks you need to record it. Once you have spent this time and money, you can prepare the spell just like your other spells.",
+            {
+              "b": {
+                "i": "Replacing the Book."
+              },
+              "#text": "You can copy a spell from your own spellbook into another book-for example, if you want to make a backup copy of your spellbook. This is just like copying a new spell into your spellbook, but faster and easier, since you understand your own notation and already know how to cast the spell. You need spend only 1 hour and 10 gp for each level of the copied spell. If you lose your spellbook, you can use the same procedure to transcribe the spells that you have prepared into a new spellbook. Filling out the remainder of your spellbook requires you to find new spells to do so, as normal. For this reason, many wizards keep backup spellbooks in a safe place."
+            },
+            {
+              "b": {
+                "i": "The Book's Appearance"
+              },
+              "#text": "Your spellbook is a unique compilation of spells, with its own decorative flourishes and margin notes. It might be a plain, functional leather volume that you received as a gift from your master, a finely bound gilt-edged tome you found in an ancient library, or even a loose collection of notes scrounged together after you lost your previous spellbook in a mishap."
+            }
+          ],
+          "linklist": {
+            "link": [
+              {
+                "@class": "class_spell_view",
+                "@recordname": "class_spell_view.wizard@DD Tashas Cauldron of Everything - Players",
+                "#text": "Wizards Spells"
+              },
+              {
+                "@class": "class_spell_view",
+                "@recordname": "class_spell_view.wizardnew@DD Tashas Cauldron of Everything - Players",
+                "#text": "Wizard Spells (New)"
+              }
+            ]
+          },
+          "h": "Your Spellbook"
+        }
+      },
+      "spellmastery18": {
+        "level": {
+          "@type": "number",
+          "#text": "18"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Spell Mastery"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "At 18th level, you have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared. If you want to cast either spell at a higher level, you must expend a spell slot as normal.",
+            "By spending 8 hours in study, you can exchange one or both of the spells you chose for different spells of the same levels."
+          ]
+        }
+      },
+      "traininginwarandsong2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Training in War and Song"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Bladesinging"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Bladesinging feature"
+            },
+            "You gain proficiency with light armor, and you gain proficiency with one type of one-handed melee weapon of your choice.",
+            "You also gain proficiency in the Performance skill if you don't already have it."
+          ]
+        }
+      },
+      "wizardlyquill2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Wizardly Quill"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order of Scribes"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Order of Scribes feature"
+            },
+            "As a bonus action, you can magically create a Tiny quill in your free hand. The magic quill has the following properties:",
+            "This quill disappears if you create another one or if you die."
+          ],
+          "list": {
+            "li": [
+              "The quill doesn't require ink. When you write with it, it produces ink in a color of your choice on the writing surface.",
+              "The time you must spend to copy a spell into your spellbook equals 2 minutes per spell level if you use the quill for the transcription.",
+              "You can erase anything you write with the quill if you wave the feather over the text as a bonus action, provided the text is within 5 feet of you."
+            ]
+          }
+        }
+      }
+    },
+    "hp": {
+      "hitdice": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Dice"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "1d6 per wizard level"
+        }
+      },
+      "hitpointsat1stlevel": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Points at 1st Level"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "6 + your Constitution modifier"
+        }
+      },
+      "hitpointsathigherlevels": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Points at Higher Levels"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "1d6 (or 4) + your Constitution modifier per wizard level after 1st"
+        }
+      }
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "multiclassfeatures": null,
+    "multiclassproficiencies": {
+      "armor": {
+        "name": {
+          "@type": "string",
+          "#text": "Armor"
+        }
+      },
+      "skills": {
+        "name": {
+          "@type": "string",
+          "#text": "Skills"
+        }
+      },
+      "tools": {
+        "name": {
+          "@type": "string",
+          "#text": "Tools"
+        }
+      },
+      "weapons": {
+        "name": {
+          "@type": "string",
+          "#text": "Weapons"
+        }
+      }
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Wizard (Copy)"
+    },
+    "proficiencies": {
+      "armor": {
+        "name": {
+          "@type": "string",
+          "#text": "Armor"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "None"
+        }
+      },
+      "savingthrows": {
+        "name": {
+          "@type": "string",
+          "#text": "Saving Throws"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Intelligence, Wisdom"
+        }
+      },
+      "skills": {
+        "name": {
+          "@type": "string",
+          "#text": "Skills"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Choose two from Arcana, History, Insight, Investigation, Medicine, and Religion"
+        }
+      },
+      "tools": {
+        "name": {
+          "@type": "string",
+          "#text": "Tools"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "None"
+        }
+      },
+      "weapons": {
+        "name": {
+          "@type": "string",
+          "#text": "Weapons"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Daggers, darts, slings, quarterstaffs, light crossbows"
+        }
+      }
+    },
+    "text": {
+      "@type": "formattedtext",
+      "h": [
+        "Wizard",
+        "Optional Class Features",
+        "The Wizard",
+        "Spell Slots per Spell Level;",
+        "Class Features",
+        "Hit Points",
+        "Proficiencies",
+        "Equipment",
+        "Features"
+      ],
+      "linklist": [
+        {
+          "link": {
+            "@class": "imagewindow",
+            "@recordname": "image.img_wizardsymbol_jpg@DD Tashas Cauldron of Everything - Players",
+            "b": "Image:",
+            "#text": "Wizard Symbol"
+          }
+        },
+        {
+          "link": [
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.spellcasting1",
+              "#text": "Spellcasting"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.additionalwizardspells_option_1",
+              "#text": "Additional Wizard Spells (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.arcanerecovery1",
+              "#text": "Arcane Recovery"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.arcanetradition2",
+              "#text": "Arcane Tradition"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.cantripformulas_option_3",
+              "#text": "Cantrip Formulas (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.abilityscoreimprovement4",
+              "#text": "Ability Score Improvement"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.spellmastery18",
+              "#text": "Spell Mastery"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.signaturespells20",
+              "#text": "Signature Spells"
+            }
+          ]
+        }
+      ],
+      "p": [
+        "The wizard class receives new features and subclasses in this section.",
+        {
+          "i": [
+            "Player's Handbook",
+            "Player's Handbook,"
+          ],
+          "#text": "You gain class features in the when you reach certain levels in your class. This section offers additional features that you can gain as a wizard. Unlike the features in the you don't gain the features here automatically. Consulting with your DM, you decide whether to gain a feature in this section if you meet the level requirement noted in the feature's description. These features can be selected separately from one another; you can use some, all, or none of them."
+        },
+        {
+          "b": "Hit Dice:",
+          "#text": "1d6 per wizard level"
+        },
+        {
+          "b": "Hit Points At 1st Level:",
+          "#text": "6 + your Constitution modifier"
+        },
+        {
+          "b": "Hit Points At Higher Levels:",
+          "#text": "1d6 (or 4) + your Constitution modifier per wizard level after 1st"
+        },
+        {
+          "b": "Armor:",
+          "#text": "None"
+        },
+        {
+          "b": "Weapons:",
+          "#text": "Daggers, darts, slings, quarterstaffs, light crossbows"
+        },
+        {
+          "b": "Tools:",
+          "#text": "None"
+        },
+        {
+          "b": "Saving Throws:",
+          "#text": "Intelligence, Wisdom"
+        },
+        {
+          "b": "Skills:",
+          "#text": "Choose two from Arcana, History, Insight, Investigation, Medicine, and Religion"
+        },
+        "You start with the following equipment, in addition to the equipment granted by your background:"
+      ],
+      "table": [
+        {
+          "tr": [
+            {
+              "td": [
+                {
+                  "b": "Level"
+                },
+                {
+                  "b": "Bonus"
+                },
+                {
+                  "@colspan": "3",
+                  "b": "Features"
+                }
+              ]
+            },
+            {
+              "td": [
+                "1st",
+                "+2",
+                {
+                  "@colspan": "3",
+                  "#text": "Spellcasting, Arcane Recovery"
+                }
+              ]
+            },
+            {
+              "td": [
+                "2nd",
+                "+2",
+                {
+                  "@colspan": "3",
+                  "#text": "Arcane Tradition"
+                }
+              ]
+            },
+            {
+              "td": [
+                "3rd",
+                "+2",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "4th",
+                "+2",
+                {
+                  "@colspan": "3",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "5th",
+                "+3",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "6th",
+                "+3",
+                {
+                  "@colspan": "3",
+                  "#text": "Arcane Tradition feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "7th",
+                "+3",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "8th",
+                "+3",
+                {
+                  "@colspan": "3",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "9th",
+                "+4",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "10th",
+                "+4",
+                {
+                  "@colspan": "3",
+                  "#text": "Arcane Tradition feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "11th",
+                "+4",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "12th",
+                "+4",
+                {
+                  "@colspan": "3",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "13th",
+                "+5",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "14th",
+                "+5",
+                {
+                  "@colspan": "3",
+                  "#text": "Arcane Tradition feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "15th",
+                "+5",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "16th",
+                "+5",
+                {
+                  "@colspan": "3",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "17th",
+                "+6",
+                {
+                  "@colspan": "3",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "18th",
+                "+6",
+                {
+                  "@colspan": "3",
+                  "#text": "Spell Mastery"
+                }
+              ]
+            },
+            {
+              "td": [
+                "19th",
+                "+6",
+                {
+                  "@colspan": "3",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "20th",
+                "+6",
+                {
+                  "@colspan": "3",
+                  "#text": "Signature Spell"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tr": [
+            {
+              "td": [
+                {
+                  "b": "Level"
+                },
+                {
+                  "b": "Cantrips"
+                },
+                {
+                  "b": "1st"
+                },
+                {
+                  "b": "2nd"
+                },
+                {
+                  "b": "3rd"
+                },
+                {
+                  "b": "4th"
+                },
+                {
+                  "b": "5th"
+                },
+                {
+                  "b": "6th"
+                },
+                {
+                  "b": "7th"
+                },
+                {
+                  "b": "8th"
+                },
+                {
+                  "b": "9th"
+                }
+              ]
+            },
+            {
+              "td": [
+                "1st",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "2nd",
+                "3",
+                "3",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "3rd",
+                "3",
+                "4",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "4th",
+                "4",
+                "4",
+                "3",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "5th",
+                "4",
+                "4",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "6th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "7th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "1",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "8th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "9th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "3",
+                "1",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "10th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "11th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "12th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "13th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "14th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "15th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "16th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "17th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            },
+            {
+              "td": [
+                "18th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "3",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            },
+            {
+              "td": [
+                "19th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1"
+              ]
+            },
+            {
+              "td": [
+                "20th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "3",
+                "2",
+                "2",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      ],
+      "list": {
+        "li": [
+          "(a) a quarterstaff or (b) a dagger",
+          "(a) a component pouch or (b) an arcane focus",
+          "(a) a scholar's pack or (b) an explorer's pack",
+          "A spellbook"
+        ]
+      }
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00001"
+  },
+  {
+    "abilities": null,
+    "equipment": {
+      "standard": {
+        "group": {
+          "@type": "string",
+          "#text": "standard"
+        }
+      }
+    },
+    "features": {
+      "abilityscoreimprovement12": {
+        "level": {
+          "@type": "number",
+          "#text": "12"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement16": {
+        "level": {
+          "@type": "number",
+          "#text": "16"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement19": {
+        "level": {
+          "@type": "number",
+          "#text": "19"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement4": {
+        "level": {
+          "@type": "number",
+          "#text": "4"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "additionalclericspells_option_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Additional Cleric Spells (Option)"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level cleric feature"
+            },
+            {
+              "i": [
+                "Player's Handbook.",
+                "Player's Handbook,",
+                "Xanathar's Guide to Everything"
+              ],
+              "#text": "The spells in the following list expand the cleric spell list in the The list is organized by spell level, not character level. If a spell can be cast as a ritual, the ritual tag appears after the spell's name. Each spell is in the unless it has an asterisk (a spell in chapter 3). also offers more spells."
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericoptional@DD Tashas Cauldron of Everything - Players",
+              "b": "Spells:",
+              "#text": "Optional Cleric Spells"
+            }
+          }
+        }
+      },
+      "blessedstrikes_option_8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Blessed Strikes (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "8th-level cleric feature, which replaces the Divine Strike or Potent Spellcasting feature"
+            },
+            "You are blessed with divine might in battle. When a creature takes damage from one of your cantrips or weapon attacks, you can also deal 1d8 radiant damage to that creature. Once you deal this damage, you can't use this feature again until the start of your next turn."
+          ]
+        }
+      },
+      "bonusproficiencies_order_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Bonus Proficiencies (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            "You gain proficiency with heavy armor. You also gain proficiency in the Intimidation or Persuasion skill (your choice)."
+          ]
+        }
+      },
+      "bonusproficiencies_twilight_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Bonus Proficiencies (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You gain proficiency with martial weapons and heavy armor."
+          ]
+        }
+      },
+      "cantripversatility_option_4": {
+        "level": {
+          "@type": "number",
+          "#text": "4"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Cantrip Versatility (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "4th-level cleric feature"
+            },
+            "Whenever you reach a level in this class that grants the Ability Score Improvement feature, you can replace one cantrip you learned from this class's Spellcasting feature with another cantrip from the cleric spell list."
+          ]
+        }
+      },
+      "channeldivinity_balmofpeace2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Channel Divinity: Balm of Peace"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Peace Domain feature"
+            },
+            "You can use your Channel Divinity to make your very presence a soothing balm. As an action, you can move up to your speed, without provoking opportunity attacks, and when you move within 5 feet of any other creature during this action, you can restore a number of hit points to that creature equal to 2d6 + your Wisdom modifier (minimum of 1 hit point). A creature can receive this healing only once whenever you take this action."
+          ]
+        }
+      },
+      "channeldivinity_order_sdemand2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Channel Divinity: Order's Demand"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Order Domain feature"
+            },
+            "You can use your Channel Divinity to exert an intimidating presence over others.",
+            "As an action, you present your holy symbol, and each creature of your choice that can see or hear you within 30 feet of you must succeed on a Wisdom saving throw or be charmed by you until the end of your next turn or until the charmed creature takes any damage. You can also cause any of the charmed creatures to drop what they are holding when they fail the saving throw."
+          ],
+          "linklist": {
+            "link": {
+              "@class": "imagewindow",
+              "@recordname": "image.img_clericorder_jpg@DD Tashas Cauldron of Everything - Players",
+              "b": "Image:",
+              "#text": "Dragonborn Cleric of Order"
+            }
+          }
+        }
+      },
+      "channeldivinity_twilightsanctuary2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Channel Divinity: Twilight Sanctuary"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level Twilight Domain feature"
+            },
+            "You can use your Channel Divinity to refresh your allies with soothing twilight.",
+            "As an action, you present your holy symbol, and a sphere of twilight emanates from you. The sphere is centered on you, has a 30-foot radius, and is filled with dim light. The sphere moves with you, and it lasts for 1 minute or until you are incapacitated or die. Whenever a creature (including you) ends its turn in the sphere, you can grant that creature one of these benefits:"
+          ],
+          "list": {
+            "li": [
+              "You grant it temporary hit points equal to 1d6 plus your cleric level.",
+              "You end one effect on it causing it to be charmed or frightened."
+            ]
+          }
+        }
+      },
+      "channeldivinity18": {
+        "level": {
+          "@type": "number",
+          "#text": "18"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Channel Divinity"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "At 2nd level, you gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects. You start with two such effectsTurn Undead and an effect determined by your domain. Some domains grant you additional effects as you advance in levels, as noted in the domain description.",
+            "When you use your Channel Divinity, you choose which effect to create. You must then finish a short or long rest to use your Channel Divinity again.",
+            "Some Channel Divinity effects require saving throws. When you use such an effect from this class, the DC equals your cleric spell save DC.",
+            "Beginning at 6th level, you can use your Channel Divinity twice between rests, and beginning at 18th level, you can use it three times between rests. When you finish a short or long rest, you regain your expended uses.",
+            {
+              "b": "Channel Divinity:",
+              "#text": "Turn Undead"
+            },
+            "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.",
+            "A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."
+          ]
+        }
+      },
+      "channeldivinity2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Channel Divinity"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "At 2nd level, you gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects. You start with two such effectsTurn Undead and an effect determined by your domain. Some domains grant you additional effects as you advance in levels, as noted in the domain description.",
+            "When you use your Channel Divinity, you choose which effect to create. You must then finish a short or long rest to use your Channel Divinity again.",
+            "Some Channel Divinity effects require saving throws. When you use such an effect from this class, the DC equals your cleric spell save DC.",
+            "Beginning at 6th level, you can use your Channel Divinity twice between rests, and beginning at 18th level, you can use it three times between rests. When you finish a short or long rest, you regain your expended uses.",
+            {
+              "b": "Channel Divinity:",
+              "#text": "Turn Undead"
+            },
+            "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.",
+            "A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."
+          ]
+        }
+      },
+      "channeldivinity6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Channel Divinity"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "At 2nd level, you gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects. You start with two such effectsTurn Undead and an effect determined by your domain. Some domains grant you additional effects as you advance in levels, as noted in the domain description.",
+            "When you use your Channel Divinity, you choose which effect to create. You must then finish a short or long rest to use your Channel Divinity again.",
+            "Some Channel Divinity effects require saving throws. When you use such an effect from this class, the DC equals your cleric spell save DC.",
+            "Beginning at 6th level, you can use your Channel Divinity twice between rests, and beginning at 18th level, you can use it three times between rests. When you finish a short or long rest, you regain your expended uses.",
+            {
+              "b": "Channel Divinity:",
+              "#text": "Turn Undead"
+            },
+            "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.",
+            "A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."
+          ]
+        }
+      },
+      "destroyundead5": {
+        "level": {
+          "@type": "number",
+          "#text": "5"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Destroy Undead"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Starting at 5th level, when an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table.",
+            {
+              "b": "Destroy Undead"
+            }
+          ],
+          "table": {
+            "tr": [
+              {
+                "td": [
+                  {
+                    "b": "Cleric Level"
+                  },
+                  {
+                    "b": "Destroys Undead of CR ..."
+                  }
+                ]
+              },
+              {
+                "td": [
+                  "5th",
+                  "1/2 or lower"
+                ]
+              },
+              {
+                "td": [
+                  "8th",
+                  "1 or lower"
+                ]
+              },
+              {
+                "td": [
+                  "11th",
+                  "2 or lower"
+                ]
+              },
+              {
+                "td": [
+                  "14th",
+                  "3 or lower"
+                ]
+              },
+              {
+                "td": [
+                  "17th",
+                  "4 or lower"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "divinedomain1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Choose one domain related to your deity, such as Life. Each domain is detailed at the end of the class description, and each one provides examples of gods associated with it. Your choice grants you domain spells and other features when you choose it at 1st level. It also grants you additional ways to use Channel Divinity when you gain that feature at 2nd level, and additional benefits at 6th, 8th, and 17th levels.",
+            {
+              "b": "Domain Spells"
+            },
+            "Each domain has a list of spells-its domain spellsthat you gain at the cleric levels noted in the domain description. Once you gain a domain spell, you always have it prepared, and it doesn't count against the number of spells you can prepare each day.",
+            "If you have a domain spell that doesn't appear on the cleric spell list, the spell is nonetheless a cleric spell for you."
+          ]
+        }
+      },
+      "divineintervention10": {
+        "level": {
+          "@type": "number",
+          "#text": "10"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Intervention"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Beginning at 10th level, you can call on your deity to intervene on your behalf when your need is great. Imploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes. The GM chooses the nature of the intervention; the effect of any cleric spell or cleric domain spell would be appropriate.",
+            "If your deity intervenes, you can't use this feature again for 7 days. Otherwise, you can use it again after you finish a long rest.",
+            "At 20th level, your call for intervention succeeds automatically, no roll required."
+          ]
+        }
+      },
+      "divineintervention20": {
+        "level": {
+          "@type": "number",
+          "#text": "20"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Intervention"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Beginning at 10th level, you can call on your deity to intervene on your behalf when your need is great. Imploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes. The GM chooses the nature of the intervention; the effect of any cleric spell or cleric domain spell would be appropriate.",
+            "If your deity intervenes, you can't use this feature again for 7 days. Otherwise, you can use it again after you finish a long rest.",
+            "At 20th level, your call for intervention succeeds automatically, no roll required."
+          ]
+        }
+      },
+      "divinestrike_order_14": {
+        "level": {
+          "@type": "number",
+          "#text": "14"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Strike (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "8th-level Order Domain feature"
+            },
+            "You gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 psychic damage to the target. When you reach 14th level, the extra damage increases to 2d8."
+          ]
+        }
+      },
+      "divinestrike_order_8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Strike (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "8th-level Order Domain feature"
+            },
+            "You gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 psychic damage to the target. When you reach 14th level, the extra damage increases to 2d8."
+          ]
+        }
+      },
+      "divinestrike_twilight_14": {
+        "level": {
+          "@type": "number",
+          "#text": "14"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Strike (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "8th-level Twilight Domain feature"
+            },
+            "You gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage. When you reach 14th level, the extra damage increases to 2d8."
+          ]
+        }
+      },
+      "divinestrike_twilight_8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Divine Strike (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "8th-level Twilight Domain feature"
+            },
+            "You gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage. When you reach 14th level, the extra damage increases to 2d8."
+          ]
+        }
+      },
+      "domainspells_order_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            {
+              "i": "Player's Handbook",
+              "#text": "You gain domain spells at the cleric levels listed in the Order Domain Spells table. See the Divine Domain class feature in the for how domain spells work."
+            },
+            {
+              "b": "Order Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericorderdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Order Domain"
+            }
+          }
+        }
+      },
+      "domainspells_order_3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            {
+              "i": "Player's Handbook",
+              "#text": "You gain domain spells at the cleric levels listed in the Order Domain Spells table. See the Divine Domain class feature in the for how domain spells work."
+            },
+            {
+              "b": "Order Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericorderdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Order Domain"
+            }
+          }
+        }
+      },
+      "domainspells_order_5": {
+        "level": {
+          "@type": "number",
+          "#text": "5"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            {
+              "i": "Player's Handbook",
+              "#text": "You gain domain spells at the cleric levels listed in the Order Domain Spells table. See the Divine Domain class feature in the for how domain spells work."
+            },
+            {
+              "b": "Order Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericorderdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Order Domain"
+            }
+          }
+        }
+      },
+      "domainspells_order_7": {
+        "level": {
+          "@type": "number",
+          "#text": "7"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            {
+              "i": "Player's Handbook",
+              "#text": "You gain domain spells at the cleric levels listed in the Order Domain Spells table. See the Divine Domain class feature in the for how domain spells work."
+            },
+            {
+              "b": "Order Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericorderdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Order Domain"
+            }
+          }
+        }
+      },
+      "domainspells_order_9": {
+        "level": {
+          "@type": "number",
+          "#text": "9"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Order)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            {
+              "i": "Player's Handbook",
+              "#text": "You gain domain spells at the cleric levels listed in the Order Domain Spells table. See the Divine Domain class feature in the for how domain spells work."
+            },
+            {
+              "b": "Order Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericorderdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Order Domain"
+            }
+          }
+        }
+      },
+      "domainspells_peace_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Peace)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Peace Domain feature"
+            },
+            "You gain domain spells at the cleric levels listed in the Peace Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+            {
+              "b": "Peace Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clericpeacedomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Peace Domain"
+            }
+          }
+        }
+      },
+      "domainspells_twilight_1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You gain domain spells at the cleric levels listed in the Twilight Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+            {
+              "b": "Twilight Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clerictwilightdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Twilight Domain"
+            }
+          }
+        }
+      },
+      "domainspells_twilight_3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You gain domain spells at the cleric levels listed in the Twilight Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+            {
+              "b": "Twilight Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clerictwilightdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Twilight Domain"
+            }
+          }
+        }
+      },
+      "domainspells_twilight_5": {
+        "level": {
+          "@type": "number",
+          "#text": "5"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You gain domain spells at the cleric levels listed in the Twilight Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+            {
+              "b": "Twilight Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clerictwilightdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Twilight Domain"
+            }
+          }
+        }
+      },
+      "domainspells_twilight_7": {
+        "level": {
+          "@type": "number",
+          "#text": "7"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You gain domain spells at the cleric levels listed in the Twilight Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+            {
+              "b": "Twilight Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clerictwilightdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Twilight Domain"
+            }
+          }
+        }
+      },
+      "domainspells_twilight_9": {
+        "level": {
+          "@type": "number",
+          "#text": "9"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Domain Spells (Twilight)"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You gain domain spells at the cleric levels listed in the Twilight Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+            {
+              "b": "Twilight Domain Spells"
+            }
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.clerictwilightdomain@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Twilight Domain"
+            }
+          }
+        }
+      },
+      "embodimentofthelaw6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Embodiment of the Law"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Order Domain feature"
+            },
+            "You have become remarkably adept at channeling magical energy to compel others.",
+            "If you cast a spell of the enchantment school using a spell slot of 1st level or higher, you can change the spell's casting time to 1 bonus action for this casting, provided the spell's casting time is normally 1 action.",
+            "You can use this feature a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses of it when you finish a long rest."
+          ]
+        }
+      },
+      "emboldeningbond1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Emboldening Bond"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Peace Domain feature"
+            },
+            "You can forge an empowering bond among people who are at peace with one another. As an action, you choose a number of willing creatures within 30 feet of you (this can include yourself) equal to your proficiency bonus. You create a magical bond among them for 10 minutes or until you use this feature again. While any bonded creature is within 30 feet of another, the creature can roll a d4 and add the number rolled to an attack roll, an ability check, or a saving throw it makes. Each creature can add the d4 no more than once per turn.",
+            "You can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest."
+          ],
+          "linklist": {
+            "link": {
+              "@class": "imagewindow",
+              "@recordname": "image.img_clericpeace_jpg@DD Tashas Cauldron of Everything - Players",
+              "b": "Image:",
+              "#text": "Human Cleric of Peace"
+            }
+          }
+        }
+      },
+      "expansivebond17": {
+        "level": {
+          "@type": "number",
+          "#text": "17"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Expansive Bond"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "17th-level Peace Domain feature"
+            },
+            "The benefits of your Emboldening Bond and Protective Bond features now work when the creatures are within 60 feet of each other. Moreover, when a creature uses Protective Bond to take someone else's damage, the creature has resistance to that damage."
+          ]
+        }
+      },
+      "eyesofnight1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Eyes of Night"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "You can see through the deepest gloom. You have darkvision out to a range of 300 feet. In that radius, you can see in dim light as if it were bright light and in darkness as if it were dim light.",
+            "As an action, you can magically share the darkvision of this feature with willing creatures you can see within 10 feet of you, up to a number of creatures equal to your Wisdom modifier (minimum of one creature). The shared darkvision lasts for 1 hour. Once you share it, you can't do so again until you finish a long rest, unless you expend a spell slot of any level to share it again."
+          ]
+        }
+      },
+      "harnessdivinepower_option_18": {
+        "level": {
+          "@type": "number",
+          "#text": "18"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Harness Divine Power (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level cleric feature"
+            },
+            "You can expend a use of your Channel Divinity to fuel your spells. As a bonus action, you touch your holy symbol, utter a prayer, and regain one expended spell slot, the level of which can be no higher than half your proficiency bonus (rounded up). The number of times you can use this feature is based on the level you've reached in this class: 2nd level, once; 6th level, twice; and 18th level, thrice. You regain all expended uses when you finish a long rest."
+          ]
+        }
+      },
+      "harnessdivinepower_option_2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Harness Divine Power (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level cleric feature"
+            },
+            "You can expend a use of your Channel Divinity to fuel your spells. As a bonus action, you touch your holy symbol, utter a prayer, and regain one expended spell slot, the level of which can be no higher than half your proficiency bonus (rounded up). The number of times you can use this feature is based on the level you've reached in this class: 2nd level, once; 6th level, twice; and 18th level, thrice. You regain all expended uses when you finish a long rest."
+          ]
+        }
+      },
+      "harnessdivinepower_option_6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Harness Divine Power (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level cleric feature"
+            },
+            "You can expend a use of your Channel Divinity to fuel your spells. As a bonus action, you touch your holy symbol, utter a prayer, and regain one expended spell slot, the level of which can be no higher than half your proficiency bonus (rounded up). The number of times you can use this feature is based on the level you've reached in this class: 2nd level, once; 6th level, twice; and 18th level, thrice. You regain all expended uses when you finish a long rest."
+          ]
+        }
+      },
+      "implementofpeace1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Implement of Peace"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Peace Domain feature"
+            },
+            "You gain proficiency in the Insight, Performance, or Persuasion skill (your choice)."
+          ]
+        }
+      },
+      "order_swrath17": {
+        "level": {
+          "@type": "number",
+          "#text": "17"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Order's Wrath"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "17th-level Order Domain feature"
+            },
+            "Enemies you designate for destruction wilt under the combined efforts of you and your allies. If you deal your Divine Strike damage to a creature on your turn, you can curse that creature until the start of your next turn. The next time one of your allies hits the cursed creature with an attack, the target also takes 2d8 psychic damage, and the curse ends. You can curse a creature in this way only once per turn."
+          ]
+        }
+      },
+      "potentspellcasting8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Potent Spellcasting"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "8th-level Peace Domain feature"
+            },
+            "You add your Wisdom modifier to the damage you deal with any cleric cantrip."
+          ]
+        }
+      },
+      "protectivebond6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Protective Bond"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Peace Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Peace Domain feature"
+            },
+            "The bond you forge between people helps them protect each other. When a creature affected by your Emboldening Bond feature is about to take damage, a second bonded creature within 30 feet of the first can use its reaction to teleport to an unoccupied space within 5 feet of the first creature. The second creature then takes all the damage instead."
+          ]
+        }
+      },
+      "spellcasting1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Spellcasting"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "As a conduit for divine power, you can cast cleric spells.",
+            {
+              "b": "Cantrips"
+            },
+            "At 1st level, you know three cantrips of your choice from the cleric spell list. You learn additional cleric cantrips of your choice at higher levels, as shown in the Cantrips Known column of the Cleric table.",
+            {
+              "b": "Preparing and Casting Spells"
+            },
+            "The Cleric table shows how many spell slots you have to cast your spells of 1st level and higher. To cast one of these spells, you must expend a slot of the spell's level or higher. You regain all expended spell slots when you finish a long rest.",
+            "You prepare the list of cleric spells that are available for you to cast, choosing from the cleric spell list. When you do so, choose a number of cleric spells equal to your Wisdom modifier + your cleric level (minimum of one spell). The spells must be of a level for which you have spell slots.",
+            "For example, if you are a 3rd-level cleric, you have four 1st-level and two 2nd-level spell slots. With a Wisdom of 16, your list of prepared spells can include six spells",
+            "of 1st or 2nd level, in any combination. If you prepare the 1st-level spell cure wounds, you can cast it using a 1st-level or 2nd-level slot. Casting the spell doesn't remove it from your list of prepared spells.",
+            "You can change your list of prepared spells when you finish a long rest. Preparing a new list of cleric spells requires time spent in prayer and meditation: at least 1 minute per spell level for each spell on your list.",
+            {
+              "b": "Spellcasting Ability"
+            },
+            "Wisdom is your spellcasting ability for your cleric spells. The power of your spells comes from your devotion to your deity. You use your Wisdom whenever a cleric spell refers to your spellcasting ability. In addition, you use your Wisdom modifier when setting the saving throw DC for a cleric spell you cast and when making an attack roll with one.",
+            {
+              "b": "Spell save DC",
+              "#text": "= 8 + your proficiency bonus + your Wisdom modifier"
+            },
+            {
+              "b": "Spell attack modifier",
+              "#text": "= your proficiency bonus + your Wisdom modifier"
+            },
+            {
+              "b": "Ritual Casting"
+            },
+            "You can cast a cleric spell as a ritual if that spell has the ritual tag and you have the spell prepared.",
+            {
+              "b": "Spellcasting Focus"
+            },
+            "You can use a holy symbol as a spellcasting focus for your cleric spells."
+          ],
+          "linklist": {
+            "link": {
+              "@class": "class_spell_view",
+              "@recordname": "class_spell_view.cleric@DD Tashas Cauldron of Everything - Players",
+              "#text": "Cleric Spells"
+            }
+          }
+        }
+      },
+      "stepsofnight6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Steps of Night"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Twilight Domain feature"
+            },
+            "You can draw on the mystical power of night to rise into the air. As a bonus action when you are in dim light or darkness, you can magically give yourself a flying speed equal to your walking speed for 1 minute. You can use this bonus action a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest."
+          ]
+        }
+      },
+      "twilightshroud17": {
+        "level": {
+          "@type": "number",
+          "#text": "17"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Twilight Shroud"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "17th-level Twilight Domain feature"
+            },
+            "The twilight that you summon offers a protective embrace: you and your allies have half cover while in the sphere created by your Twilight Sanctuary."
+          ]
+        }
+      },
+      "vigilantblessing1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Vigilant Blessing"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Twilight Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Twilight Domain feature"
+            },
+            "The night has taught you to be vigilant. As an action, you give one creature you touch (including possibly yourself) advantage on the next initiative roll the creature makes. This benefit ends immediately after the roll or if you use this feature again."
+          ]
+        }
+      },
+      "voiceofauthority1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Voice of Authority"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Order Domain"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "1st-level Order Domain feature"
+            },
+            "You can invoke the power of law to embolden an ally to attack. If you cast a spell with a spell slot of 1st level or higher and target an ally with the spell, that ally can use their reaction immediately after the spell to make one weapon attack against a creature of your choice that you can see.",
+            "If the spell targets more than one ally, you choose the ally who can make the attack."
+          ]
+        }
+      }
+    },
+    "hp": {
+      "hitdice": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Dice"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "1d8 per cleric level"
+        }
+      },
+      "hitpointsat1stlevel": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Points at 1st Level"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "8 + your Constitution modifier"
+        }
+      },
+      "hitpointsathigherlevels": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Points at Higher Levels"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "1d8 (or 5) + your Constitution modifier per cleric level after 1st"
+        }
+      }
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "multiclassfeatures": null,
+    "multiclassproficiencies": {
+      "armor": {
+        "name": {
+          "@type": "string",
+          "#text": "Armor"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Light armor, medium armor, shields"
+        }
+      },
+      "skills": {
+        "name": {
+          "@type": "string",
+          "#text": "Skills"
+        }
+      },
+      "tools": {
+        "name": {
+          "@type": "string",
+          "#text": "Tools"
+        }
+      },
+      "weapons": {
+        "name": {
+          "@type": "string",
+          "#text": "Weapons"
+        }
+      }
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Cleric (Copy)"
+    },
+    "proficiencies": {
+      "armor": {
+        "name": {
+          "@type": "string",
+          "#text": "Armor"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Light armor, medium armor, shields"
+        }
+      },
+      "savingthrows": {
+        "name": {
+          "@type": "string",
+          "#text": "Saving Throws"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Wisdom, Charisma"
+        }
+      },
+      "skills": {
+        "name": {
+          "@type": "string",
+          "#text": "Skills"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Choose two from History, Insight, Medicine, Persuasion, and Religion"
+        }
+      },
+      "tools": {
+        "name": {
+          "@type": "string",
+          "#text": "Tools"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "None"
+        }
+      },
+      "weapons": {
+        "name": {
+          "@type": "string",
+          "#text": "Weapons"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "All simple weapons"
+        }
+      }
+    },
+    "text": {
+      "@type": "formattedtext",
+      "h": [
+        "Cleric",
+        "Optional Class Features",
+        "The Cleric",
+        "Spell Slots per Spell Level",
+        "Class Features",
+        "Hit Points",
+        "Proficiencies",
+        "Equipment",
+        "Features"
+      ],
+      "linklist": [
+        {
+          "link": {
+            "@class": "imagewindow",
+            "@recordname": "image.img_clericsymbol_jpg@DD Tashas Cauldron of Everything - Players",
+            "b": "Image:",
+            "#text": "Cleric Symbol"
+          }
+        },
+        {
+          "link": [
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.spellcasting1",
+              "#text": "Spellcasting"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.additionalclericspells_option_1",
+              "#text": "Additional Cleric Spells (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.divinedomain1",
+              "#text": "Divine Domain"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.channeldivinity2",
+              "#text": "Channel Divinity"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.harnessdivinepower_option_2",
+              "#text": "Harness Divine Power (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.abilityscoreimprovement4",
+              "#text": "Ability Score Improvement"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.cantripversatility_option_4",
+              "#text": "Cantrip Versatility (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.destroyundead5",
+              "#text": "Destroy Undead"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.blessedstrikes_option_8",
+              "#text": "Blessed Strikes (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.divineintervention10",
+              "#text": "Divine Intervention"
+            }
+          ]
+        }
+      ],
+      "p": [
+        "The cleric class receives new features and subclasses in this section.",
+        {
+          "i": [
+            "Player's Handbook",
+            "Player's Handbook,"
+          ],
+          "#text": "You gain class features in the when you reach certain levels in your class. This section offers additional features that you can gain as a cleric. Unlike the features in the you don't gain the features here automatically. Consulting with your DM, you decide whether to gain a feature in this section if you meet the level requirement noted in the feature's description. These features can be selected separately from one another; you can use some, all, or none of them. If you take a feature that replaces another feature, you gain no benefit from the replaced one and don't qualify for anything in the game that requires it."
+        },
+        "As a cleric, you gain the following class features.",
+        {
+          "b": "Hit Dice:",
+          "#text": "1d8 per cleric level"
+        },
+        {
+          "b": "Hit Points At 1st Level:",
+          "#text": "8 + your Constitution modifier"
+        },
+        {
+          "b": "Hit Points At Higher Levels:",
+          "#text": "1d8 (or 5) + your Constitution modifier per cleric level after 1st"
+        },
+        {
+          "b": "Armor:",
+          "#text": "Light armor, medium armor, shields"
+        },
+        {
+          "b": "Weapons:",
+          "#text": "All simple weapons"
+        },
+        {
+          "b": "Tools:",
+          "#text": "None"
+        },
+        {
+          "b": "Saving Throws:",
+          "#text": "Wisdom, Charisma"
+        },
+        {
+          "b": "Skills:",
+          "#text": "Choose two from History, Insight, Medicine, Persuasion, and Religion"
+        },
+        "You start with the following equipment, in addition to the equipment granted by your background:"
+      ],
+      "table": [
+        {
+          "tr": [
+            {
+              "td": [
+                {
+                  "b": "Level"
+                },
+                {
+                  "b": "Proficiency"
+                },
+                {
+                  "@colspan": "4",
+                  "b": "Features"
+                }
+              ]
+            },
+            {
+              "td": [
+                "1st",
+                "+2",
+                {
+                  "@colspan": "4",
+                  "#text": "Spellcasting, Divine Domain"
+                }
+              ]
+            },
+            {
+              "td": [
+                "2nd",
+                "+2",
+                {
+                  "@colspan": "4",
+                  "#text": "Channel Divinity (1/rest), Divine Domain feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "3rd",
+                "+2",
+                {
+                  "@colspan": "4",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "4th",
+                "+2",
+                {
+                  "@colspan": "4",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "5th",
+                "+3",
+                {
+                  "@colspan": "4",
+                  "#text": "Destroy Undead (CR 1/2)"
+                }
+              ]
+            },
+            {
+              "td": [
+                "6th",
+                "+3",
+                {
+                  "@colspan": "4",
+                  "#text": "Channel Divinity (2/rest), Divine Domain feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "7th",
+                "+3",
+                {
+                  "@colspan": "4",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "8th",
+                "+3",
+                {
+                  "@colspan": "4",
+                  "#text": "Ability Score Improvement, Destroy Undead (CR 1), Divine Domain feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "9th",
+                "+4",
+                {
+                  "@colspan": "4",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "10th",
+                "+4",
+                {
+                  "@colspan": "4",
+                  "#text": "Divine Intervention"
+                }
+              ]
+            },
+            {
+              "td": [
+                "11th",
+                "+4",
+                {
+                  "@colspan": "4",
+                  "#text": "Destroy Undead (CR 2)"
+                }
+              ]
+            },
+            {
+              "td": [
+                "12th",
+                "+4",
+                {
+                  "@colspan": "4",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "13th",
+                "+5",
+                {
+                  "@colspan": "4",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "14th",
+                "+5",
+                {
+                  "@colspan": "4",
+                  "#text": "Destroy Undead (CR 3)"
+                }
+              ]
+            },
+            {
+              "td": [
+                "15th",
+                "+5",
+                {
+                  "@colspan": "4",
+                  "#text": "-"
+                }
+              ]
+            },
+            {
+              "td": [
+                "16th",
+                "+5",
+                {
+                  "@colspan": "4",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "17th",
+                "+6",
+                {
+                  "@colspan": "4",
+                  "#text": "Destroy Undead (CR 4), Divine Domain feature"
+                }
+              ]
+            },
+            {
+              "td": [
+                "18th",
+                "+6",
+                {
+                  "@colspan": "4",
+                  "#text": "Channel Divinity (3/rest)"
+                }
+              ]
+            },
+            {
+              "td": [
+                "19th",
+                "+6",
+                {
+                  "@colspan": "4",
+                  "#text": "Ability Score Improvement"
+                }
+              ]
+            },
+            {
+              "td": [
+                "20th",
+                "+6",
+                {
+                  "@colspan": "4",
+                  "#text": "Divine Intervention improvement"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tr": [
+            {
+              "td": [
+                {
+                  "b": "Level"
+                },
+                {
+                  "b": "Cantrips"
+                },
+                {
+                  "b": "1st"
+                },
+                {
+                  "b": "2nd"
+                },
+                {
+                  "b": "3rd"
+                },
+                {
+                  "b": "4th"
+                },
+                {
+                  "b": "5th"
+                },
+                {
+                  "b": "6th"
+                },
+                {
+                  "b": "7th"
+                },
+                {
+                  "b": "8th"
+                },
+                {
+                  "b": "9th"
+                }
+              ]
+            },
+            {
+              "td": [
+                "1st",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "2nd",
+                "3",
+                "3",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "3rd",
+                "3",
+                "4",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "4th",
+                "4",
+                "4",
+                "3",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "5th",
+                "4",
+                "4",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "6th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "7th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "1",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "8th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "9th",
+                "4",
+                "4",
+                "3",
+                "3",
+                "3",
+                "1",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "10th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "-",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "11th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "12th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "-",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "13th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "14th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "-",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "15th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "16th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1",
+                "-"
+              ]
+            },
+            {
+              "td": [
+                "17th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            },
+            {
+              "td": [
+                "18th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "3",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            },
+            {
+              "td": [
+                "19th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "3",
+                "2",
+                "1",
+                "1",
+                "1"
+              ]
+            },
+            {
+              "td": [
+                "20th",
+                "5",
+                "4",
+                "3",
+                "3",
+                "3",
+                "3",
+                "2",
+                "2",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      ],
+      "list": {
+        "li": [
+          "(a) a mace or (b) a warhammer (if proficient)",
+          "(a) scale mail, (b) leather armor, or (c) chain mail (if proficient)",
+          "(a) a light crossbow and 20 bolts or (b) any simple weapon",
+          "(a) a priest's pack or (b) an explorer's pack",
+          "A shield and a holy symbol"
+        ]
+      }
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00002"
+  },
+  {
+    "abilities": null,
+    "equipment": {
+      "standard": {
+        "group": {
+          "@type": "string",
+          "#text": "standard"
+        }
+      }
+    },
+    "features": {
+      "abilityscoreimprovement12": {
+        "level": {
+          "@type": "number",
+          "#text": "12"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement16": {
+        "level": {
+          "@type": "number",
+          "#text": "16"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement19": {
+        "level": {
+          "@type": "number",
+          "#text": "19"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement4": {
+        "level": {
+          "@type": "number",
+          "#text": "4"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "abilityscoreimprovement8": {
+        "level": {
+          "@type": "number",
+          "#text": "8"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ability Score Improvement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+        }
+      },
+      "armsoftheastralself3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Arms of the Astral Self"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of the Astral Self"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "3rd-level Way of the Astral Self feature"
+            },
+            "Your mastery of your ki allows you to summon a portion of your astral self. As a bonus action, you can spend 1 ki point to summon the arms of your astral self. When you do so, each creature of your choice that you can see within 10 feet of you must succeed on a Dexterity saving throw or take force damage equal to two rolls of your Martial Arts die.",
+            "For 10 minutes, these spectral arms hover near your shoulders or surround your arms (your choice). You determine the arms' appearance, and they vanish early if you are incapacitated or die.",
+            "While the spectral arms are present, you gain the following benefits:",
+            {
+              "b": "Forms of Your Astral Self"
+            },
+            "The astral self is a translucent embodiment of the monk's soul. As a result, an astral self can reflect aspects of a monk's background, ideals, flaws, and bonds, and an astral self doesn't necessarily look anything like the monk. For example, the astral self of a lanky human might be reminiscent of a minotaur-the strength of which the monk feels within. Similarly, an orc monk might manifest gossamer arms and a delicate visage, representing the gentle beauty of the orc's soul. Each astral self is unique, and some of the monks of this monastic tradition are known more for the appearance of their astral self than for their physical appearance.",
+            "When choosing this path, consider the quirks that define your monk. Are you obsessed with something? Are you driven by justice or a selfish desire? Any of these motivations could manifest in the form of your astral self."
+          ],
+          "list": {
+            "li": [
+              "You can use your Wisdom modifier in place of your Strength modifier when making Strength checks and Strength saving throws.",
+              "You can use the spectral arms to make unarmed strikes.",
+              "When you make an unarmed strike with the arms on your turn, your reach for it is 5 feet greater than normal.",
+              "The unarmed strikes you make with the arms can use your Wisdom modifier in place of your Strength or Dexterity modifier for the attack and damage rolls, and their damage type is force."
+            ]
+          }
+        }
+      },
+      "awakenedastralself17": {
+        "level": {
+          "@type": "number",
+          "#text": "17"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Awakened Astral Self"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of the Astral Self"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "17th-level Way of the Astral Self feature"
+            },
+            "Your connection to your astral self is complete, allowing you to unleash its full potential. As a bonus action, you can spend 5 ki points to summon the arms, visage, and body of your astral self and awaken it for 10 minutes. This awakening ends early if you are incapacitated or die.",
+            "While your astral self is awakened, you gain the following benefits.",
+            {
+              "b": {
+                "i": "Armor of the Spirit."
+              },
+              "#text": "You gain a +2 bonus to Armor Class."
+            },
+            {
+              "b": {
+                "i": "Astral Barrage."
+              },
+              "#text": "Whenever you use the Extra Attack feature to attack twice, you can instead attack three times if all the attacks are made with your astral arms."
+            }
+          ]
+        }
+      },
+      "bodyoftheastralself11": {
+        "level": {
+          "@type": "number",
+          "#text": "11"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Body of the Astral Self"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of the Astral Self"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "11th-level Way of the Astral Self feature"
+            },
+            "When you have both your astral arms and visage summoned, you can cause the body of your astral self to appear (no action required). This spectral body covers your physical form like a suit of armor, connecting with the arms and visage. You determine its appearance.",
+            "While the spectral body is present, you gain the following benefits.",
+            {
+              "b": {
+                "i": "Deflect Energy."
+              },
+              "#text": "When you take acid, cold, fire, force, lightning, or thunder damage, you can use your reaction to deflect it. When you do so, the damage you take is reduced by 1d10 + your Wisdom modifier (minimum reduction of 1)."
+            },
+            {
+              "b": {
+                "i": "Empowered Arms."
+              },
+              "#text": "Once on each of your turns when you hit a target with the Arms of the Astral Self, you can deal extra damage to the target equal to your Martial Arts die."
+            }
+          ]
+        }
+      },
+      "dedicatedweapon_option_2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Dedicated Weapon (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "2nd-level monk feature"
+            },
+            "You train yourself to use a variety of weapons as monk weapons, not just simple melee weapons and shortswords. Whenever you finish a short or long rest, you can touch one weapon, focus your ki on it, and then count that weapon as a monk weapon until you use this feature again.",
+            "The chosen weapon must meet these criteria:"
+          ],
+          "list": {
+            "li": [
+              "The weapon must be a simple or martial weapon.",
+              "You must be proficient with it.",
+              "It must lack the heavy and special properties."
+            ]
+          }
+        }
+      },
+      "deflectmissiles3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Deflect Missiles"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack (20/60 ft.). When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level.",
+            "If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction. You make this attack with proficiency, regardless of your weapon proficiencies, and the missile counts as a monk weapon for the attack, which has a normal range of 20 feet and a long range of 60 feet."
+          ]
+        }
+      },
+      "diamondsoul14": {
+        "level": {
+          "@type": "number",
+          "#text": "14"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Diamond Soul"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Beginning at 14th level, your mastery of ki grants you proficiency in all saving throws.",
+            "Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."
+          ]
+        }
+      },
+      "emptybody18": {
+        "level": {
+          "@type": "number",
+          "#text": "18"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Empty Body"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Beginning at 18th level, you can use your action to spend 4 ki points to become invisible for 1 minute.",
+            {
+              "i": "astral projection",
+              "#text": "During that time, you also have resistance to all damage but force damage. Additionally, you can spend 8 ki points to cast the spell, without needing material components. When you do so, you can't take any other creatures with you."
+            }
+          ]
+        }
+      },
+      "evasion7": {
+        "level": {
+          "@type": "number",
+          "#text": "7"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Evasion"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."
+        }
+      },
+      "extraattack5": {
+        "level": {
+          "@type": "number",
+          "#text": "5"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Extra Attack"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+        }
+      },
+      "flurryofhealingandharm11": {
+        "level": {
+          "@type": "number",
+          "#text": "11"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Flurry of Healing and Harm"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of Mercy"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "11th-level Way of Mercy feature"
+            },
+            "You can now mete out a flurry of comfort and hurt. When you use Flurry of Blows, you can now replace each of the unarmed strikes with a use of your Hand of Healing, without spending ki points for the healing.",
+            "In addition, when you make an unarmed strike with Flurry of Blows, you can use Hand of Harm with that strike without spending the ki point for Hand of Harm. You can still use Hand of Harm only once per turn."
+          ]
+        }
+      },
+      "focusedaim_option_5": {
+        "level": {
+          "@type": "number",
+          "#text": "5"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Focused Aim (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "5th-level monk feature"
+            },
+            "When you miss with an attack roll, you can spend 1 to 3 ki points to increase your attack roll by 2 for each of these ki points you spend, potentially turning the miss into a hit."
+          ],
+          "linklist": {
+            "link": {
+              "@class": "imagewindow",
+              "@recordname": "image.img_monk_jpg@DD Tashas Cauldron of Everything - Players",
+              "b": "Image:",
+              "#text": "An orc monk of the Four Elements unleashes a ki-fueled attack."
+            }
+          }
+        }
+      },
+      "handofharm3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Hand of Harm"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of Mercy"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "3rd-level Way of Mercy feature"
+            },
+            "You use your ki to inflict wounds. When you hit a creature with an unarmed strike, you can spend 1 ki point to deal extra necrotic damage equal to one roll of your Martial Arts die + your Wisdom modifier. You can use this feature only once per turn."
+          ]
+        }
+      },
+      "handofhealing3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Hand of Healing"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of Mercy"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "0"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "3rd-level Way of Mercy feature"
+            },
+            "Your mystical touch can mend wounds. As an action, you can spend 1 ki point to touch a creature and restore a number of hit points equal to a roll of your Martial Arts die + your Wisdom modifier.",
+            "When you use your Flurry of Blows, you can replace one of the unarmed strikes with a use of this feature without spending a ki point for the healing."
+          ]
+        }
+      },
+      "handofultimatemercy17": {
+        "level": {
+          "@type": "number",
+          "#text": "17"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Hand of Ultimate Mercy"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of Mercy"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "17th-level Way of Mercy feature"
+            },
+            "Your mastery of life energy opens the door to the ultimate mercy. As an action, you can touch the corpse of a creature that died within the past 24 hours and expend 5 ki points. The creature then returns to life, regaining a number of hit points equal to 4d10 + your Wisdom modifier. If the creature died while subject to any of the following conditions, it revives with them removed: blinded, deafened, paralyzed, poisoned, and stunned.",
+            "Once you use this feature, you can't use it again until you finish a long rest."
+          ]
+        }
+      },
+      "implementsofmercy3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Implements of Mercy"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of Mercy"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "3rd-level Way of Mercy feature"
+            },
+            "You gain proficiency in the Insight and Medicine skills, and you gain proficiency with the herbalism kit.",
+            "You also gain a special mask, which you often wear when using the features of this subclass. You determine its appearance, or generate it randomly by rolling on the Merciful Mask table."
+          ],
+          "linklist": {
+            "link": {
+              "@class": "table",
+              "@recordname": "reference.tables.tab_mercifulmask@DD Tashas Cauldron of Everything - Players",
+              "b": "Table:",
+              "#text": "Merciful Mask"
+            }
+          }
+        }
+      },
+      "ki_empoweredstrikes6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ki-Empowered Strikes"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Starting at 6th level, your unarmed strikes count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage."
+        }
+      },
+      "ki_fueledattack_option_3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ki-Fueled Attack (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "3rd-level monk feature"
+            },
+            "If you spend 1 ki point or more as part of your action on your turn, you can make one attack with an unarmed strike or a monk weapon as a bonus action before the end of the turn."
+          ]
+        }
+      },
+      "ki2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Ki"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.",
+            "You can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.",
+            "When you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.",
+            "Some of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:",
+            {
+              "b": "Ki save DC",
+              "#text": "= 8 + your proficiency bonus + your Wisdom modifier"
+            },
+            {
+              "b": "Flurry of Blows"
+            },
+            "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action.",
+            {
+              "b": "Patient Defense"
+            },
+            "You can spend 1 ki point to take the Dodge action as a bonus action on your turn.",
+            {
+              "b": "Step of the Wind"
+            },
+            "You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn."
+          ]
+        }
+      },
+      "martialarts1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Martial Arts"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "At 1st level, your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons, which are shortswords and any simple melee weapons that don't have the two-handed or heavy property.",
+            "You gain the following benefits while you are unarmed or wielding only monk weapons and you aren't wearing armor or wielding a shield:",
+            "Certain monasteries use specialized forms of the monk weapons. For example, you might use a club that is two lengths of wood connected by a short chain (called a nunchaku) or a sickle with a shorter, straighter blade (called a kama). Whatever name you use for a monk weapon, you can use the game statistics provided for the weapon."
+          ],
+          "list": {
+            "li": [
+              "You can use Dexterity instead of Strength for the attack and damage rolls of your unarmed strikes and monk weapons.",
+              "You can roll a d4 in place of the normal damage of your unarmed strike or monk weapon. This die changes as you gain monk levels, as shown in the Martial Arts column of the Monk table.",
+              "When you use the Attack action with an unarmed strike or a monk weapon on your turn, you can make one unarmed strike as a bonus action. For example, if you take the Attack action and attack with a quarterstaff, you can also make an unarmed strike as a bonus action, assuming you haven't already taken a bonus action this turn."
+            ]
+          }
+        }
+      },
+      "monastictradition3": {
+        "level": {
+          "@type": "number",
+          "#text": "3"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Monastic Tradition"
+        },
+        "specializationchoice": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Three traditions of monastic pursuit are common in the monasteries scattered across the multiverse. Most monasteries practice one tradition exclusively, but a few honor the three traditions and instruct each monk according to his or her aptitude and interest. All three traditions rely on the same basic techniques, diverging as the student grows more adept. Thus, a monk need choose a tradition only upon reaching 3rd level.",
+            "When you reach 3rd level, you commit yourself to a monastic tradition, such as the Way of the Open Hand. Your tradition grants you features at 3rd level and again at 6th, 11th, and 17th level."
+          ]
+        }
+      },
+      "perfectself20": {
+        "level": {
+          "@type": "number",
+          "#text": "20"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Perfect Self"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "At 20th level, when you roll for initiative and have no ki points remaining, you regain 4 ki points."
+        }
+      },
+      "physician_stouch6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Physician's Touch"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of Mercy"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Way of Mercy feature"
+            },
+            "You can administer even greater cures with a touch, and if you feel it's necessary, you can use your knowledge to cause harm.",
+            "When you use Hand of Healing on a creature, you can also end one disease or one of the following conditions affecting the creature: blinded, deafened, paralyzed, poisoned, or stunned.",
+            "When you use Hand of Harm on a creature, you can subject that creature to the poisoned condition until the end of your next turn."
+          ]
+        }
+      },
+      "purityofbody10": {
+        "level": {
+          "@type": "number",
+          "#text": "10"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Purity of Body"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "At 10th level, your mastery of the ki flowing through you makes you immune to disease and poison."
+        }
+      },
+      "quickenedhealing_option_4": {
+        "level": {
+          "@type": "number",
+          "#text": "4"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Quickened Healing (Option)"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "4th-level monk feature"
+            },
+            "As an action, you can spend 2 ki points and roll a Martial Arts die. You regain a number of hit points equal to the number rolled plus your proficiency bonus."
+          ]
+        }
+      },
+      "slowfall4": {
+        "level": {
+          "@type": "number",
+          "#text": "4"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Slow Fall"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."
+        }
+      },
+      "stillnessofmind7": {
+        "level": {
+          "@type": "number",
+          "#text": "7"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Stillness of Mind"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Starting at 7th level, you can use your action to end one effect on yourself that is causing you to be charmed or frightened."
+        }
+      },
+      "stunningstrike5": {
+        "level": {
+          "@type": "number",
+          "#text": "5"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Stunning Strike"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike. The target must succeed on a Constitution saving throw or be stunned until the end of your next turn."
+        }
+      },
+      "timelessbody15": {
+        "level": {
+          "@type": "number",
+          "#text": "15"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Timeless Body"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "At 15th level, your ki sustains you so that you suffer none of the frailty of old age, and you can't be aged magically. You can still die of old age, however. In addition, you no longer need food or water."
+        }
+      },
+      "tongueofthesunandmoon13": {
+        "level": {
+          "@type": "number",
+          "#text": "13"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Tongue of the Sun and Moon"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Starting at 13th level, you learn to touch the ki of other minds so that you understand all spoken languages. Moreover, any creature that can understand a language can understand what you say."
+        }
+      },
+      "unarmoreddefense1": {
+        "level": {
+          "@type": "number",
+          "#text": "1"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Unarmored Defense"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": "Beginning at 1st level, while you are wearing no armor and not wielding a shield, your AC equals 10 + your Dexterity modifier + your Wisdom modifier."
+        }
+      },
+      "unarmoredmovement2": {
+        "level": {
+          "@type": "number",
+          "#text": "2"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Unarmored Movement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Starting at 2nd level, your speed increases by 10 feet while you are not wearing armor or wielding a shield. This bonus increases when you reach certain monk levels, as shown in the Monk table.",
+            "At 9th level, you gain the ability to move along vertical surfaces and across liquids on your turn without falling during the move."
+          ]
+        }
+      },
+      "unarmoredmovement9": {
+        "level": {
+          "@type": "number",
+          "#text": "9"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Unarmored Movement"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            "Starting at 2nd level, your speed increases by 10 feet while you are not wearing armor or wielding a shield. This bonus increases when you reach certain monk levels, as shown in the Monk table.",
+            "At 9th level, you gain the ability to move along vertical surfaces and across liquids on your turn without falling during the move."
+          ]
+        }
+      },
+      "visageoftheastralself6": {
+        "level": {
+          "@type": "number",
+          "#text": "6"
+        },
+        "name": {
+          "@type": "string",
+          "#text": "Visage of the Astral Self"
+        },
+        "specialization": {
+          "@type": "string",
+          "#text": "Way of the Astral Self"
+        },
+        "text": {
+          "@type": "formattedtext",
+          "p": [
+            {
+              "i": "6th-level Way of the Astral Self feature"
+            },
+            "You can summon the visage of your astral self. As a bonus action, or as part of the bonus action you take to activate Arms of the Astral Self, you can spend 1 ki point to summon this visage for 10 minutes. It vanishes early if you are incapacitated or die.",
+            "The spectral visage covers your face like a helmet or mask. You determine its appearance.",
+            "While the spectral visage is present, you gain the following benefits.",
+            {
+              "b": {
+                "i": "Astral Sight."
+              },
+              "#text": "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet."
+            },
+            {
+              "b": {
+                "i": "Wisdom of the Spirit."
+              },
+              "#text": "You have advantage on Wisdom (Insight) and Charisma (Intimidation) checks."
+            },
+            {
+              "b": {
+                "i": "Word of the Spirit."
+              },
+              "#text": "When you speak, you can direct your words to a creature of your choice that you can see within 60 feet of you, making it so only that creature can hear you. Alternatively, you can amplify your voice so that all creatures within 600 feet can hear you."
+            }
+          ]
+        }
+      }
+    },
+    "hp": {
+      "hitdice": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Dice"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "1d8 per monk level"
+        }
+      },
+      "hitpointsat1stlevel": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Points at 1st Level"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "8 + your Constitution modifier"
+        }
+      },
+      "hitpointsathigherlevels": {
+        "name": {
+          "@type": "string",
+          "#text": "Hit Points at Higher Levels"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "1d8 (or 5) + your Constitution modifier per monk level after 1st"
+        }
+      }
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "multiclassfeatures": null,
+    "multiclassproficiencies": {
+      "armor": null,
+      "skills": null,
+      "tools": null,
+      "weapons": {
+        "name": {
+          "@type": "string",
+          "#text": "Weapons"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Simple weapons, shortswords"
+        }
+      }
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Monk (Copy)"
+    },
+    "proficiencies": {
+      "armor": {
+        "name": {
+          "@type": "string",
+          "#text": "Armor"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "None"
+        }
+      },
+      "savingthrows": {
+        "name": {
+          "@type": "string",
+          "#text": "Saving Throws"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Strength, Dexterity"
+        }
+      },
+      "skills": {
+        "name": {
+          "@type": "string",
+          "#text": "Skills"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Choose two from Acrobatics, Athletics, History, Insight, Religion, and Stealth"
+        }
+      },
+      "tools": {
+        "name": {
+          "@type": "string",
+          "#text": "Tools"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Choose one type of artisan's tools or one musical instrument"
+        }
+      },
+      "weapons": {
+        "name": {
+          "@type": "string",
+          "#text": "Weapons"
+        },
+        "text": {
+          "@type": "string",
+          "#text": "Simple weapons, shortswords"
+        }
+      }
+    },
+    "text": {
+      "@type": "formattedtext",
+      "h": [
+        "Monk",
+        "Optional Class Features",
+        "The Monk",
+        "Class Features",
+        "Hit Points",
+        "Proficiencies",
+        "Equipment",
+        "Features"
+      ],
+      "linklist": [
+        {
+          "link": {
+            "@class": "imagewindow",
+            "@recordname": "image.img_monksymbol_jpg@DD Tashas Cauldron of Everything - Players",
+            "b": "Image:",
+            "#text": "Monk Symbol"
+          }
+        },
+        {
+          "link": [
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.unarmoreddefense1",
+              "#text": "Unarmored Defense"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.martialarts1",
+              "#text": "Martial Arts"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.ki2",
+              "#text": "Ki"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.unarmoredmovement2",
+              "#text": "Unarmored Movement"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.dedicatedweapon_option_2",
+              "#text": "Dedicated Weapon (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.monastictradition3",
+              "#text": "Monastic Tradition"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.deflectmissiles3",
+              "#text": "Deflect Missiles"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.ki_fueledattack_option_3",
+              "#text": "Ki-Fueled Attack (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.abilityscoreimprovement4",
+              "#text": "Ability Score Improvement"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.slowfall4",
+              "#text": "Slow Fall"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.quickenedhealing_option_4",
+              "#text": "Quickened Healing (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.extraattack5",
+              "#text": "Extra Attack"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.stunningstrike5",
+              "#text": "Stunning Strike"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.focusedaim_option_5",
+              "#text": "Focused Aim (Option)"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.ki_empoweredstrikes6",
+              "#text": "Ki-Empowered Strikes"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.evasion7",
+              "#text": "Evasion"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.stillnessofmind7",
+              "#text": "Stillness of Mind"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.purityofbody10",
+              "#text": "Purity of Body"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.tongueofthesunandmoon13",
+              "#text": "Tongue of the Sun and Moon"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.diamondsoul14",
+              "#text": "Diamond Soul"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.timelessbody15",
+              "#text": "Timeless Body"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.emptybody18",
+              "#text": "Empty Body"
+            },
+            {
+              "@class": "reference_classfeature",
+              "@recordname": "..features.perfectself20",
+              "#text": "Perfect Self"
+            }
+          ]
+        }
+      ],
+      "p": [
+        "The monk class receives new features and subclasses in this section.",
+        {
+          "i": [
+            "Player's Handbook",
+            "Player's Handbook,"
+          ],
+          "#text": "You gain class features in the when you reach certain levels in your class. This section offers additional features that you can gain as a monk. Unlike the features in the you don't gain the features here automatically. Consulting with your DM, you decide whether to gain a feature in this section if you meet the level requirement noted in the feature's description. These features can be selected separately from one another; you can use some, all, or none of them."
+        },
+        {
+          "b": "Hit Dice:",
+          "#text": "1d8 per monk level"
+        },
+        {
+          "b": "Hit Points At 1st Level:",
+          "#text": "8 + your Constitution modifier"
+        },
+        {
+          "b": "Hit Points At Higher Levels:",
+          "#text": "1d8 (or 5) + your Constitution modifier per monk level after 1st"
+        },
+        {
+          "b": "Armor:",
+          "#text": "None"
+        },
+        {
+          "b": "Weapons:",
+          "#text": "Simple weapons, shortswords"
+        },
+        {
+          "b": "Tools:",
+          "#text": "Choose one type of artisan's tools or one musical instrument"
+        },
+        {
+          "b": "Saving Throws:",
+          "#text": "Strength, Dexterity"
+        },
+        {
+          "b": "Skills:",
+          "#text": "Choose two from Acrobatics, Athletics, History, Insight, Religion, and Stealth"
+        },
+        "You start with the following equipment, in addition to the equipment granted by your background:"
+      ],
+      "table": {
+        "tr": [
+          {
+            "td": [
+              {
+                "b": "Level"
+              },
+              {
+                "b": "Proficiency Bonus"
+              },
+              {
+                "b": "Martial Arts"
+              },
+              {
+                "b": "Ki Points"
+              },
+              {
+                "b": "Unarmored Movement"
+              },
+              {
+                "b": "Features"
+              }
+            ]
+          },
+          {
+            "td": [
+              "1st",
+              "+2",
+              "1d4",
+              "-",
+              "-",
+              "Unarmored Defense, Martial Arts"
+            ]
+          },
+          {
+            "td": [
+              "2nd",
+              "+2",
+              "1d4",
+              "2",
+              "+10 ft.",
+              "Ki, Unarmored Movement"
+            ]
+          },
+          {
+            "td": [
+              "3rd",
+              "+2",
+              "1d4",
+              "3",
+              "+10 ft.",
+              "Monastic Tradition, Deflect Missiles"
+            ]
+          },
+          {
+            "td": [
+              "4th",
+              "+2",
+              "1d4",
+              "4",
+              "+10 ft.",
+              "Ability Score Improvement, Slow Fall"
+            ]
+          },
+          {
+            "td": [
+              "5th",
+              "+3",
+              "1d6",
+              "5",
+              "+10 ft.",
+              "Extra Attack, Stunning Strike"
+            ]
+          },
+          {
+            "td": [
+              "6th",
+              "+3",
+              "1d6",
+              "6",
+              "+15 ft.",
+              "Ki-Empowered Strikes, Monastic Tradition feature"
+            ]
+          },
+          {
+            "td": [
+              "7th",
+              "+3",
+              "1d6",
+              "7",
+              "+15 ft.",
+              "Evasion, Stillness of Mind"
+            ]
+          },
+          {
+            "td": [
+              "8th",
+              "+3",
+              "1d6",
+              "8",
+              "+15 ft.",
+              "Ability Score Improvement"
+            ]
+          },
+          {
+            "td": [
+              "9th",
+              "+4",
+              "1d6",
+              "9",
+              "+15 ft.",
+              "Unarmored Movement improvement"
+            ]
+          },
+          {
+            "td": [
+              "10th",
+              "+4",
+              "1d6",
+              "10",
+              "+20 ft.",
+              "Purity of Body"
+            ]
+          },
+          {
+            "td": [
+              "11th",
+              "+4",
+              "1d8",
+              "11",
+              "+20 ft.",
+              "Monastic Tradition feature"
+            ]
+          },
+          {
+            "td": [
+              "12th",
+              "+4",
+              "1d8",
+              "12",
+              "+20 ft.",
+              "Ability Score Improvement"
+            ]
+          },
+          {
+            "td": [
+              "13th",
+              "+5",
+              "1d8",
+              "13",
+              "+20 ft.",
+              "Tongue of the Sun and Moon"
+            ]
+          },
+          {
+            "td": [
+              "14th",
+              "+5",
+              "1d8",
+              "14",
+              "+25 ft.",
+              "Diamond Soul"
+            ]
+          },
+          {
+            "td": [
+              "15th",
+              "+5",
+              "1d8",
+              "15",
+              "+25 ft.",
+              "Timeless Body"
+            ]
+          },
+          {
+            "td": [
+              "16th",
+              "+5",
+              "1d8",
+              "16",
+              "+25 ft.",
+              "Ability Score Improvement"
+            ]
+          },
+          {
+            "td": [
+              "17th",
+              "+6",
+              "1d10",
+              "17",
+              "+25 ft.",
+              "Monastic Tradition feature"
+            ]
+          },
+          {
+            "td": [
+              "18th",
+              "+6",
+              "1d10",
+              "18",
+              "+30 ft.",
+              "Empty Body"
+            ]
+          },
+          {
+            "td": [
+              "19th",
+              "+6",
+              "1d10",
+              "19",
+              "+30 ft.",
+              "Ability Score Improvement"
+            ]
+          },
+          {
+            "td": [
+              "20th",
+              "+6",
+              "1d10",
+              "20",
+              "+30 ft.",
+              "Perfect Self"
+            ]
+          }
+        ]
+      },
+      "list": {
+        "li": [
+          "(a) a shortsword or (b) any simple weapon",
+          "(a) a dungeoneer's pack or (b) an explorer's pack",
+          "10 darts"
+        ]
+      }
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00003"
+  }
+]

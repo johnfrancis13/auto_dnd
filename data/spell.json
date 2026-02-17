@@ -1,0 +1,870 @@
+[
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice. It can roll the die before or after making the ability check. The spell then ends."
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 1 minute"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "0"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Guidance (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "Touch"
+    },
+    "ritual": {
+      "@type": "number",
+      "#text": "0"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Divination"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Artificer"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00001"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S, M (a tiny ball of bat guano and sulfur)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame. Each creature in a 20-foot-radius sphere centered on that point must make a Dexterity saving throw. A target takes 8d6 fire damage on a failed save, or half as much damage on a successful one.",
+        "The fire spreads around corners. It ignites flammable objects in the area that aren't being worn or carried.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 4th level or higher, the damage increases by 1d6 for each slot level above 3rd."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "3"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Fireball (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "150 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Cleric Light Domain, Eldritch Knight, Warlock (Fiend), Monk, Sorcerer, Wizard, Arcane Trickster"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00002"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You hurl a mote of fire at a creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it isn't being worn or carried.",
+        "This spell's damage increases by 1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th level (4d10)."
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "0"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Fire Bolt (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "120 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Eldritch Knight, Sorcerer, Wizard, Arcane Trickster"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00003"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw. The spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "0"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Sacred Flame (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "60 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Cleric"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00004"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S, M (a miniature cloak)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one saving throw of its choice. It can roll the die before or after making the saving throw. The spell then ends."
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 1 minute"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "0"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Resistance (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "Touch"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Abjuration"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Cleric, Druid"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00005"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 reaction, which you take in response to being damaged by a creature within 60 feet of you that you can see"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You point your finger, and the creature that damaged you is momentarily surrounded by hellish flames. The creature must make a Dexterity saving throw. It takes 2d10 fire damage on a failed save, or half as much damage on a successful one.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Hellish Rebuke (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "60 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Warlock"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00006"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range. A dart deals 1d4 + 1 force damage to its target. The darts all strike simultaneously, and you can direct them to hit one creature or several.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 2nd level or higher, the spell creates one more dart for each slot level above 1st."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Magic Missile (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "120 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Eldritch Knight, Sorcerer, Wizard, Arcane Trickster"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00007"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S, M (a bit of spiderweb)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You conjure a mass of thick, sticky webbing at a point of your choice within range. The webs fill a 20-foot cube from that point for the duration. The webs are difficult terrain and lightly obscure their area.",
+        "If the webs aren't anchored between two solid masses (such as walls or trees) or layered across a floor, wall, or ceiling, the conjured web collapses on itself, and the spell ends at the start of your next turn. webs layered over a flat surface have a depth of 5 feet.",
+        "Each creature that starts its turn in the webs or that enters them during its turn must make a Dexterity saving throw. On a failed save, the creature is restrained as long as it remains in the webs or until it breaks free. A creature restrained by the webs can use its action to make a Strength check against your spell save DC. If it succeeds, it is no longer restrained.",
+        "The webs are flammable. Any 5-foot cube of webs exposed to fire burns away in 1 round, dealing 2d4 fire damage to any creature that starts its turn in the fire."
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 1 hour"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "2"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Web (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "60 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Conjuration"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Artificer"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00008"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, M (a snake's tongue and either a bit of honeycomb or a drop of sweet oil)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You suggest a course of activity (limited to a sentence or two) and magically influence a creature you can see within range that can hear and understand you.",
+        "Creatures that can't be charmed are immune to this effect. The suggestion must be worded in such a manner as to make the course of action sound reasonable.",
+        "Asking the creature to stab itself, throw itself onto a spear, immolate itself, or do some other obviously harmful act ends the spell.",
+        "The target must make a Wisdom saving throw. On a failed save, it pursues the course of action you described to the best of its ability. The suggested course of action can continue for the entire duration. If the suggested activity can be completed in a shorter time, the spell ends when the subject finishes what it was asked to do. You can also specify conditions that will trigger a special activity during the duration. For example, you might suggest that a knight give her warhorse to the first beggar she meets. If the condition isn't met before the spell expires, the activity isn't performed.",
+        "If you or any of your companions damage the target, the spell ends."
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 8 hours"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "2"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Suggestion (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "30 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Enchantment"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Bard, Cleric Knowledge Domain, Eldritch Knight, Sorcerer, Warlock, Wizard, Arcane Trickster"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00009"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 reaction, which you take when you see a creature within 60 feet of you casting a spell"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, its spell fails and has no effect. If it is casting a spell of 4th level or higher, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a success, the creature's spell fails and has no effect.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 4th level or higher, the interrupted spell has no effect if its level is less than or equal to the level of the spell slot you used."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "3"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Counterspell (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "60 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Abjuration"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Eldritch Knight, Sorcerer, Warlock, Wizard, Arcane Trickster"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00010"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S, M (a wing feather from any bird)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You touch a willing creature. The target gains a flying speed of 60 feet for the duration. When the spell ends, the target falls if it is still aloft, unless it can stop the fall.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 4th level or higher, you can target one additional creature for each slot level above 3rd."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 10 minutes"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "3"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Fly (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "Touch"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Transmutation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Artificer"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00011"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "Action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "One Beast you can see within range must succeed on a Wisdom saving throw or have the Charmed condition for the duration. The target has Advantage on the save if you or your allies are fighting it. Whenever the target takes damage, it repeats the save, ending the spell on itself on a success.",
+        "You have a telepathic link with the Charmed target while the two of you are on the same plane of existence. On your turn, you can use this link to issue commands to the target (no action required), such as \"Attack that creature,\" \"Move over there,\" or \"Fetch that object.\" The target does its best to obey on its turn. If it completes an order and doesn't receive further direction from you, it acts and moves as it likes, focusing on protecting itself.",
+        "You can command the target to take a Reaction but must take your own Reaction to do so.",
+        {
+          "b": "Using a Higher-Level Spell Slot.",
+          "#text": "Your Concentration can last longer with a spell slot of level 5 (up to 10 minutes), 6 (up to 1 hour), or 7+ (up to 8 hours)."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 1 minute"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "4"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Dominate Beast (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "60 feet"
+    },
+    "ritual": {
+      "@type": "number",
+      "#text": "0"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Enchantment"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Druid, Ranger, Sorcerer"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00012"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S, M (an eggshell and a snake-skin glove)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You create a Large hand of shimmering, translucent force in an unoccupied space that you can see within range. The hand lasts for the spell's duration, and it moves at your command, mimicking the movements of your own hand.",
+        "The hand is an object that has AC 20 and hit points equal to your hit point maximum. If it drops to 0 hit points, the spell ends. It has a Strength of 26 (+8) and a Dexterity of 10 (+0). The hand doesn't fill its space.",
+        "When you cast the spell and as a bonus action on your subsequent turns, you can move the hand up to 60 feet and then cause one of the following effects with it.",
+        {
+          "b": "Clenched Fist.",
+          "#text": "The hand strikes one creature or object within 5 feet of it. Make a melee spell attack for the hand using your game statistics. On a hit, the target takes 4d8 force damage."
+        },
+        {
+          "b": "Forceful Hand.",
+          "#text": "The hand attempts to push a creature within 5 feet of it in a direction you choose. Make a check with the hand's Strength contested by the Strength (Athletics) check of the target. If the target is Medium or smaller, you have advantage on the check. If you succeed, the hand pushes the target up to 5 feet plus a number of feet equal to five times your spellcasting ability modifier. The hand moves with the target to remain within 5 feet of it."
+        },
+        {
+          "b": "Grasping Hand.",
+          "#text": "The hand attempts to grapple a Huge or smaller creature within 5 feet of it. You use the hand's Strength score to resolve the grapple. If the target is Medium or smaller, you have advantage on the check. While the hand is grappling the target, you can use a bonus action to have the hand crush it. When you do so, the target takes bludgeoning damage equal to 2d6 + your spellcasting ability modifier."
+        },
+        {
+          "b": "Interposing Hand.",
+          "#text": "The hand interposes itself between you and a creature you choose until you give the hand a different command. The hand moves to stay between you and the target, providing you with half cover against the target. The target can't move through the hand's space if its Strength score is less than or equal to the hand's Strength score. If its Strength score is higher than the hand's Strength score, the target can move toward you through the hand's space, but that space is difficult terrain for the target."
+        },
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 6th level or higher, the damage from the clenched fist option increases by 2d8 and the damage from the grasping hand increases by 2d6 for each slot level above 5th."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 1 minute"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "5"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Bigby's Hand (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "120 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Artificer, Sorcerer (optional)"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00013"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S, M (diamond dust worth at least 100 gp, which the spell consumes)"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": "You imbue a creature you touch with positive energy to undo a debilitating effect. You can reduce the target's exhaustion level by one, or end one of the following effects on the target:",
+      "list": {
+        "li": [
+          "One effect that charmed or petrified the target",
+          "One curse, including the target's attunement to a cursed magic item",
+          "Any reduction to one of the target's ability scores",
+          "One effect reducing the target's hit point maximum"
+        ]
+      }
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "5"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Greater Restoration (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "Touch"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Abjuration"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Artificer, Ranger (optional)"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00014"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "You summon fey spirits that take the form of beasts and appear in unoccupied spaces that you can see within range. Choose one of the following options for what appears:",
+        "Each beast is also considered fey, and it disappears when it drops to 0 hit points or when the spell ends.",
+        "The summoned creatures are friendly to you and your companions. Roll initiative for the summoned creatures as a group, which has its own turns. They obey any verbal commands that you issue to them (no action required by you). If you don't issue any commands to them, they defend themselves from hostile creatures, but otherwise take no actions.",
+        "The DM has the creatures' statistics.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using certain higher-level spell slots, you choose one of the summoning options above, and more creatures appear: twice as many with a 5th-level slot, three times as many with a 7th-level slot, and four times as many with a 9th-level slot."
+        }
+      ],
+      "list": {
+        "li": [
+          "One beast of challenge rating 2 or lower",
+          "Two beasts of challenge rating 1 or lower",
+          "Four beasts of challenge rating 1/2 or lower",
+          "Eight beasts of challenge rating 1/4 or lower"
+        ]
+      }
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Concentration, up to 1 hour"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "3"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Conjure Animals (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "60 feet"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Conjuration"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Druid, Ranger"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00015"
+  },
+  {
+    "castingtime": {
+      "@type": "string",
+      "#text": "1 action"
+    },
+    "components": {
+      "@type": "string",
+      "#text": "V, S"
+    },
+    "description": {
+      "@type": "formattedtext",
+      "p": [
+        "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs.",
+        {
+          "b": "At Higher Levels.",
+          "#text": "When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st."
+        }
+      ]
+    },
+    "duration": {
+      "@type": "string",
+      "#text": "Instantaneous"
+    },
+    "level": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "locked": {
+      "@type": "number",
+      "#text": "1"
+    },
+    "name": {
+      "@type": "string",
+      "#text": "Cure Wounds (Copy)"
+    },
+    "range": {
+      "@type": "string",
+      "#text": "Touch"
+    },
+    "school": {
+      "@type": "string",
+      "#text": "Evocation"
+    },
+    "source": {
+      "@type": "string",
+      "#text": "Artificer"
+    },
+    "version": {
+      "@type": "string",
+      "#text": "2024"
+    },
+    "_fg_id": "id-00016"
+  }
+]
