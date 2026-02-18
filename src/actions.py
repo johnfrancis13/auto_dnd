@@ -6,8 +6,10 @@ from proficiency import ProficiencyType
 
 class ActionType(Enum):
     ACTION = auto()
-    BONUS_ACTION = auto()
+    BONUS = auto()
     REACTION = auto()
+    LAIR = auto()
+    LEGENDARY = auto()
     FREE = auto()
     SPECIAL = auto()
 

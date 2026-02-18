@@ -2,11 +2,6 @@ import json
 from collections import defaultdict
 from helper_functions import normalize_fg, clean_item_description, extract_link_text
 
-class Spellcasting:
-    def __init__(self):
-        self.known_spells = []
-        self.prepared_spells = []
-        self.spellcasting_ability = None
 
 class Spell:
     def __init__(self, data):
@@ -24,6 +19,14 @@ class Spell:
         self.links = extract_link_text(data)
         #self.save = data["Save"]
 
+class Spellcasting:
+    def __init__(self):
+        self.known_spells = []
+        self.prepared_spells = []
+        self.spellcasting_ability = None
+
+    def add_spell(self, spell: Spell):
+        self.known_spells[spell.name] = spell
 
 
 class SpellRepository:
