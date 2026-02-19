@@ -205,12 +205,15 @@ class DiceHandler:
                     attack_result = feature(attack_result)
 
         # Apply modifiers
-        if source.proficiencies.has_proficiency( ProficiencyType.WEAPON,action.proficiency_type):
-            prof = source.proficiencies.proficiency_bonus
+        if action.attack_roll.get("precomputed"):
+            attack_result.add_modifier(action.attack_roll["bonus"] )
         else:
-            prof = 0
+            if source.proficiencies.has_proficiency( ProficiencyType.WEAPON,action.proficiency_type):
+                prof = source.proficiencies.proficiency_bonus
+            else:
+                prof = 0
+            attack_result.add_modifier(source.ability_scores.modifier(action.attack_roll["ability"]) + action.attack_roll["bonus"] + prof )
 
-        attack_result.add_modifier(source.ability_scores.modifier(action.attack_roll["ability"]) + action.attack_roll["bonus"] + prof )
         if attack_result.total>= target.stats.armor_class():
             dmg_result = DamageResult()
             for val in action.damage_roll:
@@ -220,7 +223,10 @@ class DiceHandler:
                     for feature in source.features._features:
                         if getattr(feature, "feature_type", None) == "affects_rolls":
                             temp_dmg_result = feature(temp_dmg_result) 
-                temp_dmg_result.add_modifier(val["bonus"] + source.ability_scores.modifier(val["ability"]))
+                if val.get("precomputed"):
+                    temp_dmg_result.add_modifier(val["bonus"])
+                else:
+                    temp_dmg_result.add_modifier(val["bonus"] + source.ability_scores.modifier(val["ability"]))
                 dmg_result.add_damage(val["dmg_type"],temp_dmg_result)
 
             return AttackResult(attack_roll=attack_result,

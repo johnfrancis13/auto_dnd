@@ -5,6 +5,8 @@ from spellcasting import Spellcasting, SpellRepository
 from dataclasses import dataclass, field
 from typing import List, Any
 from conditions import ConditionManager
+from features import FeatureManager
+import re
 
 
 # Class to create an NPC
@@ -75,6 +77,48 @@ def unwrap(value):
         return [unwrap(v) for v in value]
     return value
     
+def parse_attack(text: str):
+    attack_roll = {
+        "ability": None,
+        "bonus": 0,
+        "proficiency_type": None,
+        "precomputed": True
+    }
+
+    damage_roll = []
+
+    # #  Attack type
+    # attack_type_match = re.search(r"(Melee|Ranged) (Weapon|Spell) Attack:", text)
+    # if attack_type_match:
+    #     kind, category = attack_type_match.groups()
+    #     attack_roll["proficiency_type"] = f"{kind.lower()} {category.lower()}"
+
+    # Hit bonus
+    hit_match = re.search(r"\+(\d+) to hit", text)
+    if hit_match:
+        attack_roll["bonus"] = int(hit_match.group(1))
+
+    #  Damage dice and type
+    dmg_match = re.search(
+        r"\((\d+)d(\d+)\)\s+(\w+)\s+damage",
+        text
+    )
+
+    if dmg_match:
+        dice_amount = int(dmg_match.group(1))
+        dice_type = int(dmg_match.group(2))
+        dmg_type = dmg_match.group(3)
+
+        damage_roll.append({
+            "dmg_type": dmg_type,
+            "dice_type": dice_type,
+            "dice_amount": dice_amount,
+            "ability": None,
+            "bonus": 0,
+            "precomputed": True
+        })
+
+    return attack_roll, damage_roll
 
 @dataclass
 class NPC:
@@ -100,6 +144,11 @@ class NPC:
     languages: str
     inventory: Inventory = field(default_factory=Inventory)
     conditions: ConditionManager = field(default_factory=ConditionManager)
+    features: FeatureManager = field(default_factory=FeatureManager)
+    stats: "ComputedStats" = field(init=False)
+
+    def __post_init__(self):
+        self.stats = ComputedStats(self)
 
 
 def create_npc(json_data):
@@ -121,11 +170,14 @@ def create_npc(json_data):
     for val in range(len(action_classes)):
         if npc_dict[action_classes[val]] is not None:
             for key in  npc_dict[action_classes[val]]:
+
+                attack_roll, damage_roll = parse_attack(npc_dict[action_classes[val]][key]["desc"])
                 actions_manager.add(
                     Action( id= npc_dict[action_classes[val]][key]["name"],
                             name= npc_dict[action_classes[val]][key]["name"],
                             action_type= action_types[val],
-                            execute = npc_dict[action_classes[val]][key]["desc"])
+                            attack_roll=attack_roll,
+                            damage_roll=damage_roll)
                     )
                 
     # Create the spells
@@ -182,6 +234,73 @@ def create_npc(json_data):
     return NPC_new
 
 
+class ComputedStats:
+    def __init__(self, pc):
+        self.pc = pc
+    #     self._ac_cache = self.armor_class()
+
+    def armor_class(self):
+        return self.pc.ac
+        ctx = ArmorClassContext(self.pc)
+
+        # # Armor & shields
+        # self.pc.inventory.modify_armor_class(ctx)
+
+        # # Class & racial features
+        # self.pc.features.modify_armor_class(ctx)
+
+        # # Conditions (haste, restrained, etc.)
+        # self.pc.conditions.modify_armor_class(ctx)
+
+        # dex_mod = self.pc.ability_scores.modifier("dex")
+        if ctx.dex_cap is not None:
+            dex_mod = min(dex_mod, ctx.dex_cap)
+
+        return ctx.base + dex_mod + ctx.bonus
+    
+    # def initiative(self):
+    #     # Baseline based on ability, modified by any features, items, spells, etc.
+
+    #     return total_level
+    
+    # def speed(self):
+    #     # Baseline based on race, modified by any features, items, spells, etc.
+    #     speed = self.pc.race.get_speed()
+
+    #     speed += self.pc.features.modify_speed()
+    #     speed += self.pc.inventory.modify_speed()
+    #     speed += self.pc.inventory.modify_speed()
+
+    #     return speed
+    # def size(self):
+    #     # Baseline based on race, modified by any features, items, spells, etc.
+    #     size = self.pc.race.get_size()
+
+    #     size = self.pc.features.modify_speed()
+    #     size = self.pc.inventory.modify_speed()
+    #     size = self.pc.inventory.modify_speed()
+
+    #     return size
+    # def creature_type(self):
+    #     # Baseline based on race, modified by any features, items, spells, etc.
+    #     creature_type = self.pc.race.get_creature_type()
+
+    #     creature_type = self.pc.features.modify_creature_type()
+    #     creature_type = self.pc.inventory.modify_creature_type()
+    #     creature_type = self.pc.inventory.modify_creature_type()
+
+    #     return creature_type
+    
+    # def passive_perception(self):
+    #     # Baseline based on ability, modified by any features, items, spells, etc.
+        
+
+    #     return total_level
+    
+    # def spell_save_dc(self):
+    #     # Baseline based on class, ability, modified by any features, items, spells, etc.
+
+    #     return total_level
 
 # # Same as above, but connected to random generators
 # def create_random_npc(name:str,

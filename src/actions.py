@@ -49,10 +49,10 @@ class ActionManager:
         if action.execute:
             return action.execute(source, target)
     
-    def attack_roll(self, action_id, source, target=None):
+    def attack_roll(self, action_id, source, target=None,adv=None):
         action = self.get(action_id)
         if action.attack_roll:
-            attack_result = DiceHandler().roll_attack(action,source,target) # roll attack, determine if success, roll damage
+            attack_result = DiceHandler().roll_attack(action,source,target,advantage=adv) # roll attack, determine if success, roll damage
             return attack_result
     
     def request_save(self, action_id, source, target=None):
