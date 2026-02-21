@@ -198,13 +198,14 @@ def create_npc(json_data):
 
     # create resources from each spell slot if they exist
     resource_pool = ResourcePool()
-    for lvl in npc_dict["spellslots"]:
-        resource_pool.add_resource( Resource(id= lvl ,
-                                         name= lvl ,
-                                         category= ResourceCategory.SPELL_SLOT,
-                                         current= npc_dict["spellslots"][lvl],
-                                         maximum= npc_dict["spellslots"][lvl],
-                                         recharge= RechargeType.LONG_REST ))
+    if npc_dict.get("spellslots"):
+        for lvl in npc_dict["spellslots"]:
+            resource_pool.add_resource( Resource(id= lvl ,
+                                             name= lvl ,
+                                             category= ResourceCategory.SPELL_SLOT,
+                                             current= npc_dict["spellslots"][lvl],
+                                             maximum= npc_dict["spellslots"][lvl],
+                                             recharge= RechargeType.LONG_REST ))
 
 
     NPC_new = NPC(

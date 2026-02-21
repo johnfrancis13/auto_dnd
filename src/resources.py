@@ -74,6 +74,13 @@ class ResourcePool:
             if resource.recharge == rest_type:
                 resource.current = resource.maximum
 
+    def update_health(self, amount:int):
+        self.max_hit_points += amount
+        self.current_hit_points += amount
+
+    def update_hit_die(self, dice:int, amount:int):
+        self.hit_die[dice] += amount
+
 # Example resources
 # Resource(
 #         id="rage",
