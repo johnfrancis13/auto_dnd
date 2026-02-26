@@ -79,7 +79,7 @@ class ResourcePool:
         self.current_hit_points += amount
 
     def update_hit_die(self, dice:int, amount:int):
-        self.hit_die[dice] += amount
+        self.hit_die[dice] =  self.hit_die.get(dice, 0) + amount
 
 # Example resources
 # Resource(

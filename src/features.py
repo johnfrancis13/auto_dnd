@@ -9,18 +9,21 @@ class FeatureManager:
     def __init__(self):
         self._features = []
 
-    def add_feature(self, feature, engine):
+    def add_feature(self, feature, engine,description=None):
         # First check if in Feature registry
-        if feature["name"] not in FEATURE_REGISTRY:
+        if feature not in FEATURE_REGISTRY:
             print("Feature does not exist or has not yet been implemented in the feature registry")
-            return None # make this an error later
+            # create a descriptive feature for now
+            feature_class =Feature(name=feature,description=description)
+            #return None # make this an error later
             #raise ValueError("Feature does not exist or has not yet been implemented in the feature registry")
+        else:
+            feature_class = FEATURE_REGISTRY[feature]()
 
         
-        feature_class = FEATURE_REGISTRY[feature["name"]]
         if feature_class not in self._features:
             self._features.append(feature_class)
-            feature_class().on_attach(engine) # add permanent character level changes
+            feature_class.on_attach(engine) # add permanent character level changes
 
     def remove_feature(self, feature, engine):
         if feature in self._features:
@@ -44,10 +47,11 @@ class FeatureManager:
 
 
 class Feature:
-    def __init__(self, name, source=None,feature_type=None):
+    def __init__(self, name, source=None,feature_type=None, description=None):
         self.name = name
         self.source = source  # race, class, item, feat
         self.feature_type = feature_type
+        self.description = description
 
     # =========================
     # Lifecycle
@@ -134,7 +138,9 @@ class Feature:
         pass
 
 
-
+###################################################################################################
+# Build feature subclass only when necessary, otherwise it is just a data holder (description only)
+###################################################################################################
     
 # Features that affect dice rolls need to take rolls, total as input and output new rolls and new totals
 class HalflingLuck(Feature):

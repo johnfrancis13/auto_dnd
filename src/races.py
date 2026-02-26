@@ -20,7 +20,7 @@ class Race:
 
         racial_traits = ast.literal_eval(self.racial_data["unique_traits"])
         for feat in racial_traits:
-            character.features.add_feature(feat, character)
+            character.features.add_feature(feat["name"], character)
 
 
         self.description = self.racial_data["description"]

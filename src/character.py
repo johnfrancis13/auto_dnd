@@ -15,7 +15,7 @@ from races import Race
 from items import Item
 from resources import ResourcePool
 from actions import ActionManager
-import ast
+from classes import ClassProgression
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 
@@ -217,21 +217,7 @@ class AbilityScores:
 
 
 
-class ClassProgression:
-    def __init__(self):
-        self.classes = []  # e.g. [Fighter, Fighter, Fighter, Rogue]
 
-    def add_class(self, char_class, pc):
-        # Create the class fist to make sure char_class is valid
-        new_class = CharClass(char_class)
-        # add the new class
-        self.classes.append(char_class)
-
-        # get the level of the new class being added
-        class_level_to_add = sum([1 for val in self.classes if val==char_class])
-
-        # Add in the relevant info for the new class to the pc
-        # new_class.apply(class_level_to_add, pc)
 
 
 

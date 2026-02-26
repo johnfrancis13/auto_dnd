@@ -147,16 +147,27 @@ class CharClass:
 
         self.spell_caster = True if self.levelup_spell_slots else False
         
-
+    def apply(self, level_to_add,character):
+        if level_to_add==1:
+            self.first_level_setup(character) # have not implemented multiclassing yet
+        elif 1 < level_to_add <= 20:
+            self.level_up(character,level_to_add)
+        else:
+            raise ValueError("level_to_add must be an integer greater than 0 and no more than 20")
         # need something different for the others
     def first_level_setup(self, character):
         # Add hp
-        character.resources.update_health(self.starting_hp )
+        flat_val = int(re.search(r'\d+', self.starting_hp).group())
+        con_modifier = character.ability_scores.modifier("CON")
+        starting_hp = flat_val+con_modifier
+        character.resources.update_health( starting_hp)
+        print(f"Starting HP set to {starting_hp}")
 
         # Assign hit dice
         dice_part = self.hit_dice.split()[0] 
         num, sides = dice_part.split('d')
         character.resources.update_hit_die(int(sides),int(num))
+        print(f"Hit die updated")
 
         # Add proficiencies
         class_profs = dict()
@@ -175,16 +186,21 @@ class CharClass:
             class_profs[ ProficiencyType.WEAPON] = set([item.strip() for item in self.proficiencies["weapons"]["text"].split(",")])
         
         character.proficiencies.add_proficiencies(class_profs)
+        print(f"Proficiences added: {class_profs}")
+
 
 
         # Add equipment
         for item in self.starting_equipment:
             character.inventory.add_item(item)
         
+        print(f"Items added: {self.starting_equipment}")
+
         # Add features
         level_1_features =  self.class_features[1]
         for feat in level_1_features:
-            character.features.add_feature(level_1_features[feat], character)
+            # convert to an actual feature first... need to parse the text into a feature class object
+            character.features.add_feature(feat,character,description = level_1_features[feat])
 
         # Add resoources
         if self.levelup_spell_slots is not None:
@@ -283,3 +299,24 @@ class CharClassRepository:
         ]
 
 
+class ClassProgression:
+    def __init__(self):
+        self.classes = []  # e.g. [Fighter, Fighter, Fighter, Rogue]
+
+    def add_class(self, char_class, pc):
+        # Create the class fist to make sure char_class is valid
+        new_class = CharClassRepository().get(char_class)
+        # add the new class
+        self.classes.append(new_class.name)
+
+        # get the level of the new class being added
+        class_level_to_add = sum([1 for val in self.classes if val==new_class.name])
+
+        # Add in the relevant info for the new class to the pc
+        new_class.apply(class_level_to_add, pc)
+
+    def pc_level(self):
+        return len(self.classes)
+    
+    def class_level(self,char_class):
+        return sum([1 for val in self.classes if val==char_class])
