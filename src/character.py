@@ -78,6 +78,9 @@ class PCFactory:
         if char_class:
             pc.classes.add_class(char_class, pc)
         
+        # If "Spellcasting" is the name of a feature, we need to add some spells to the character... ideally the person gets to pick them
+
+
         # Ensure the character is a valid 5e character
         PCValidator(pc).validate()
 
@@ -105,7 +108,9 @@ class PC:
         self.skill_scores = dict()
         self.skills = self.update_skills()
 
-
+    def __repr__(self):
+        return f"PC({self.identity.name!r} is a level {len(self.classes.classes)} {self.identity.race!r} {self.classes.classes[0]} who is currently sitting at {self.resources.current_hit_points} hit points, with the following attributes: {self.ability_scores.scores})"
+    
     def update_skills(self):
         skills = {
             "athletics": "STR",

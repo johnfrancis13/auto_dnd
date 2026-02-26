@@ -219,8 +219,8 @@ class CharClass:
                      id="level_1_spells",
                      name="Level 1 Spells",
                      category=ResourceCategory.SPELL_SLOT,
-                     current=self.levelup_spell_slots[1]["slots"]["1"],
-                     maximum=self.levelup_spell_slots[1]["slots"]["1"],
+                     current=self.levelup_spell_slots[1]["slots"][1],
+                     maximum=self.levelup_spell_slots[1]["slots"][1],
                      recharge=RechargeType.SHORT_REST if self.name=="Warlock" else RechargeType.LONG_REST,
                      source="class"
                      ))
