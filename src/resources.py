@@ -32,8 +32,11 @@ class Resource:
     source: Optional[str] = None  # "Monk", "Magic Item", "Feat"
 
     def max_value(self, character):
-        self.maximum = self.max_calc(character)
-        return self.max_calc(character)
+        if self.max_calc is None:
+            return self.maximum
+        value = self.max_calc(character)
+        self.maximum = value
+        return value
 
 
 class ResourcePool:
@@ -43,6 +46,27 @@ class ResourcePool:
         self.hit_die: Dict[int, int] = {}
         self.death_saves = {"success": 0, "failure": 0}
 
+        spell_types = ["cantrips"]+["Level_"+str(a+1) for a in range(9)]
+
+        # Create a holder for the amount of spells a character can know
+        self.spells ={a:Resource(id=a+"_spells",
+                                 name=a+" Spells",
+                                   category=ResourceCategory.CLASS_RESOURCE,
+                                     current=0,
+                                     maximum=0,
+                                     recharge=RechargeType.NONE,
+                                     source="class"
+                                     )  for a in spell_types}
+        
+        # Create a holder for the amount of spell slots a character has access to
+        self.spell_slots ={a:Resource(id=a+"_spell_slots",
+                                 name=a+" Spell Slots",
+                                   category=ResourceCategory.SPELL_SLOT,
+                                     current=0,
+                                     maximum=0,
+                                     recharge=RechargeType.LONG_REST, # for Warlock switch to short rest
+                                     source="class"
+                                     )  for a in spell_types}
         # 🔥 unified system
         self.resources: Dict[str, Resource] = {}
 
@@ -80,6 +104,21 @@ class ResourcePool:
 
     def update_hit_die(self, dice:int, amount:int):
         self.hit_die[dice] =  self.hit_die.get(dice, 0) + amount
+
+    def update_spell_access(self, spell_level,  amount=1, set_current=False, set_max=False):
+        if set_max:
+            self.spells[spell_level].maximum = amount
+        if set_current:
+            self.spells[spell_level].current += amount
+
+    def update_spell_slots(self, spell_level,  amount=1, use_spell=False, set_max=False):
+        if set_max:
+            self.spell_slots[spell_level].maximum = amount
+        if use_spell:
+            self.spell_slots[spell_level].current += -1*(amount)
+            if self.spell_slots[spell_level].current<0:
+                self.spell_slots[spell_level].current = 0
+                raise ValueError(f"Not enough {spell_level} spell slots remianing to cast a spell.")
 
 # Example resources
 # Resource(

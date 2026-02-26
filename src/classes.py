@@ -188,8 +188,6 @@ class CharClass:
         character.proficiencies.add_proficiencies(class_profs)
         print(f"Proficiences added: {class_profs}")
 
-
-
         # Add equipment
         for item in self.starting_equipment:
             character.inventory.add_item(item)
@@ -204,27 +202,15 @@ class CharClass:
 
         # Add resoources
         if self.levelup_spell_slots is not None:
-            character.resources.add_resource(
-                 Resource(
-                     id="cantrips",
-                     name="Cantrips",
-                     category=ResourceCategory.SPELL_SLOT,
-                     current=self.levelup_spell_slots[1]["cantrips"],
-                     maximum=self.levelup_spell_slots[1]["cantrips"],
-                     recharge=RechargeType.LONG_REST,
-                     source="class"
-                     ))
-            character.resources.add_resource(
-                Resource(
-                     id="level_1_spells",
-                     name="Level 1 Spells",
-                     category=ResourceCategory.SPELL_SLOT,
-                     current=self.levelup_spell_slots[1]["slots"][1],
-                     maximum=self.levelup_spell_slots[1]["slots"][1],
-                     recharge=RechargeType.SHORT_REST if self.name=="Warlock" else RechargeType.LONG_REST,
-                     source="class"
-                     ))
+            character.resources.update_spell_slots(
+                "cantrips",self.levelup_spell_slots[1]["cantrips"],set_max=True)
+            character.resources.update_spell_slots(
+                "Level_1",self.levelup_spell_slots[1]["slots"][1],set_max=True)
+            # If warlock, need to update all the recharge types to Short_rest
+            #RechargeType.SHORT_REST if self.name=="Warlock" else RechargeType.LONG_REST,
 
+            #   Also need to add in the total number of spells of each type they should have  character.resources.update_spell_access
+            
 
     def level_up(self, character,level):
 
@@ -239,28 +225,12 @@ class CharClass:
         # Update resources
         # Add resources
         if self.levelup_spell_slots is not None:
-            character.resources.add_resource(
-                 Resource(
-                     id="cantrips",
-                     name="Cantrips",
-                     category=ResourceCategory.SPELL_SLOT,
-                     current=self.levelup_spell_slots[level]["cantrips"],
-                     maximum=self.levelup_spell_slots[level]["cantrips"],
-                     recharge=RechargeType.LONG_REST,
-                     source="class"
-                     ))
+            character.resources.update_spell_slots(
+                "cantrips",self.levelup_spell_slots[level]["cantrips"],set_max=True)
             for lvl in self.levelup_spell_slots[level]["slots"]:
-                character.resources.add_resource(
-                    Resource(
-                         id=f"level_{lvl}_spells",
-                         name="Level {lvl} Spells",
-                         category=ResourceCategory.SPELL_SLOT,
-                         current=self.levelup_spell_slots[level]["slots"][f"{lvl}"],
-                         maximum=self.levelup_spell_slots[level]["slots"][f"{lvl}"],
-                         recharge=RechargeType.SHORT_REST if self.name=="Warlock" else RechargeType.LONG_REST,
-                         source="class"
-                         ))
-        
+                character.resources.update_spell_slots(
+                "Level_{lvl}",self.levelup_spell_slots[level]["slots"][f"{lvl}"],set_max=True)
+
         
 class CharClassRepository:
     def __init__(self, path="../data/class.json"):

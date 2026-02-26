@@ -240,6 +240,72 @@ class DiceHandler:
                                 damage=None)
 
 
+
+
+class CombatTracker:
+    def __init__(self):
+        self.combatants: set[str] = set()
+        self.initiative_order: list[str] = []  # list of combatant IDs
+        self.current_turn_index: int = 0
+        self.round_number: int = 1
+        self.active: bool = False
+        self.initiatives = self.get_initiatives()
+        self._recalculate_initiative()
+    # -----------------------
+    # Combat Management
+    # -----------------------
+
+    def add_combatant(self, combatant):
+        self.combatants.add(combatant)
+        self._recalculate_initiative()
+
+    def remove_combatant(self, combatant):
+        if combatant in self.combatants:
+            self.combatants.remove(combatant)
+            self._recalculate_initiative()
+
+    def get_initiatives(self):
+        initiatives = dict()
+        for combatant in self.combatants:
+            initiatives[combatant.name] = combatant.roll_initiative()
+
+    def _recalculate_initiative(self):
+        self.initiative_order = sorted(
+            self.initiatives.keys(),
+            key=lambda cid: self.initiatives[cid],
+            reverse=True
+        )
+
+    # -----------------------
+    # Turn Handling
+    # -----------------------
+
+    def start_combat(self):
+        self.active = True
+        self.round_number = 1
+        self.current_turn_index = 0
+        self._recalculate_initiative()
+
+    def get_current_combatant(self):
+        if not self.initiative_order:
+            return None
+        cid = self.initiative_order[self.current_turn_index]
+        return self.combatants[cid]
+
+    def next_turn(self):
+        if not self.active:
+            return
+
+        self.current_turn_index += 1
+
+        if self.current_turn_index >= len(self.initiative_order):
+            self.current_turn_index = 0
+            self.round_number += 1
+
+        current = self.get_current_combatant()
+        if current:
+            current.reset_turn_resources()
+
 # @dataclass
 # class DiceRequest:
 #     roll_type: str               # attack, damage, save, check
