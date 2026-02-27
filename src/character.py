@@ -64,7 +64,7 @@ class PCFactory:
             if set(ability_score_assignment) != expected:
                 raise ValueError(f"Keys must be exactly {expected}, got {ability_score_assignment}")
 
-        pc.ability_scores = AbilityScores(dict(zip(ability_score_assignment, sorted(ability_score_values, reverse=True))))
+        pc.ability_scores = AbilityScores(pc, dict(zip(ability_score_assignment, sorted(ability_score_values, reverse=True))))
         
         # Apply race bonuses
         if pc.identity.race:
@@ -79,7 +79,9 @@ class PCFactory:
             pc.classes.add_class(char_class, pc)
         
         # If "Spellcasting" is the name of a feature, we need to add some spells to the character... ideally the person gets to pick them
-
+        
+        pc.update_saving_throws()
+        pc.update_skills()
 
         # Ensure the character is a valid 5e character
         PCValidator(pc).validate()
@@ -90,23 +92,26 @@ class PCFactory:
 class PC:
     def __init__(self, name, race, background):
         self.identity = Identity(name, race, background)
-        self.ability_scores = AbilityScores()
-        self.classes = ClassProgression()
-        self.proficiencies = ProficiencyManager()
-        self.resources = ResourcePool()
-        self.inventory = Inventory()
-        self.features = FeatureManager()
-        self.spells = Spellcasting()
-        self.conditions = ConditionManager()
-        self.effects = EffectsManager()
+        self.ability_scores = AbilityScores(self)
+        self.classes = ClassProgression(self)
+        self.proficiencies = ProficiencyManager(self)
+        self.resources = ResourcePool(self)
+        self.inventory = Inventory(self)
+        self.features = FeatureManager(self)
+        self.spells = Spellcasting(self)
+        self.conditions = ConditionManager(self)
+        self.effects = EffectsManager(self)
 
         self.stats = ComputedStats(self)
-        self.actions = ActionManager()
+        self.actions = ActionManager(self)
 
 
         # Generate skill scores
         self.skill_scores = dict()
-        self.skills = self.update_skills()
+        self.update_skills()
+
+        self.saving_throws = dict()
+        self.update_saving_throws()
 
     def __repr__(self):
         return f"PC({self.identity.name!r} is a level {len(self.classes.classes)} {self.identity.race!r} {self.classes.classes[0]} who is currently sitting at {self.resources.current_hit_points} hit points, with the following attributes: {self.ability_scores.scores})"
@@ -139,6 +144,16 @@ class PC:
                 self.skill_scores[skill] = self.ability_scores.modifier(skills[skill]) + self.proficiencies.proficiency_bonus
             else:
                 self.skill_scores[skill] = self.ability_scores.modifier(skills[skill])
+    
+    def update_saving_throws(self):
+        saving_throws = ["STR","DEX","CON","INT","WIS","CHA"]
+        
+        # Apply the ability score + proficiency bonus
+        for abiility in saving_throws:
+            if abiility in self.proficiencies.proficiencies[ProficiencyType.SAVE]:
+                self.saving_throws[abiility] = self.ability_scores.modifier(abiility) + self.proficiencies.proficiency_bonus
+            else:
+                self.saving_throws[abiility] = self.ability_scores.modifier(abiility)
 
 
 
@@ -197,7 +212,8 @@ class AbilityScoreGenerator:
 
 
 class AbilityScores:
-    def __init__(self, 
+    def __init__(self,
+                 owner,
                  scores= {
                      "STR": 10,
                      "DEX": 10,
@@ -206,6 +222,7 @@ class AbilityScores:
                      "WIS": 10,
                      "CHA": 10,
                  }):
+        self.owner = owner
         self.scores = scores
         self.ability_names = ["STR","DEX","CON","INT","WIS","CHA"]
 
@@ -221,17 +238,30 @@ class AbilityScores:
                 print(key,"updated by", bonus_dict[key])
 
 
-
-
-
-
-
-
-
 class Inventory:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.items = {}  # {Item: quantity}
+        self.equipped = set()
 
+    def equip(self, item, equip_or_unequip="equip"):
+        # ensure item is in inventory
+        if item in self.items:
+            if equip_or_unequip=="equip":
+                self.equipped.add(item)
+                # need a function that runs here to ensure equipped item effects are applied properly
+            elif equip_or_unequip=="unequip":
+                self.equipped.remove(item)
+                # need a function that runs here to ensure equipped item effects are applied properly
+            else:
+                raise ValueError(f"equip_or_unequip must be one of equip or unequip, not {equip_or_unequip}")
+
+        else:
+            raise ValueError("Cannot equip or unequip an item that is not in inventory.")
+
+    def get(self, item_name):
+        return next((obj for obj in self.items if obj.name == item_name), None)
+        
     def add_item(self, item, quantity=1):
         self.items[item] = self.items.get(item, 0) + quantity
 

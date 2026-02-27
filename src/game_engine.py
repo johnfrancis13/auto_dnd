@@ -34,7 +34,18 @@ class RollResult:
     advantage: Optional[str] = None
     is_critical: bool = False
     metadata: Dict = field(default_factory=dict)
-    
+    def __repr__(self) -> str:
+        return (
+            f"RollResult("
+            f"total={self.total}, "
+            f"dice={self.dice}, "
+            f"dice_total={self.base_total}, "
+            f"modifiers={self.modifiers}, "
+            f"advantage={self.advantage}, "
+            f"is_critical={self.is_critical}, "
+            f"metadata={self.metadata}"
+            f")")
+
     @property
     def total(self) -> int:
         return self.base_total + self.modifiers
@@ -46,7 +57,7 @@ class RollResult:
         self.metadata[key] = value
 
     def add_roll(self,roll_result):
-        self.dice.append(roll_result.dice)
+        self.dice.extend(roll_result.dice)
         self.base_total += roll_result.base_total
 
 @dataclass
@@ -174,7 +185,7 @@ class DiceHandler:
         if features:
             for feature in features:
                 if getattr(feature, "feature_type", None) == "affects_rolls":
-                    result = feature(result)
+                    result = feature.on_d20_roll(result)
         # Apply modifiers
         result.add_modifier(modifiers)        
         

@@ -29,7 +29,8 @@ class Action:
     resource_cost: Optional[dict] = None
 
 class ActionManager:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self._actions = {}
 
     def add(self, action: Action):
@@ -60,6 +61,25 @@ class ActionManager:
         if action.request_save:
             return {"save_request":action.request_save(source, target),
                     "damage":action.damage_roll(source, target)}
+        
+    def roll_ability_check(self, ability,advantage=None):
+        return DiceHandler().roll(dice_specs = [(20,1)],
+                                  modifiers=self.owner.ability_scores.modifier(ability), 
+                                  features=self.owner.features._features,
+                                  advantage=advantage)
+    
+    def roll_skill_check(self, skill,advantage=None):
+        return DiceHandler().roll(dice_specs = [(20,1)],
+                                  modifiers=self.owner.skill_scores[skill], 
+                                  features=self.owner.features._features,
+                                  advantage=advantage)
+    
+    def roll_saving_throw(self, ability,advantage=None):
+        return DiceHandler().roll(dice_specs = [(20,1)],
+                                  modifiers=self.owner.saving_throws[ability], 
+                                  features=self.owner.features._features,
+                                  advantage=advantage)
+
 
 
 

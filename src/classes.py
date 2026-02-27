@@ -174,7 +174,7 @@ class CharClass:
         if self.proficiencies["armor"]["text"]!="None":
             class_profs[ ProficiencyType.ARMOR] = set([item.strip() for item in self.proficiencies["armor"]["text"].split(",")])
         if self.proficiencies["savingthrows"]["text"]!="None":
-            class_profs[ ProficiencyType.SAVE] = set([item.strip() for item in self.proficiencies["savingthrows"]["text"].split(",")])
+            class_profs[ ProficiencyType.SAVE] = set([item.strip()[:3].upper() for item in self.proficiencies["savingthrows"]["text"].split(",")])
         if self.proficiencies["skills"]["text"]!="None":
             if "Choose two from" in self.proficiencies["skills"]["text"]:
                 class_profs[ ProficiencyType.SKILL] = set([item.strip() for item in self.proficiencies["skills"]["text"].split(",")][-2:])
@@ -270,7 +270,8 @@ class CharClassRepository:
 
 
 class ClassProgression:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.classes = []  # e.g. [Fighter, Fighter, Fighter, Rogue]
 
     def add_class(self, char_class, pc):

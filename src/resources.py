@@ -40,7 +40,8 @@ class Resource:
 
 
 class ResourcePool:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.max_hit_points = 0
         self.current_hit_points = 0
         self.hit_die: Dict[int, int] = {}
@@ -70,6 +71,9 @@ class ResourcePool:
         # 🔥 unified system
         self.resources: Dict[str, Resource] = {}
 
+    def get(self, resource_name):
+        return next((obj for obj in self.resources if obj.name == resource_name), None)
+    
     def add_resource(self, resource: Resource):
         self.resources[resource.id] = resource
 

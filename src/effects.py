@@ -1,5 +1,6 @@
 class EffectsManager:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.effectss = []
 
     def add(self, effects):

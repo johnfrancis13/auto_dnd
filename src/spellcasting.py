@@ -20,13 +20,30 @@ class Spell:
         #self.save = data["Save"]
 
 class Spellcasting:
-    def __init__(self):
-        self.known_spells = []
-        self.prepared_spells = []
+    def __init__(self, owner):
+        self.owner = owner
+        self.known_spells = dict()
+        self.prepared_spells = dict()
         self.spellcasting_ability = None
+        self.spell_save_dc = None
 
-    def add_spell(self, spell: Spell):
-        self.known_spells[spell.name] = spell
+    def manage_spells(self, spell: Spell,action="add"):
+        if action=="add":
+            self.known_spells[spell.name] = spell
+        elif action=="remove":
+            self.known_spells.pop(spell.name, None)
+        else:
+            raise ValueError("action must be one of remove or add")
+
+
+    def prepare_spell(self, spell: Spell, action="add"):
+        if action=="add":
+            self.prepared_spells[spell.name] = spell
+        elif action=="remove":
+            self.prepared_spells.pop(spell.name, None)
+        else:
+            raise ValueError("action must be one of remove or add")
+
 
 
 class SpellRepository:

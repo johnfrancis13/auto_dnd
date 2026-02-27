@@ -1,5 +1,6 @@
 class ConditionManager:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.conditions = []
 
     def add(self, condition):

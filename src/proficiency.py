@@ -15,7 +15,8 @@ class ProficiencyType(Enum):
 
 # Manager class to deal with proficiency
 class ProficiencyManager:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.proficiencies = {
             ProficiencyType.ARMOR: set(),
             ProficiencyType.WEAPON: set(),

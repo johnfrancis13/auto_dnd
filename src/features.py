@@ -6,7 +6,8 @@ from typing import Optional, Callable, Dict
 import random
 
 class FeatureManager:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self._features = []
 
     def add_feature(self, feature, engine,description=None):
@@ -24,6 +25,9 @@ class FeatureManager:
         if feature_class not in self._features:
             self._features.append(feature_class)
             feature_class.on_attach(engine) # add permanent character level changes
+
+    def get(self, feature_name):
+        return next((obj for obj in self._features if obj.name == feature_name), None)
 
     def remove_feature(self, feature, engine):
         if feature in self._features:
@@ -150,7 +154,7 @@ class HalflingLuck(Feature):
     def on_d20_roll(self,roll_result):
         # reroll any 1s 
         roll_result.dice = [r if r > 1 else random.randint(2, 20) for r in roll_result.dice]
-        roll_result.total()
+        roll_result.base_total = sum(roll_result.dice )
         return roll_result
     
 class FelineAgility(Feature):
@@ -203,7 +207,7 @@ FEATURE_REGISTRY = {
     "Feline Agility": FelineAgility,
     "Claws": Claws,
     "Talent": Talent,
-    "Halfling Luck": HalflingLuck,
+    "Luck": HalflingLuck,
 }
 
 
