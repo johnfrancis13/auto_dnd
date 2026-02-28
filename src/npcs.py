@@ -122,16 +122,13 @@ def parse_attack(text: str):
 
 @dataclass
 class NPC:
-    ability_scores: Any
+    abilities: Any
     name: str
     description: str
     size: str
     type: str
     alignment: str
     traits: list
-    resources: Any
-    actions: Any
-    spells: Any
     senses: str
     skills: str
     ac: int
@@ -142,15 +139,20 @@ class NPC:
     xp: int
     speed: str
     languages: str
-    inventory: Inventory = field(default_factory=Inventory)
-    conditions: ConditionManager = field(default_factory=ConditionManager)
-    features: FeatureManager = field(default_factory=FeatureManager)
     stats: "ComputedStats" = field(init=False)
 
     def __post_init__(self):
         self.stats = ComputedStats(self)
+        self.actions = ActionManager(self)
+        self.spells = Spellcasting(self)
+        self.resources = ResourcePool(self)
+        self.ability_scores = AbilityScores(self,scores=self.abilities)
+        self.inventory = Inventory(self)
+        self.conditions = ConditionManager(self)
+        self.features = FeatureManager(self)
 
 
+# Create NPC from json data, need a separate function to create a random npc
 def create_npc(json_data):
     
 
@@ -162,54 +164,9 @@ def create_npc(json_data):
         for name, ability in npc_dict["abilities"].items()
     }
 
-    # Create the actions
-    actions_manager = ActionManager()
-    action_classes =['actions', 'bonusactions','lairactions','legendaryactions', 'reactions']
-    action_types =[ActionType.ACTION,ActionType.BONUS,ActionType.LAIR,ActionType.LEGENDARY, ActionType.REACTION]
-    
-    for val in range(len(action_classes)):
-        if npc_dict[action_classes[val]] is not None:
-            for key in  npc_dict[action_classes[val]]:
-
-                attack_roll, damage_roll = parse_attack(npc_dict[action_classes[val]][key]["desc"])
-                actions_manager.add(
-                    Action( id= npc_dict[action_classes[val]][key]["name"],
-                            name= npc_dict[action_classes[val]][key]["name"],
-                            action_type= action_types[val],
-                            attack_roll=attack_roll,
-                            damage_roll=damage_roll)
-                    )
-                
-    # Create the spells
-    spellcasting = Spellcasting()
-    spell_repo = SpellRepository()
-    spell_classes =['innatespells', 'spells']
-    
-    for val in range(len(spell_classes)):
-        if npc_dict[spell_classes[val]] is not None:
-            for key in  npc_dict[spell_classes[val]]:
-                temp_spell = spell_repo.get(npc_dict[spell_classes[val]][key]["name"])
-                if temp_spell is not None:
-                    spellcasting.add_spell(
-                        temp_spell
-                    )
-            
-
-
-    # create resources from each spell slot if they exist
-    resource_pool = ResourcePool()
-    if npc_dict.get("spellslots"):
-        for lvl in npc_dict["spellslots"]:
-            resource_pool.add_resource( Resource(id= lvl ,
-                                             name= lvl ,
-                                             category= ResourceCategory.SPELL_SLOT,
-                                             current= npc_dict["spellslots"][lvl],
-                                             maximum= npc_dict["spellslots"][lvl],
-                                             recharge= RechargeType.LONG_REST ))
-
-
+    # Set up the NPC class
     NPC_new = NPC(
-        ability_scores=AbilityScores(scores=ability_scores),
+        abilities=ability_scores,
         name=npc_dict["name"].replace(" (Copy)", "").strip(),
         description=npc_dict["text"]["p"],
         size=npc_dict.get("size", {}),
@@ -217,9 +174,6 @@ def create_npc(json_data):
         alignment=npc_dict.get("alignment", {}),
         #traits = [npc_dict["traits"][b] for b in npc_dict["traits"]],
         traits = list((npc_dict.get("traits") or {}).values()),
-        resources=resource_pool,
-        actions = actions_manager,
-        spells= spellcasting,
         senses=npc_dict.get("senses", {}),
         skills=npc_dict.get("skills", {}),
         ac=npc_dict.get("ac", {}),
@@ -232,6 +186,47 @@ def create_npc(json_data):
         languages=npc_dict.get("languages", {}),
     )
 
+    # Create the actions
+    action_classes =['actions', 'bonusactions','lairactions','legendaryactions', 'reactions']
+    action_types =[ActionType.ACTION,ActionType.BONUS,ActionType.LAIR,ActionType.LEGENDARY, ActionType.REACTION]
+    
+    for val in range(len(action_classes)):
+        if npc_dict[action_classes[val]] is not None:
+            for key in  npc_dict[action_classes[val]]:
+
+                attack_roll, damage_roll = parse_attack(npc_dict[action_classes[val]][key]["desc"])
+                NPC_new.actions.add(
+                    Action( id= npc_dict[action_classes[val]][key]["name"],
+                            name= npc_dict[action_classes[val]][key]["name"],
+                            action_type= action_types[val],
+                            attack_roll=attack_roll,
+                            damage_roll=damage_roll)
+                    )
+                
+    # Create the spells
+    spell_repo = SpellRepository()
+    spell_classes =['innatespells', 'spells']
+    
+    for val in range(len(spell_classes)):
+        if npc_dict[spell_classes[val]] is not None:
+            for key in  npc_dict[spell_classes[val]]:
+                temp_spell = spell_repo.get(npc_dict[spell_classes[val]][key]["name"])
+                if temp_spell is not None:
+                    NPC_new.spells.add_spell(
+                        temp_spell
+                    )
+            
+
+
+    # create resources from each spell slot if they exist
+    if npc_dict.get("spellslots"):
+        for lvl in npc_dict["spellslots"]:
+            NPC_new.resources.add_resource( Resource(id= lvl ,
+                                             name= lvl ,
+                                             category= ResourceCategory.SPELL_SLOT,
+                                             current= npc_dict["spellslots"][lvl],
+                                             maximum= npc_dict["spellslots"][lvl],
+                                             recharge= RechargeType.LONG_REST ))
 
     return NPC_new
 

@@ -89,22 +89,22 @@ class Feature:
     # Roll Hooks
     # =========================
 
-    def on_d20_roll(self, rolls, total):
+    def on_d20_roll(self, roll_result):
         pass
 
-    def on_attack_roll(self, rolls, total):
+    def on_attack_roll(self, roll_result):
         pass
 
-    def on_damage_roll(self, rolls, total):
+    def on_damage_roll(self, roll_result):
         pass
 
-    def on_ability_check(self, rolls, total):
+    def on_ability_check(self, roll_result):
         pass
 
-    def on_saving_throw(self, rolls, total):
+    def on_saving_throw(self, roll_result):
         pass
 
-    def on_initiative(self, rolls, total):
+    def on_initiative(self, roll_result):
         pass
 
     # =========================
