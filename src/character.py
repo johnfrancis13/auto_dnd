@@ -104,6 +104,7 @@ class PC:
 
         self.stats = ComputedStats(self)
         self.actions = ActionManager(self)
+        self.short_character_description=None
 
 
         # Generate skill scores
