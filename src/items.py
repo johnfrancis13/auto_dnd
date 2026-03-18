@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from actions import Action
 from features import Feature
 from helper_functions import normalize_fg, clean_item_description, extract_link_text
@@ -19,7 +20,11 @@ class Item:
 
 
 class ItemRepository:
-    def __init__(self, path="../data/item.json"):
+    def __init__(self, path=None):
+        if path is None:
+            path = Path(__file__).resolve().parents[1] / "data" / "item.json"
+        else:
+            path = Path(path)
         with open(path, "r", encoding="utf-8") as f:
             raw_data = normalize_fg(json.load(f))
 

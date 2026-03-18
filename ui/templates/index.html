@@ -1,0 +1,147 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto DnD</title>
+    <link rel="stylesheet" href="/static/app.css" />
+    <script defer src="/static/app.js"></script>
+  </head>
+  <body>
+    <div id="setup-screen" class="setup-screen">
+      <section class="setup-panel">
+        <h1>Build Your Character</h1>
+        <form id="char-form" class="setup-form">
+          <label>
+            Name
+            <input name="name" type="text" value="Garian" />
+          </label>
+          <label>
+            Race
+            <select name="race">
+              <option>Halfling</option>
+              <option>Tabaxi</option>
+            </select>
+          </label>
+          <label>
+            Class
+            <select name="class">
+              <option>Cleric</option>
+              <option>Wizard</option>
+              <option>Monk</option>
+            </select>
+          </label>
+          <label>
+            Background
+            <select name="background">
+              <option>Acolyte</option>
+            </select>
+          </label>
+          <label>
+            Ability Method
+            <select name="ability_method">
+              <option value="roll">Roll 4d6</option>
+              <option value="standard">Standard Array</option>
+            </select>
+          </label>
+          <label>
+            Short Description
+            <textarea name="short_description" rows="4">A compact halfling cleric with a travel-worn staff and calm eyes.</textarea>
+          </label>
+          <button type="button" id="start-game">Start Adventure</button>
+        </form>
+      </section>
+      <section class="setup-panel instructions">
+        <h2>How It Works</h2>
+        <ul>
+          <li>Create a character using the options on the left.</li>
+          <li>Press Start Adventure to launch a one-shot.</li>
+          <li>The AI Dungeon Master will narrate and ask for your actions.</li>
+          <li>Combat actions can be selected directly once combat starts.</li>
+        </ul>
+        <div class="muted">Tip: Provide a short description to shape the DM narration.</div>
+      </section>
+    </div>
+
+    <div id="game-screen" class="app hidden">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-title">Auto DnD</div>
+          <div class="brand-sub">AI Dungeon Master</div>
+        </div>
+
+        <section class="panel">
+          <h2>Character</h2>
+          <button type="button" id="new-game">Start New Adventure</button>
+        </section>
+
+        <section class="panel" id="char-stats">
+          <h2>Sheet</h2>
+          <div class="tabs" id="sheet-tabs">
+            <button type="button" class="tab active" data-tab="about">About</button>
+            <button type="button" class="tab" data-tab="abilities">Abilities</button>
+            <button type="button" class="tab" data-tab="inventory">Inventory</button>
+            <button type="button" class="tab" data-tab="actions">Actions</button>
+            <button type="button" class="tab" data-tab="spells">Spells</button>
+          </div>
+          <div class="tab-body" id="sheet-body">
+            <div class="muted">Start a game to load stats.</div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="chat">
+        <section class="images inline">
+          <h2>Scene Images</h2>
+          <div id="image-grid" class="image-grid">
+            <div class="empty">No images yet</div>
+          </div>
+        </section>
+        <header>
+          <div>
+            <h1>Session</h1>
+            <div id="game-state" class="muted">No session running</div>
+          </div>
+          <div class="pill" id="session-indicator">Idle</div>
+        </header>
+
+        <section id="messages" class="messages"></section>
+
+        <section id="combat-panel" class="combat-panel hidden">
+          <div class="combat-header">
+            <h2>Combat Actions</h2>
+            <div class="muted" id="combat-turn">Waiting for turn...</div>
+          </div>
+          <div class="combat-meta">
+            <div class="initiative-order" id="initiative-order"></div>
+            <div class="turn-state" id="turn-state"></div>
+          </div>
+          <div class="combat-map-wrap">
+            <div class="combat-map" id="combat-map"></div>
+          </div>
+          <div class="combat-controls">
+            <label>
+              Action
+              <select id="combat-action"></select>
+            </label>
+            <label>
+              Target
+              <select id="combat-target" multiple size="4"></select>
+            </label>
+            <div class="combat-buttons">
+              <button type="button" id="combat-submit">Resolve</button>
+              <button type="button" id="combat-end-turn" class="ghost">End Turn</button>
+            </div>
+          </div>
+          <div class="muted combat-hint">Tip: Hold Ctrl (Windows) or Cmd (Mac) to select multiple targets.</div>
+        </section>
+
+        <form id="chat-form" class="composer">
+          <input id="chat-input" type="text" placeholder="What do you do?" autocomplete="off" />
+          <button type="submit">Send</button>
+        </form>
+      </main>
+
+    </div>
+  </body>
+</html>

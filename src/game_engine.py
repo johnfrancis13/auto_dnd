@@ -219,7 +219,8 @@ class DiceHandler:
         if action.attack_roll.get("precomputed"):
             attack_result.add_modifier(action.attack_roll["bonus"] )
         else:
-            if source.proficiencies.has_proficiency( ProficiencyType.WEAPON,action.proficiency_type):
+            prof_type = action.proficiency_type or action.attack_roll.get("proficiency_type")
+            if prof_type and source.proficiencies.has_proficiency(ProficiencyType.WEAPON, prof_type):
                 prof = source.proficiencies.proficiency_bonus
             else:
                 prof = 0
@@ -254,31 +255,52 @@ class DiceHandler:
 
 
 class CombatTracker:
-    def __init__(self):
-        self.combatants: set[str] = set()
+    def __init__(self, combatants: Optional[Dict[str, object]] = None):
+        self.combatants: Dict[str, object] = combatants or {}
+        self.initiatives: Dict[str, int] = {}
         self.initiative_order: list[str] = []  # list of combatant IDs
         self.current_turn_index: int = 0
         self.round_number: int = 1
         self.active: bool = False
-        self.initiatives = self.get_initiatives()
-        self._recalculate_initiative()
+        if self.combatants:
+            self.roll_initiative()
+
     # -----------------------
     # Combat Management
     # -----------------------
 
-    def add_combatant(self, combatant):
-        self.combatants.add(combatant)
+    def set_combatants(self, combatants: Dict[str, object]):
+        self.combatants = combatants
+        self.roll_initiative()
+
+    def add_combatant(self, combatant, combatant_id: Optional[str] = None):
+        cid = combatant_id or getattr(combatant, "name", str(combatant))
+        self.combatants[cid] = combatant
+        self.initiatives[cid] = self._roll_initiative(combatant)
         self._recalculate_initiative()
 
-    def remove_combatant(self, combatant):
-        if combatant in self.combatants:
-            self.combatants.remove(combatant)
+    def remove_combatant(self, combatant_id: str):
+        if combatant_id in self.combatants:
+            self.combatants.pop(combatant_id)
+            self.initiatives.pop(combatant_id, None)
             self._recalculate_initiative()
 
-    def get_initiatives(self):
-        initiatives = dict()
-        for combatant in self.combatants:
-            initiatives[combatant.name] = combatant.roll_initiative()
+    def _roll_initiative(self, combatant) -> int:
+        roll = Dice.roll(sides=20, count=1)
+        dex_mod = 0
+        if hasattr(combatant, "ability_scores"):
+            try:
+                dex_mod = combatant.ability_scores.modifier("DEX")
+            except Exception:
+                dex_mod = 0
+        roll.add_modifier(dex_mod)
+        return roll.total
+
+    def roll_initiative(self):
+        self.initiatives = {}
+        for cid, combatant in self.combatants.items():
+            self.initiatives[cid] = self._roll_initiative(combatant)
+        self._recalculate_initiative()
 
     def _recalculate_initiative(self):
         self.initiative_order = sorted(
@@ -295,17 +317,23 @@ class CombatTracker:
         self.active = True
         self.round_number = 1
         self.current_turn_index = 0
-        self._recalculate_initiative()
+        if not self.initiative_order:
+            self.roll_initiative()
 
-    def get_current_combatant(self):
+    def get_current_combatant_id(self) -> Optional[str]:
         if not self.initiative_order:
             return None
-        cid = self.initiative_order[self.current_turn_index]
-        return self.combatants[cid]
+        return self.initiative_order[self.current_turn_index]
+
+    def get_current_combatant(self):
+        cid = self.get_current_combatant_id()
+        if cid is None:
+            return None
+        return self.combatants.get(cid)
 
     def next_turn(self):
-        if not self.active:
-            return
+        if not self.active or not self.initiative_order:
+            return None
 
         self.current_turn_index += 1
 
@@ -314,8 +342,149 @@ class CombatTracker:
             self.round_number += 1
 
         current = self.get_current_combatant()
-        if current:
+        if current and hasattr(current, "reset_turn_resources"):
             current.reset_turn_resources()
+        return self.get_current_combatant_id()
+
+
+@dataclass
+class CombatActionLog:
+    actor: str
+    action_id: str
+    action_name: str
+    target: Optional[str] = None
+    hit: Optional[bool] = None
+    critical: bool = False
+    attack_total: Optional[int] = None
+    damage_total: int = 0
+    damage_breakdown: Optional[Dict[str, int]] = None
+    target_hp_before: Optional[int] = None
+    target_hp_after: Optional[int] = None
+    notes: Optional[str] = None
+
+
+class CombatEngine:
+    def __init__(self, combatants: Dict[str, object]):
+        self.combatants = combatants
+        self.tracker = CombatTracker(combatants)
+
+    def start(self):
+        self.tracker.start_combat()
+
+    def current_turn_id(self) -> Optional[str]:
+        return self.tracker.get_current_combatant_id()
+
+    def _coerce_hp(self, value) -> Optional[int]:
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            import re
+            match = re.search(r"\d+", value)
+            return int(match.group(0)) if match else None
+        return None
+
+    def _get_hp(self, combatant) -> Optional[int]:
+        if hasattr(combatant, "resources"):
+            return combatant.resources.current_hit_points
+        if hasattr(combatant, "hp"):
+            return self._coerce_hp(combatant.hp)
+        return None
+
+    def _set_hp(self, combatant, value: int):
+        if hasattr(combatant, "resources"):
+            combatant.resources.current_hit_points = value
+            if combatant.resources.max_hit_points < value:
+                combatant.resources.max_hit_points = value
+        elif hasattr(combatant, "hp"):
+            combatant.hp = value
+
+    def _ensure_hp_initialized(self, combatant):
+        if not hasattr(combatant, "resources"):
+            return
+        if combatant.resources.max_hit_points != 0:
+            return
+        base_hp = None
+        if hasattr(combatant, "hp"):
+            base_hp = self._coerce_hp(combatant.hp)
+        if base_hp is not None:
+            combatant.resources.max_hit_points = base_hp
+            combatant.resources.current_hit_points = base_hp
+
+    def apply_damage(self, target, amount: int) -> Optional[int]:
+        self._ensure_hp_initialized(target)
+        hp_before = self._get_hp(target)
+        if hp_before is None:
+            return None
+        new_hp = max(0, hp_before - amount)
+        self._set_hp(target, new_hp)
+        return new_hp
+
+    def is_defeated(self, combatant) -> bool:
+        hp = self._get_hp(combatant)
+        return hp is not None and hp <= 0
+
+    def resolve_attack_action(
+        self,
+        attacker_id: str,
+        action_id: str,
+        target_id: str,
+        advantage: Optional[str] = None,
+    ) -> CombatActionLog:
+        attacker = self.combatants.get(attacker_id)
+        target = self.combatants.get(target_id)
+        if attacker is None or target is None:
+            return CombatActionLog(
+                actor=attacker_id,
+                action_id=action_id,
+                action_name=action_id,
+                target=target_id,
+                notes="Invalid attacker or target.",
+            )
+
+        try:
+            action = attacker.actions.get(action_id)
+        except KeyError:
+            action = None
+        log = CombatActionLog(
+            actor=attacker_id,
+            action_id=action_id,
+            action_name=action.name if action else action_id,
+            target=target_id,
+        )
+
+        if action is None or not action.attack_roll:
+            log.notes = "Action not supported by combat engine."
+            return log
+
+        target_hp_before = self._get_hp(target)
+        log.target_hp_before = target_hp_before
+
+        attack_result = attacker.actions.attack_roll(
+            action_id, attacker, target, adv=advantage
+        )
+
+        if attack_result is None:
+            log.notes = "Action did not produce an attack result."
+            return log
+
+        log.hit = attack_result.hit
+        log.critical = attack_result.is_critical
+        log.attack_total = attack_result.attack_roll.total
+
+        if attack_result.damage:
+            log.damage_total = attack_result.damage.total
+            log.damage_breakdown = {
+                str(dmg_type): subtotal
+                for dmg_type, subtotal in attack_result.damage.breakdown().items()
+            }
+            self.apply_damage(target, log.damage_total)
+            log.target_hp_after = self._get_hp(target)
+        else:
+            log.damage_total = 0
+            log.target_hp_after = target_hp_before
+
+        return log
+
 
 # @dataclass
 # class DiceRequest:

@@ -27,6 +27,9 @@ class Action:
     effects: Optional[dict] = None # each effect should be listed separately
     proficiency_type: Optional[ProficiencyType] = None
     resource_cost: Optional[dict] = None
+    range: Optional[int] = None  # feet
+    targeting: Optional[dict] = None  # {shape, radius/length/width/origin}
+    max_targets: Optional[int] = None
 
 class ActionManager:
     def __init__(self, owner):
@@ -94,7 +97,9 @@ longsword_attack = Action(
                   "dice_type": 8,
                   "dice_amount":1,
                   "ability":"STR",
-                 "bonus":0}]
+                 "bonus":0}],
+    range=5,
+    targeting={"shape": "single"}
 )
 
 #DiceHandler.roll_attack( action,source, target, advantage=None))

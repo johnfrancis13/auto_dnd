@@ -3,9 +3,11 @@ from resources import ResourcePool, Resource, ResourceCategory, RechargeType
 from actions import Action, ActionManager, ActionType
 from spellcasting import Spellcasting, SpellRepository
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import List, Any, Optional, Dict, Union
 from conditions import ConditionManager
 from features import FeatureManager
+from pathlib import Path
+import json
 import re
 
 
@@ -86,6 +88,7 @@ def parse_attack(text: str):
     }
 
     damage_roll = []
+    attack_range = None
 
     # #  Attack type
     # attack_type_match = re.search(r"(Melee|Ranged) (Weapon|Spell) Attack:", text)
@@ -97,6 +100,14 @@ def parse_attack(text: str):
     hit_match = re.search(r"\+(\d+) to hit", text)
     if hit_match:
         attack_roll["bonus"] = int(hit_match.group(1))
+
+    reach_match = re.search(r"reach\s+(\d+)\s*ft", text, re.IGNORECASE)
+    if reach_match:
+        attack_range = int(reach_match.group(1))
+
+    range_match = re.search(r"range\s+(\d+)\s*/\s*\d+\s*ft", text, re.IGNORECASE)
+    if range_match:
+        attack_range = int(range_match.group(1))
 
     #  Damage dice and type
     dmg_match = re.search(
@@ -118,7 +129,24 @@ def parse_attack(text: str):
             "precomputed": True
         })
 
-    return attack_roll, damage_roll
+    return attack_roll, damage_roll, attack_range
+
+
+def _extract_hp_value(value):
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        match = re.search(r"\d+", value)
+        return int(match.group(0)) if match else None
+    return None
+
+
+def _clean_npc_name(value: Optional[Union[dict, str]]) -> str:
+    if isinstance(value, dict):
+        name = value.get("#text", "")
+    else:
+        name = value or ""
+    return name.replace(" (Copy)", "").strip()
 
 @dataclass
 class NPC:
@@ -167,7 +195,7 @@ def create_npc(json_data):
     # Set up the NPC class
     NPC_new = NPC(
         abilities=ability_scores,
-        name=npc_dict["name"].replace(" (Copy)", "").strip(),
+        name=_clean_npc_name(npc_dict.get("name")),
         description=npc_dict["text"]["p"],
         size=npc_dict.get("size", {}),
         type=npc_dict.get("type", {}),
@@ -186,6 +214,11 @@ def create_npc(json_data):
         languages=npc_dict.get("languages", {}),
     )
 
+    base_hp = _extract_hp_value(npc_dict.get("hp"))
+    if base_hp is not None:
+        NPC_new.resources.max_hit_points = base_hp
+        NPC_new.resources.current_hit_points = base_hp
+
     # Create the actions
     action_classes =['actions', 'bonusactions','lairactions','legendaryactions', 'reactions']
     action_types =[ActionType.ACTION,ActionType.BONUS,ActionType.LAIR,ActionType.LEGENDARY, ActionType.REACTION]
@@ -194,13 +227,15 @@ def create_npc(json_data):
         if npc_dict[action_classes[val]] is not None:
             for key in  npc_dict[action_classes[val]]:
 
-                attack_roll, damage_roll = parse_attack(npc_dict[action_classes[val]][key]["desc"])
+                attack_roll, damage_roll, attack_range = parse_attack(npc_dict[action_classes[val]][key]["desc"])
                 NPC_new.actions.add(
                     Action( id= npc_dict[action_classes[val]][key]["name"],
                             name= npc_dict[action_classes[val]][key]["name"],
                             action_type= action_types[val],
                             attack_roll=attack_roll,
-                            damage_roll=damage_roll)
+                            damage_roll=damage_roll,
+                            range=attack_range,
+                            targeting={"shape": "single"})
                     )
                 
     # Create the spells
@@ -229,6 +264,47 @@ def create_npc(json_data):
                                              recharge= RechargeType.LONG_REST ))
 
     return NPC_new
+
+
+class NPCRepository:
+    def __init__(self, path: Optional[Union[str, Path]] = None):
+        if path is None:
+            path = Path(__file__).resolve().parents[1] / "data" / "npc.json"
+        self.path = Path(path)
+        self._raw = []
+        self._index: Dict[str, dict] = {}
+        self._lower_index: Dict[str, str] = {}
+        self._load()
+
+    def _load(self):
+        if not self.path.exists():
+            raise FileNotFoundError(f"NPC data file not found: {self.path}")
+        with self.path.open("r", encoding="utf-8") as handle:
+            self._raw = json.load(handle)
+        for entry in self._raw:
+            name = _clean_npc_name(entry.get("name"))
+            if not name:
+                continue
+            if name not in self._index:
+                self._index[name] = entry
+                self._lower_index[name.lower()] = name
+
+    def list_names(self) -> List[str]:
+        return sorted(self._index.keys())
+
+    def get_raw(self, name: str) -> Optional[dict]:
+        if name in self._index:
+            return self._index[name]
+        key = self._lower_index.get(name.strip().lower())
+        if key:
+            return self._index[key]
+        return None
+
+    def create(self, name: str) -> NPC:
+        raw = self.get_raw(name)
+        if raw is None:
+            raise KeyError(f"NPC '{name}' not found in repository.")
+        return create_npc(raw)
 
 
 class ComputedStats:

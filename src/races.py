@@ -1,10 +1,13 @@
+from pathlib import Path
 import pandas as pd
 from proficiency import ProficiencyType
 import ast
+# Repo-local data path
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 # Look up values from db
 class Race:
     def __init__(self, id):
-        df = pd.read_csv("../data/woc_races_clean.csv")
+        df = pd.read_csv(DATA_DIR / "woc_races_clean.csv")
         self.id = id
         if id not in df["name"].values:
             raise ValueError(f"{id} not a valid race.")

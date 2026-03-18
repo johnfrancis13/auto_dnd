@@ -192,7 +192,9 @@ class Claws(Feature):
                                                              "dice_type": 4,
                                                              "dice_amount":1,
                                                              "ability":"DEX",
-                                                             "bonus":0}]))
+                                                             "bonus":0}],
+                                              range=5,
+                                              targeting={"shape": "single"}))
 
 
 class Talent(Feature):

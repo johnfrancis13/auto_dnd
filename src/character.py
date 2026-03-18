@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List
 import math
 import random as random
@@ -18,6 +19,7 @@ from actions import ActionManager
 from classes import ClassProgression
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
 
 def ability_modifier(score: int) -> int:
@@ -278,7 +280,7 @@ class Inventory:
 
 class Background:
     def __init__(self, id):
-        df = pd.read_csv("../data/woc_backgrounds.csv")
+        df = pd.read_csv(DATA_DIR / "woc_backgrounds.csv")
         self.id = id
         if id not in df["name"].values:
             raise ValueError(f"{id} not a valid background.")
