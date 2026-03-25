@@ -3,3 +3,8 @@ data/woc_monsters.csv
 src/__pycache__/
 
 data/local/
+
+5e-database/
+
+data/
+data/srd/

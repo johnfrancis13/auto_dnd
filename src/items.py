@@ -1,32 +1,61 @@
 import json
-from pathlib import Path
-from actions import Action
-from features import Feature
-from helper_functions import normalize_fg, clean_item_description, extract_link_text
 from collections import defaultdict
-import re
+from helper_functions import clean_item_description, extract_link_text
+from srd_loader import load_srd
 
 class Item:
     def __init__(self, data):
         self.name = data["name"].replace(" (Copy)", "").strip()
-        self.description = clean_item_description(data.get("description", ""))
-        self.type = data.get("type", None)
-        self.subtype = data.get("subType", None)
-        self.rarity = data.get("Rarity","Common")
-        self.attunement = "attunement" in (self.rarity or "").lower()
-        self.cost = data.get("cost",0)
-        self.weight = data.get("weight",0)
-        self.links = extract_link_text(data)
+        if "equipment_category" in data:
+            desc = data.get("desc") or []
+            self.description = "\n".join(desc).strip()
+            category = data.get("equipment_category")
+            if isinstance(category, dict):
+                self.type = category.get("name")
+            else:
+                self.type = category
+            self.subtype = (
+                data.get("weapon_category")
+                or data.get("armor_category")
+                or data.get("gear_category")
+            )
+            rarity = data.get("rarity")
+            if isinstance(rarity, dict):
+                rarity = rarity.get("name")
+            self.rarity = rarity or "Common"
+            self.attunement = bool(data.get("requires_attunement")) or "attunement" in (
+                self.rarity or ""
+            ).lower()
+            cost = data.get("cost") or {}
+            if isinstance(cost, dict):
+                qty = cost.get("quantity")
+                unit = cost.get("unit")
+                self.cost = f"{qty} {unit}".strip() if qty is not None else None
+            else:
+                self.cost = cost
+            self.weight = data.get("weight", 0)
+            self.links = []
+        else:
+            self.description = clean_item_description(data.get("description", ""))
+            self.type = data.get("type", None)
+            self.subtype = data.get("subType", None)
+            self.rarity = data.get("Rarity","Common")
+            self.attunement = "attunement" in (self.rarity or "").lower()
+            self.cost = data.get("cost",0)
+            self.weight = data.get("weight",0)
+            self.links = extract_link_text(data)
 
 
 class ItemRepository:
     def __init__(self, path=None):
         if path is None:
-            path = Path(__file__).resolve().parents[1] / "data" / "item.json"
+            equipment = load_srd("equipment", "5e-SRD-Equipment.json")
+            magic_items = load_srd("magic_items", "5e-SRD-Magic-Items.json")
+            raw_data = list(equipment or []) + list(magic_items or [])
         else:
-            path = Path(path)
-        with open(path, "r", encoding="utf-8") as f:
-            raw_data = normalize_fg(json.load(f))
+            from pathlib import Path
+            with Path(path).open("r", encoding="utf-8") as f:
+                raw_data = json.load(f)
 
         # Create objects
         self.all_items = [Item(item) for item in raw_data]

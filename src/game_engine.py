@@ -117,7 +117,8 @@ class Dice:
             else:
                 r1 = random.randint(1, sides)
                 r2 = random.randint(1, sides)
-                print(f"Rolled: {r1} and {r2} -> taking {'highest' if advantage=="adv" else 'lowest'}: {max(r1, r2)}")
+                choice = "highest" if advantage == "adv" else "lowest"
+                print(f"Rolled: {r1} and {r2} -> taking {choice}: {max(r1, r2)}")
                 if max(r1, r2)==20:
                     crit=True
                 else:
@@ -134,7 +135,8 @@ class Dice:
             else:
                 r1 = random.randint(1, sides)
                 r2 = random.randint(1, sides)
-                print(f"Rolled: {r1} and {r2} -> taking {'highest' if advantage=="adv" else 'lowest'}: {min(r1, r2)}")
+                choice = "highest" if advantage == "adv" else "lowest"
+                print(f"Rolled: {r1} and {r2} -> taking {choice}: {min(r1, r2)}")
 
                 if min(r1, r2)==20:
                     crit=True

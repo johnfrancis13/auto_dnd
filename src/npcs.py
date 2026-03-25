@@ -9,6 +9,7 @@ from features import FeatureManager
 from pathlib import Path
 import json
 import re
+from srd_loader import load_srd
 
 
 # Class to create an NPC
@@ -111,21 +112,25 @@ def parse_attack(text: str):
 
     #  Damage dice and type
     dmg_match = re.search(
-        r"\((\d+)d(\d+)\)\s+(\w+)\s+damage",
+        r"\((\d+)d(\d+)(\s*[+-]\s*\d+)?\)\s+(\w+)\s+damage",
         text
     )
 
     if dmg_match:
         dice_amount = int(dmg_match.group(1))
         dice_type = int(dmg_match.group(2))
-        dmg_type = dmg_match.group(3)
+        bonus = dmg_match.group(3)
+        dmg_type = dmg_match.group(4)
+        bonus_value = 0
+        if bonus:
+            bonus_value = int(bonus.replace(" ", ""))
 
         damage_roll.append({
             "dmg_type": dmg_type,
             "dice_type": dice_type,
             "dice_amount": dice_amount,
             "ability": None,
-            "bonus": 0,
+            "bonus": bonus_value,
             "precomputed": True
         })
 
@@ -181,10 +186,39 @@ class NPC:
 
 
 # Create NPC from json data, need a separate function to create a random npc
-def create_npc(json_data):
-    
+def _format_speed(speed):
+    if isinstance(speed, str):
+        return speed
+    if isinstance(speed, dict):
+        parts = []
+        for key, value in speed.items():
+            parts.append(f"{key} {value}")
+        return ", ".join(parts)
+    return ""
 
+
+def _extract_ac(value):
+    if isinstance(value, int):
+        return value
+    if isinstance(value, list) and value:
+        first = value[0]
+        if isinstance(first, dict):
+            return first.get("value") or first.get("armor_class") or 10
+    if isinstance(value, dict):
+        return value.get("value") or value.get("armor_class") or 10
+    return 10
+
+
+def _join_desc(desc):
+    if isinstance(desc, list):
+        return " ".join(desc)
+    return desc or ""
+
+
+def create_npc(json_data):
     npc_dict = unwrap(json_data)
+    if "hit_points" in npc_dict:
+        return create_npc_from_srd(npc_dict)
 
     
     ability_scores = {
@@ -266,21 +300,108 @@ def create_npc(json_data):
     return NPC_new
 
 
+def create_npc_from_srd(npc_dict):
+    ability_scores = {
+        "STR": npc_dict.get("strength"),
+        "DEX": npc_dict.get("dexterity"),
+        "CON": npc_dict.get("constitution"),
+        "INT": npc_dict.get("intelligence"),
+        "WIS": npc_dict.get("wisdom"),
+        "CHA": npc_dict.get("charisma"),
+    }
+
+    NPC_new = NPC(
+        abilities=ability_scores,
+        name=npc_dict.get("name", ""),
+        description=_join_desc(npc_dict.get("desc", "")),
+        size=npc_dict.get("size", ""),
+        type=npc_dict.get("type", ""),
+        alignment=npc_dict.get("alignment", ""),
+        traits=npc_dict.get("special_abilities", []) or [],
+        senses=npc_dict.get("senses", {}),
+        skills=npc_dict.get("skills", {}),
+        ac=_extract_ac(npc_dict.get("armor_class")),
+        hp=npc_dict.get("hit_points"),
+        hd=npc_dict.get("hit_dice", ""),
+        cr=npc_dict.get("challenge_rating", ""),
+        damagethreshold=npc_dict.get("damage_threshold", 0),
+        xp=npc_dict.get("xp", 0),
+        speed=_format_speed(npc_dict.get("speed", "")),
+        languages=npc_dict.get("languages", ""),
+    )
+
+    base_hp = _extract_hp_value(npc_dict.get("hit_points"))
+    if base_hp is not None:
+        NPC_new.resources.max_hit_points = base_hp
+        NPC_new.resources.current_hit_points = base_hp
+
+    action_groups = [
+        ("actions", ActionType.ACTION),
+        ("bonus_actions", ActionType.BONUS),
+        ("reactions", ActionType.REACTION),
+        ("legendary_actions", ActionType.LEGENDARY),
+    ]
+
+    for key, action_type in action_groups:
+        for action in npc_dict.get(key, []) or []:
+            desc = _join_desc(action.get("desc", ""))
+            attack_roll, damage_roll, attack_range = parse_attack(desc)
+
+            if action.get("attack_bonus") is not None:
+                attack_roll["bonus"] = action.get("attack_bonus")
+
+            if action.get("damage"):
+                damage_roll = []
+                for dmg in action["damage"]:
+                    dmg_type = dmg.get("damage_type", {}).get("name")
+                    dmg_dice = dmg.get("damage_dice")
+                    if dmg_type and dmg_dice:
+                        dice_match = re.match(r"(\d+)d(\d+)(\s*[+-]\s*\d+)?", dmg_dice)
+                        if dice_match:
+                            dice_amount = int(dice_match.group(1))
+                            dice_type = int(dice_match.group(2))
+                            bonus = dice_match.group(3)
+                            bonus_val = int(bonus.replace(" ", "")) if bonus else 0
+                            damage_roll.append({
+                                "dmg_type": dmg_type.lower(),
+                                "dice_type": dice_type,
+                                "dice_amount": dice_amount,
+                                "ability": None,
+                                "bonus": bonus_val,
+                                "precomputed": True,
+                            })
+
+            NPC_new.actions.add(
+                Action(
+                    id=action.get("name", ""),
+                    name=action.get("name", ""),
+                    action_type=action_type,
+                    attack_roll=attack_roll,
+                    damage_roll=damage_roll,
+                    range=attack_range,
+                    targeting={"shape": "single"},
+                )
+            )
+
+    return NPC_new
+
+
 class NPCRepository:
     def __init__(self, path: Optional[Union[str, Path]] = None):
-        if path is None:
-            path = Path(__file__).resolve().parents[1] / "data" / "npc.json"
-        self.path = Path(path)
+        self.path = Path(path) if path else None
         self._raw = []
         self._index: Dict[str, dict] = {}
         self._lower_index: Dict[str, str] = {}
         self._load()
 
     def _load(self):
-        if not self.path.exists():
-            raise FileNotFoundError(f"NPC data file not found: {self.path}")
-        with self.path.open("r", encoding="utf-8") as handle:
-            self._raw = json.load(handle)
+        if self.path is None:
+            self._raw = load_srd("monsters", "5e-SRD-Monsters.json")
+        else:
+            if not self.path.exists():
+                raise FileNotFoundError(f"NPC data file not found: {self.path}")
+            with self.path.open("r", encoding="utf-8") as handle:
+                self._raw = json.load(handle)
         for entry in self._raw:
             name = _clean_npc_name(entry.get("name"))
             if not name:

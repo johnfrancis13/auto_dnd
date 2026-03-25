@@ -77,7 +77,7 @@ class ResourcePool:
     def add_resource(self, resource: Resource):
         self.resources[resource.id] = resource
 
-    def get(self, resource_id: str) -> Resource | None:
+    def get(self, resource_id: str) -> Optional[Resource]:
         return self.resources.get(resource_id)
 
     def spend(self, resource_id: str, amount: int = 1):

@@ -1,24 +1,40 @@
 import json
-from pathlib import Path
 from collections import defaultdict
-from helper_functions import normalize_fg, clean_item_description, extract_link_text
+from helper_functions import clean_item_description, extract_link_text
+from srd_loader import load_srd
 
 
 class Spell:
     def __init__(self, data):
         self.name = data["name"].replace(" (Copy)", "").strip()
-        self.description = clean_item_description(data.get("description", ""))
-        self.level = int(data["level"])
-        self.duration = data["duration"]
-        self.school = data["school"]
-        self.components = data["components"]
-        #self.dmg_type = data["DamageType"]
-        self.cast_time = data["castingtime"]
-        self.range = data["range"]
-        self.ritual =  data.get("ritual", None) 
-        self.source = data.get("source", None) 
-        self.links = extract_link_text(data)
-        #self.save = data["Save"]
+        if "desc" in data:
+            desc = data.get("desc") or []
+            higher = data.get("higher_level") or []
+            self.description = "\n".join(desc + higher).strip()
+            self.level = int(data.get("level", 0))
+            self.duration = data.get("duration")
+            school = data.get("school")
+            if isinstance(school, dict):
+                self.school = school.get("name")
+            else:
+                self.school = school
+            self.components = data.get("components") or []
+            self.cast_time = data.get("casting_time")
+            self.range = data.get("range")
+            self.ritual = data.get("ritual")
+            self.source = data.get("source") or data.get("document__title")
+            self.links = []
+        else:
+            self.description = clean_item_description(data.get("description", ""))
+            self.level = int(data["level"])
+            self.duration = data["duration"]
+            self.school = data["school"]
+            self.components = data["components"]
+            self.cast_time = data["castingtime"]
+            self.range = data["range"]
+            self.ritual =  data.get("ritual", None)
+            self.source = data.get("source", None)
+            self.links = extract_link_text(data)
 
 class Spellcasting:
     def __init__(self, owner):
@@ -50,11 +66,11 @@ class Spellcasting:
 class SpellRepository:
     def __init__(self, path=None):
         if path is None:
-            path = Path(__file__).resolve().parents[1] / "data" / "spell.json"
+            raw_data = load_srd("spells", "5e-SRD-Spells.json")
         else:
-            path = Path(path)
-        with open(path, "r", encoding="utf-8") as f:
-            raw_data = normalize_fg(json.load(f))
+            from pathlib import Path
+            with Path(path).open("r", encoding="utf-8") as f:
+                raw_data = json.load(f)
 
         # Create objects
         self.all_spells = [Spell(item) for item in raw_data]

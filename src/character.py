@@ -4,8 +4,6 @@ from typing import Dict, List
 import math
 import random as random
 
-import pandas as pd
-
 from features import FeatureManager
 from conditions import ConditionManager
 from effects import EffectsManager
@@ -17,6 +15,7 @@ from items import Item
 from resources import ResourcePool
 from actions import ActionManager
 from classes import ClassProgression
+from srd_loader import load_srd
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -107,6 +106,7 @@ class PC:
         self.stats = ComputedStats(self)
         self.actions = ActionManager(self)
         self.short_character_description=None
+        self.senses = set()
 
 
         # Generate skill scores
@@ -280,19 +280,39 @@ class Inventory:
 
 class Background:
     def __init__(self, id):
-        df = pd.read_csv(DATA_DIR / "woc_backgrounds.csv")
         self.id = id
-        if id not in df["name"].values:
+        backgrounds = load_srd("backgrounds", "5e-SRD-Backgrounds.json")
+        self.background_data = next(
+            (b for b in backgrounds if b.get("name", "").lower() == id.lower()),
+            None,
+        )
+        if not self.background_data:
             raise ValueError(f"{id} not a valid background.")
-        self.racial_data=df[df["name"]==id].iloc[0].to_dict()
 
 
     def apply(self, character):
-        pass
-        # character.ability_scores.apply_bonuses(self.ability_bonuses)
+        profs = {ProficiencyType.SKILL: set(), ProficiencyType.TOOL: set()}
 
-        # for feature in self.features:
-        #     character.features.add(feature)
+        starting = self.background_data.get("starting_proficiencies") or []
+        profs_list = self.background_data.get("proficiencies") or []
+        combined = starting + profs_list
+        for prof in combined:
+            name = prof.get("name") if isinstance(prof, dict) else str(prof)
+            if name.startswith("Skill:"):
+                profs[ProficiencyType.SKILL].add(name.replace("Skill:", "").strip().lower())
+            elif name.startswith("Tool:"):
+                profs[ProficiencyType.TOOL].add(name.replace("Tool:", "").strip().lower())
+
+        for prof_type, values in list(profs.items()):
+            if not values:
+                profs.pop(prof_type)
+
+        if profs:
+            character.proficiencies.add_proficiencies(profs)
+
+        feat = self.background_data.get("feat")
+        if isinstance(feat, dict) and feat.get("name"):
+            character.features.add_feature(feat["name"], character)
 
 
 

@@ -4,6 +4,234 @@ import resources
 import actions
 from typing import Optional, Callable, Dict
 import random
+from srd_loader import load_srd
+
+
+_TRAIT_INDEX = None
+_FEAT_INDEX = None
+_CLASS_FEATURE_INDEX = None
+_TRAIT_DATA = None
+_FEAT_DATA = None
+_CLASS_FEATURE_DATA = None
+
+
+def _load_trait_index():
+    global _TRAIT_INDEX
+    if _TRAIT_INDEX is not None:
+        return _TRAIT_INDEX
+    traits = load_srd("traits", "5e-SRD-Traits.json")
+    index = {}
+    for trait in traits:
+        name = trait.get("name")
+        if not name:
+            continue
+        desc = trait.get("desc") or []
+        if isinstance(desc, list):
+            desc_text = "\n".join(desc).strip()
+        else:
+            desc_text = str(desc).strip()
+        index[name.lower()] = desc_text
+    _TRAIT_INDEX = index
+    return _TRAIT_INDEX
+
+
+def _load_feat_index():
+    global _FEAT_INDEX
+    if _FEAT_INDEX is not None:
+        return _FEAT_INDEX
+    feats = load_srd("feats", "5e-SRD-Feats.json")
+    index = {}
+    for feat in feats:
+        name = feat.get("name")
+        if not name:
+            continue
+        desc = feat.get("desc") or []
+        if isinstance(desc, list):
+            desc_text = "\n".join(desc).strip()
+        else:
+            desc_text = str(desc).strip()
+        index[name.lower()] = desc_text
+    _FEAT_INDEX = index
+    return _FEAT_INDEX
+
+
+def _load_class_feature_index():
+    global _CLASS_FEATURE_INDEX
+    if _CLASS_FEATURE_INDEX is not None:
+        return _CLASS_FEATURE_INDEX
+    features = load_srd("features", "5e-SRD-Features.json")
+    index = {}
+    for feat in features:
+        name = feat.get("name")
+        if not name:
+            continue
+        desc = feat.get("desc") or []
+        if isinstance(desc, list):
+            desc_text = "\n".join(desc).strip()
+        else:
+            desc_text = str(desc).strip()
+        index[name.lower()] = desc_text
+    _CLASS_FEATURE_INDEX = index
+    return _CLASS_FEATURE_INDEX
+
+
+def _load_trait_data():
+    global _TRAIT_DATA
+    if _TRAIT_DATA is not None:
+        return _TRAIT_DATA
+    traits = load_srd("traits", "5e-SRD-Traits.json")
+    data = {}
+    for trait in traits:
+        name = trait.get("name")
+        if name:
+            data[name.lower()] = trait
+    _TRAIT_DATA = data
+    return _TRAIT_DATA
+
+
+def _load_feat_data():
+    global _FEAT_DATA
+    if _FEAT_DATA is not None:
+        return _FEAT_DATA
+    feats = load_srd("feats", "5e-SRD-Feats.json")
+    data = {}
+    for feat in feats:
+        name = feat.get("name")
+        if name:
+            data[name.lower()] = feat
+    _FEAT_DATA = data
+    return _FEAT_DATA
+
+
+def _load_class_feature_data():
+    global _CLASS_FEATURE_DATA
+    if _CLASS_FEATURE_DATA is not None:
+        return _CLASS_FEATURE_DATA
+    feats = load_srd("features", "5e-SRD-Features.json")
+    data = {}
+    for feat in feats:
+        name = feat.get("name")
+        if name:
+            data[name.lower()] = feat
+    _CLASS_FEATURE_DATA = data
+    return _CLASS_FEATURE_DATA
+
+
+def _trait_description(name: str) -> Optional[str]:
+    if not name:
+        return None
+    index = _load_trait_index()
+    return index.get(name.lower())
+
+
+def _feat_description(name: str) -> Optional[str]:
+    if not name:
+        return None
+    index = _load_feat_index()
+    return index.get(name.lower())
+
+
+def _class_feature_description(name: str) -> Optional[str]:
+    if not name:
+        return None
+    index = _load_class_feature_index()
+    return index.get(name.lower())
+
+
+def _feature_data(name: str) -> Optional[Dict]:
+    if not name:
+        return None
+    key = name.lower()
+    return (
+        _load_trait_data().get(key)
+        or _load_feat_data().get(key)
+        or _load_class_feature_data().get(key)
+    )
+
+
+def _extract_ability_bonuses(data: Dict) -> Dict[str, int]:
+    bonuses = {}
+
+    def add_bonus(ability, amount):
+        if ability:
+            bonuses[ability] = bonuses.get(ability, 0) + int(amount)
+
+    for entry in data.get("ability_score_increases", []) or []:
+        ability = (entry.get("ability_score") or {}).get("name")
+        add_bonus(ability, entry.get("bonus", 0))
+
+    for entry in data.get("ability_score_increase", []) or []:
+        ability = (entry.get("ability_score") or {}).get("name")
+        add_bonus(ability, entry.get("bonus", 0))
+
+    for entry in data.get("ability_bonuses", []) or []:
+        ability = (entry.get("ability_score") or {}).get("name")
+        add_bonus(ability, entry.get("bonus", 0))
+
+    return bonuses
+
+
+def _extract_proficiencies(data: Dict) -> Dict[ProficiencyType, set]:
+    profs = {ProficiencyType.SKILL: set(), ProficiencyType.TOOL: set(), ProficiencyType.LANGUAGE: set()}
+    for prof in data.get("proficiencies", []) or []:
+        name = prof.get("name") if isinstance(prof, dict) else str(prof)
+        if name.startswith("Skill:"):
+            profs[ProficiencyType.SKILL].add(name.replace("Skill:", "").strip().lower())
+        elif name.startswith("Tool:"):
+            profs[ProficiencyType.TOOL].add(name.replace("Tool:", "").strip().lower())
+        elif name.startswith("Language:"):
+            profs[ProficiencyType.LANGUAGE].add(name.replace("Language:", "").strip())
+
+    # Some feats include languages separately
+    for lang in data.get("languages", []) or []:
+        if isinstance(lang, dict):
+            profs[ProficiencyType.LANGUAGE].add(lang.get("name"))
+        elif isinstance(lang, str):
+            profs[ProficiencyType.LANGUAGE].add(lang)
+
+    # Remove empty entries
+    return {k: v for k, v in profs.items() if v}
+
+
+def _extract_senses(data: Dict) -> set:
+    senses = set()
+    raw = data.get("senses")
+    if isinstance(raw, list):
+        for sense in raw:
+            if isinstance(sense, dict):
+                name = sense.get("name")
+            else:
+                name = str(sense)
+            if name:
+                senses.add(name)
+    elif isinstance(raw, dict):
+        for key, value in raw.items():
+            senses.add(f"{key} {value}".strip())
+    return senses
+
+
+def _apply_feature_data(character, data: Optional[Dict]):
+    if not data:
+        return
+
+    bonuses = _extract_ability_bonuses(data)
+    if bonuses:
+        character.ability_scores.apply_bonuses(bonuses)
+
+    profs = _extract_proficiencies(data)
+    if profs:
+        character.proficiencies.add_proficiencies(profs)
+
+    senses = _extract_senses(data)
+    if senses:
+        if not hasattr(character, "senses"):
+            character.senses = set()
+        character.senses.update(senses)
+
+
+def apply_srd_feature_data(character, feature_name: str):
+    """Public helper for generated Feature classes."""
+    _apply_feature_data(character, _feature_data(feature_name))
 
 class FeatureManager:
     def __init__(self, owner):
@@ -11,20 +239,33 @@ class FeatureManager:
         self._features = []
 
     def add_feature(self, feature, engine,description=None):
-        # First check if in Feature registry
-        if feature not in FEATURE_REGISTRY:
+        # First check if in mechanics registry
+        if feature not in MECHANICS_REGISTRY:
             print("Feature does not exist or has not yet been implemented in the feature registry")
             # create a descriptive feature for now
-            feature_class =Feature(name=feature,description=description)
+            if description is None:
+                description = _trait_description(feature)
+            if description is None:
+                description = _feat_description(feature)
+            if description is None:
+                description = _class_feature_description(feature)
+            feature_class = Feature(name=feature, description=description)
+            _apply_feature_data(engine, _feature_data(feature))
             #return None # make this an error later
             #raise ValueError("Feature does not exist or has not yet been implemented in the feature registry")
         else:
-            feature_class = FEATURE_REGISTRY[feature]()
+            feature_class = MECHANICS_REGISTRY[feature]()
 
         
         if feature_class not in self._features:
             self._features.append(feature_class)
             feature_class.on_attach(engine) # add permanent character level changes
+
+    def on_level_up(self, engine, new_level: int):
+        for feature in self._features:
+            hook = getattr(feature, "on_level_up", None)
+            if callable(hook):
+                hook(engine, new_level)
 
     def get(self, feature_name):
         return next((obj for obj in self._features if obj.name == feature_name), None)
@@ -67,6 +308,10 @@ class Feature:
 
     def on_detach(self, engine):
         """Called when feature is removed."""
+        pass
+
+    def on_level_up(self, engine, new_level: int):
+        """Called when a character gains a level."""
         pass
 
     # =========================
@@ -205,11 +450,35 @@ class Talent(Feature):
         character.proficiencies.add_proficiencies(skill_additions)
 
 
-FEATURE_REGISTRY = {
+class DwarvenToughness(Feature):
+    def __init__(self):
+        super().__init__("Dwarven Toughness", source="race")
+
+    def on_attach(self, character):
+        character.resources.update_health(1)
+
+    def on_level_up(self, character, new_level: int):
+        character.resources.update_health(1)
+
+
+MECHANICS_REGISTRY = {
     "Feline Agility": FelineAgility,
     "Claws": Claws,
     "Talent": Talent,
     "Luck": HalflingLuck,
+    "Halfling Luck": HalflingLuck,
+    "Dwarven Toughness": DwarvenToughness,
 }
+
+# Optional generated registry (LLM scaffolding)
+try:
+    from generated_features import GENERATED_FEATURES_REGISTRY
+except Exception:
+    GENERATED_FEATURES_REGISTRY = {}
+
+# Generated features should not override hand-written mechanics.
+for key, value in GENERATED_FEATURES_REGISTRY.items():
+    if key not in MECHANICS_REGISTRY:
+        MECHANICS_REGISTRY[key] = value
 
 
