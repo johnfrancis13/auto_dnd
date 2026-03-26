@@ -22,6 +22,11 @@ os.chdir(ROOT)
 import character as char
 from gm import gm_llm
 from npcs import NPCRepository
+from equipment_choices import (
+    build_class_equipment_choices,
+    build_background_equipment_choices,
+    validate_equipment_choices,
+)
 
 
 app = FastAPI(title="Auto DnD UI")
@@ -46,6 +51,7 @@ class StartRequest(BaseModel):
     character: CharacterConfig
     model_name: str = "qwen3:8b"
     think: bool = False
+    equipment_choices: Optional[Dict[str, List[str]]] = None
 
 
 class MessageRequest(BaseModel):
@@ -87,6 +93,7 @@ class GameSession:
             ability_method=cfg.ability_method,
             ability_score_assignment=cfg.ability_score_assignment,
             ability_score_values=cfg.ability_score_values,
+            equipment_choices=self.config.equipment_choices or {},
         )
         pc.short_character_description = cfg.short_description
         return pc
@@ -323,6 +330,19 @@ def get_state() -> JSONResponse:
 @app.post("/api/start")
 def start_game(payload: StartRequest) -> JSONResponse:
     global SESSION
+    choices = []
+    choices.extend(build_class_equipment_choices(payload.character.char_class))
+    choices.extend(build_background_equipment_choices(payload.character.background))
+    if choices:
+        ok, errors = validate_equipment_choices(choices, payload.equipment_choices or {})
+        if not ok:
+            SESSION = None
+            return JSONResponse({
+                "session": False,
+                "requires_choices": True,
+                "choices": choices,
+                "errors": errors,
+            })
     SESSION = GameSession(payload)
     return JSONResponse({
         "session": True,

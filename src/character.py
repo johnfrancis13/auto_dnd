@@ -16,6 +16,8 @@ from resources import ResourcePool
 from actions import ActionManager
 from classes import ClassProgression
 from srd_loader import load_srd
+from equipment_choices import build_choice_groups, apply_equipment_choices
+from items import ItemRepository
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -38,7 +40,8 @@ class PCFactory:
                      char_class, # str name of valid class
                      ability_method="standard", # one of [standard, roll, point_buy]
                      ability_score_assignment=None, # ["STR","DEX","CON","INT","WIS","CHA"]
-                     ability_score_values=None # list of valid point buy numbers [8,10,11,13,15,8]
+                     ability_score_values=None, # list of valid point buy numbers [8,10,11,13,15,8]
+                     equipment_choices=None # dict of equipment choice selections
                      ):
         pc = PC(name, race, background)
         
@@ -73,11 +76,11 @@ class PCFactory:
         
         # Apply background bonuses
         if pc.identity.background:
-            Background(pc.identity.background).apply(pc)
+            Background(pc.identity.background).apply(pc, equipment_choices=equipment_choices)
 
         # Apply class, etc.
         if char_class:
-            pc.classes.add_class(char_class, pc)
+            pc.classes.add_class(char_class, pc, equipment_choices=equipment_choices)
         
         # If "Spellcasting" is the name of a feature, we need to add some spells to the character... ideally the person gets to pick them
         
@@ -290,7 +293,7 @@ class Background:
             raise ValueError(f"{id} not a valid background.")
 
 
-    def apply(self, character):
+    def apply(self, character, equipment_choices=None):
         profs = {ProficiencyType.SKILL: set(), ProficiencyType.TOOL: set()}
 
         starting = self.background_data.get("starting_proficiencies") or []
@@ -313,6 +316,25 @@ class Background:
         feat = self.background_data.get("feat")
         if isinstance(feat, dict) and feat.get("name"):
             character.features.add_feature(feat["name"], character)
+
+        equipment_repo = ItemRepository()
+        for entry in self.background_data.get("starting_equipment", []) or []:
+            item = entry.get("equipment") or {}
+            name = item.get("name")
+            qty = entry.get("quantity", 1)
+            if not name:
+                continue
+            obj = equipment_repo.get(name) or name
+            character.inventory.add_item(obj, qty)
+
+        option_blocks = []
+        option_blocks.extend(self.background_data.get("starting_equipment_options") or [])
+        option_blocks.extend(self.background_data.get("equipment_options") or [])
+        choice_groups = build_choice_groups(
+            option_blocks,
+            f"background:{self.background_data.get('index') or self.id.lower()}",
+        )
+        apply_equipment_choices(character, equipment_choices or {}, choice_groups)
 
 
 

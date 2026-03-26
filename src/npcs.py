@@ -1,4 +1,4 @@
-from character import AbilityScores, Inventory
+﻿from character import AbilityScores, Inventory
 from resources import ResourcePool, Resource, ResourceCategory, RechargeType
 from actions import Action, ActionManager, ActionType
 from spellcasting import Spellcasting, SpellRepository
@@ -67,19 +67,6 @@ from srd_loader import load_srd
 
 #         return pc
 
-def unwrap(value):
-    if isinstance(value, dict):
-        if '#text' in value:
-            text = value['#text']
-            if value.get('@type') == 'number':
-                return int(text)
-            return text
-        # recursively unwrap nested dicts
-        return {k: unwrap(v) for k, v in value.items()}
-    elif isinstance(value, list):
-        return [unwrap(v) for v in value]
-    return value
-    
 def parse_attack(text: str):
     attack_roll = {
         "ability": None,
@@ -146,11 +133,8 @@ def _extract_hp_value(value):
     return None
 
 
-def _clean_npc_name(value: Optional[Union[dict, str]]) -> str:
-    if isinstance(value, dict):
-        name = value.get("#text", "")
-    else:
-        name = value or ""
+def _clean_npc_name(value: Optional[str]) -> str:
+    name = value or ""
     return name.replace(" (Copy)", "").strip()
 
 @dataclass
@@ -215,92 +199,7 @@ def _join_desc(desc):
     return desc or ""
 
 
-def create_npc(json_data):
-    npc_dict = unwrap(json_data)
-    if "hit_points" in npc_dict:
-        return create_npc_from_srd(npc_dict)
-
-    
-    ability_scores = {
-        name[:3].upper(): int(ability["score"])
-        for name, ability in npc_dict["abilities"].items()
-    }
-
-    # Set up the NPC class
-    NPC_new = NPC(
-        abilities=ability_scores,
-        name=_clean_npc_name(npc_dict.get("name")),
-        description=npc_dict["text"]["p"],
-        size=npc_dict.get("size", {}),
-        type=npc_dict.get("type", {}),
-        alignment=npc_dict.get("alignment", {}),
-        #traits = [npc_dict["traits"][b] for b in npc_dict["traits"]],
-        traits = list((npc_dict.get("traits") or {}).values()),
-        senses=npc_dict.get("senses", {}),
-        skills=npc_dict.get("skills", {}),
-        ac=npc_dict.get("ac", {}),
-        hp=npc_dict.get("hp", {}),
-        hd=npc_dict.get("hd", {}),
-        cr=npc_dict.get("cr", {}),
-        damagethreshold=npc_dict.get("damagethreshold", {}),
-        xp=npc_dict.get("xp", {}),
-        speed=npc_dict.get("speed", {}),
-        languages=npc_dict.get("languages", {}),
-    )
-
-    base_hp = _extract_hp_value(npc_dict.get("hp"))
-    if base_hp is not None:
-        NPC_new.resources.max_hit_points = base_hp
-        NPC_new.resources.current_hit_points = base_hp
-
-    # Create the actions
-    action_classes =['actions', 'bonusactions','lairactions','legendaryactions', 'reactions']
-    action_types =[ActionType.ACTION,ActionType.BONUS,ActionType.LAIR,ActionType.LEGENDARY, ActionType.REACTION]
-    
-    for val in range(len(action_classes)):
-        if npc_dict[action_classes[val]] is not None:
-            for key in  npc_dict[action_classes[val]]:
-
-                attack_roll, damage_roll, attack_range = parse_attack(npc_dict[action_classes[val]][key]["desc"])
-                NPC_new.actions.add(
-                    Action( id= npc_dict[action_classes[val]][key]["name"],
-                            name= npc_dict[action_classes[val]][key]["name"],
-                            action_type= action_types[val],
-                            attack_roll=attack_roll,
-                            damage_roll=damage_roll,
-                            range=attack_range,
-                            targeting={"shape": "single"})
-                    )
-                
-    # Create the spells
-    spell_repo = SpellRepository()
-    spell_classes =['innatespells', 'spells']
-    
-    for val in range(len(spell_classes)):
-        if npc_dict[spell_classes[val]] is not None:
-            for key in  npc_dict[spell_classes[val]]:
-                temp_spell = spell_repo.get(npc_dict[spell_classes[val]][key]["name"])
-                if temp_spell is not None:
-                    NPC_new.spells.add_spell(
-                        temp_spell
-                    )
-            
-
-
-    # create resources from each spell slot if they exist
-    if npc_dict.get("spellslots"):
-        for lvl in npc_dict["spellslots"]:
-            NPC_new.resources.add_resource( Resource(id= lvl ,
-                                             name= lvl ,
-                                             category= ResourceCategory.SPELL_SLOT,
-                                             current= npc_dict["spellslots"][lvl],
-                                             maximum= npc_dict["spellslots"][lvl],
-                                             recharge= RechargeType.LONG_REST ))
-
-    return NPC_new
-
-
-def create_npc_from_srd(npc_dict):
+def create_npc(npc_dict):
     ability_scores = {
         "STR": npc_dict.get("strength"),
         "DEX": npc_dict.get("dexterity"),
@@ -545,5 +444,7 @@ class NPCValidator:
             raise ValueError("Character validation failed:\n" + "\n".join(errors))
         return True
     
+
+
 
 

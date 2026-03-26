@@ -17,6 +17,10 @@ const sheetTabs = document.getElementById("sheet-tabs");
 const sheetBody = document.getElementById("sheet-body");
 const setupScreen = document.getElementById("setup-screen");
 const gameScreen = document.getElementById("game-screen");
+const equipmentModal = document.getElementById("equipment-modal");
+const equipmentFormEl = document.getElementById("equipment-choices-form");
+const equipmentSubmit = document.getElementById("equipment-choices-submit");
+const equipmentErrorsEl = document.getElementById("equipment-choices-errors");
 const combatPanel = document.getElementById("combat-panel");
 const combatActionSelect = document.getElementById("combat-action");
 const combatTargetSelect = document.getElementById("combat-target");
@@ -30,6 +34,8 @@ const combatMapEl = document.getElementById("combat-map");
 let selectedTargets = [];
 
 let activeTab = "about";
+let pendingStartPayload = null;
+let pendingEquipmentChoices = [];
 
 function setSessionActive(active, mode = "exploration") {
   sessionIndicator.textContent = active ? "Live" : "Idle";
@@ -283,11 +289,56 @@ function renderCombat(combat) {
   updateTargetingHighlights(combat.map, actions, combat, targets);
 }
 
+function renderEquipmentChoices(choices) {
+  pendingEquipmentChoices = choices || [];
+  if (!pendingEquipmentChoices.length) {
+    equipmentModal.classList.add("hidden");
+    equipmentModal.setAttribute("aria-hidden", "true");
+    equipmentFormEl.innerHTML = "";
+    equipmentErrorsEl.textContent = "";
+    return;
+  }
+  equipmentErrorsEl.textContent = "";
+  equipmentFormEl.innerHTML = pendingEquipmentChoices.map((group) => {
+    const inputType = group.choose > 1 ? "checkbox" : "radio";
+    const optionsHtml = group.options.map((option) => `
+      <label class="equipment-option">
+        <input type="${inputType}" name="${group.id}" value="${option.id}" />
+        <span>${option.label}</span>
+      </label>
+    `).join("");
+    return `
+      <div class="equipment-group">
+        <h3>${group.label}</h3>
+        <div class="muted">Choose ${group.choose}</div>
+        ${optionsHtml}
+      </div>
+    `;
+  }).join("");
+  equipmentModal.classList.remove("hidden");
+  equipmentModal.setAttribute("aria-hidden", "false");
+}
+
+function collectEquipmentSelections() {
+  const selections = {};
+  pendingEquipmentChoices.forEach((group) => {
+    const selected = Array.from(
+      equipmentFormEl.querySelectorAll(`input[name="${group.id}"]:checked`)
+    ).map((input) => input.value);
+    if (selected.length) {
+      selections[group.id] = selected;
+    }
+  });
+  return selections;
+}
+
 async function resetUI() {
   state.session = false;
   state.character = null;
   messagesEl.innerHTML = "";
   activeTab = "about";
+  pendingStartPayload = null;
+  renderEquipmentChoices([]);
   sheetTabs.querySelectorAll(".tab").forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.tab === activeTab);
   });
@@ -310,6 +361,15 @@ async function startGame() {
     model_name: "qwen3:8b",
     think: false,
   };
+  pendingStartPayload = payload;
+
+  showGameScreen();
+  messagesEl.innerHTML = "";
+  renderCharacter(null);
+  renderImages([]);
+  renderCombat({ active: false });
+  setSessionActive(true, "exploration");
+  addMessage("dm", "Starting adventure...");
 
   const res = await fetch("/api/start", {
     method: "POST",
@@ -318,6 +378,68 @@ async function startGame() {
   });
 
   const data = await res.json();
+  if (data.requires_choices) {
+    messagesEl.innerHTML = "";
+    setSessionActive(false);
+    renderEquipmentChoices(data.choices);
+    equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+    showSetupScreen();
+    return;
+  }
+  if (!data.session) {
+    equipmentErrorsEl.textContent = data.error || "Unable to start session.";
+    setSessionActive(false);
+    showSetupScreen();
+    return;
+  }
+  state.session = data.session;
+  renderCharacter(data.character);
+  renderImages(data.images);
+  messagesEl.innerHTML = "";
+  addMessage("dm", data.narrative || "Adventure started.");
+  setSessionActive(true, data.game_state?.mode || "exploration");
+  renderCombat(data.combat);
+  showGameScreen();
+}
+
+async function submitEquipmentChoices() {
+  if (!pendingStartPayload) {
+    return;
+  }
+  const equipmentChoices = collectEquipmentSelections();
+  renderEquipmentChoices([]);
+  const payload = {
+    ...pendingStartPayload,
+    equipment_choices: equipmentChoices,
+  };
+  showGameScreen();
+  messagesEl.innerHTML = "";
+  renderCharacter(null);
+  renderImages([]);
+  renderCombat({ active: false });
+  setSessionActive(true, "exploration");
+  addMessage("dm", "Starting adventure...");
+  const res = await fetch("/api/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (data.requires_choices) {
+    messagesEl.innerHTML = "";
+    setSessionActive(false);
+    renderEquipmentChoices(data.choices);
+    equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+    showSetupScreen();
+    return;
+  }
+  if (!data.session) {
+    equipmentErrorsEl.textContent = data.error || "Unable to start session.";
+    setSessionActive(false);
+    showSetupScreen();
+    return;
+  }
+  renderEquipmentChoices([]);
   state.session = data.session;
   renderCharacter(data.character);
   renderImages(data.images);
@@ -432,6 +554,12 @@ async function sendCombatMove(x, y) {
 startButton.addEventListener("click", () => {
   startGame().catch((err) => {
     addMessage("dm", `Failed to start: ${err}`);
+  });
+});
+
+equipmentSubmit.addEventListener("click", () => {
+  submitEquipmentChoices().catch((err) => {
+    equipmentErrorsEl.textContent = `Failed to start: ${err}`;
   });
 });
 

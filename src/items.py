@@ -1,49 +1,41 @@
 import json
 from collections import defaultdict
-from helper_functions import clean_item_description, extract_link_text
 from srd_loader import load_srd
 
 class Item:
     def __init__(self, data):
         self.name = data["name"].replace(" (Copy)", "").strip()
-        if "equipment_category" in data:
-            desc = data.get("desc") or []
-            self.description = "\n".join(desc).strip()
-            category = data.get("equipment_category")
-            if isinstance(category, dict):
-                self.type = category.get("name")
-            else:
-                self.type = category
-            self.subtype = (
-                data.get("weapon_category")
-                or data.get("armor_category")
-                or data.get("gear_category")
-            )
-            rarity = data.get("rarity")
-            if isinstance(rarity, dict):
-                rarity = rarity.get("name")
-            self.rarity = rarity or "Common"
-            self.attunement = bool(data.get("requires_attunement")) or "attunement" in (
-                self.rarity or ""
-            ).lower()
-            cost = data.get("cost") or {}
-            if isinstance(cost, dict):
-                qty = cost.get("quantity")
-                unit = cost.get("unit")
-                self.cost = f"{qty} {unit}".strip() if qty is not None else None
-            else:
-                self.cost = cost
-            self.weight = data.get("weight", 0)
-            self.links = []
+        desc = data.get("desc") or []
+        self.description = "\n".join(desc).strip()
+        category = data.get("equipment_category")
+        if isinstance(category, dict):
+            self.type = category.get("name")
         else:
-            self.description = clean_item_description(data.get("description", ""))
-            self.type = data.get("type", None)
-            self.subtype = data.get("subType", None)
-            self.rarity = data.get("Rarity","Common")
-            self.attunement = "attunement" in (self.rarity or "").lower()
-            self.cost = data.get("cost",0)
-            self.weight = data.get("weight",0)
-            self.links = extract_link_text(data)
+            self.type = category
+        subtype = (
+            data.get("weapon_category")
+            or data.get("armor_category")
+            or data.get("gear_category")
+        )
+        if isinstance(subtype, dict):
+            subtype = subtype.get("name")
+        self.subtype = subtype
+        rarity = data.get("rarity")
+        if isinstance(rarity, dict):
+            rarity = rarity.get("name")
+        self.rarity = rarity or "Common"
+        self.attunement = bool(data.get("requires_attunement")) or "attunement" in (
+            self.rarity or ""
+        ).lower()
+        cost = data.get("cost") or {}
+        if isinstance(cost, dict):
+            qty = cost.get("quantity")
+            unit = cost.get("unit")
+            self.cost = f"{qty} {unit}".strip() if qty is not None else None
+        else:
+            self.cost = cost
+        self.weight = data.get("weight", 0)
+        self.links = []
 
 
 class ItemRepository:

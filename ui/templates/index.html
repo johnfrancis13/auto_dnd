@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Auto DnD</title>
-    <link rel="stylesheet" href="/static/app.css" />
-    <script defer src="/static/app.js"></script>
+    <link rel="stylesheet" href="/static/app.css?v=20260325" />
+    <script defer src="/static/app.js?v=20260325"></script>
   </head>
   <body>
     <div id="setup-screen" class="setup-screen">
@@ -19,22 +19,44 @@
           <label>
             Race
             <select name="race">
+              <option>Dragonborn</option>
+              <option>Dwarf</option>
+              <option>Elf</option>
+              <option>Goliath</option>
+              <option>Gnome</option>
               <option>Halfling</option>
+              <option>Half-Elf</option>
+              <option>Half-Orc</option>
+              <option>Human</option>
               <option>Tabaxi</option>
+              <option>Tiefling</option>
+              <option>Orc</option>
             </select>
           </label>
           <label>
             Class
             <select name="class">
+              <option>Barbarian</option>
+              <option>Bard</option>
               <option>Cleric</option>
-              <option>Wizard</option>
+              <option>Druid</option>
+              <option>Fighter</option>
               <option>Monk</option>
+              <option>Paladin</option>
+              <option>Ranger</option>
+              <option>Rogue</option>
+              <option>Sorcerer</option>
+              <option>Warlock</option>
+              <option>Wizard</option>
             </select>
           </label>
           <label>
             Background
             <select name="background">
               <option>Acolyte</option>
+              <option>Criminal</option>
+              <option>Sage</option>
+              <option>Soldier</option>
             </select>
           </label>
           <label>
@@ -142,6 +164,19 @@
         </form>
       </main>
 
+    </div>
+
+    <div id="equipment-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="equipment-modal-title">
+        <h2 id="equipment-modal-title">Starting Equipment</h2>
+        <p class="muted">Choose your starting equipment to begin the adventure.</p>
+        <div id="equipment-choices-errors" class="muted"></div>
+        <form id="equipment-choices-form" class="equipment-form"></form>
+        <div class="modal-actions">
+          <button type="button" id="equipment-choices-submit">Continue</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

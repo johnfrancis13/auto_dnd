@@ -2,7 +2,7 @@ from game_engine import Dice
 from proficiency import ProficiencyType
 import resources
 import actions
-from typing import Optional, Callable, Dict
+from typing import Optional, Callable, Dict, Tuple
 import random
 from srd_loader import load_srd
 
@@ -25,11 +25,7 @@ def _load_trait_index():
         name = trait.get("name")
         if not name:
             continue
-        desc = trait.get("desc") or []
-        if isinstance(desc, list):
-            desc_text = "\n".join(desc).strip()
-        else:
-            desc_text = str(desc).strip()
+        desc_text = _normalize_desc(trait)
         index[name.lower()] = desc_text
     _TRAIT_INDEX = index
     return _TRAIT_INDEX
@@ -45,11 +41,7 @@ def _load_feat_index():
         name = feat.get("name")
         if not name:
             continue
-        desc = feat.get("desc") or []
-        if isinstance(desc, list):
-            desc_text = "\n".join(desc).strip()
-        else:
-            desc_text = str(desc).strip()
+        desc_text = _normalize_desc(feat)
         index[name.lower()] = desc_text
     _FEAT_INDEX = index
     return _FEAT_INDEX
@@ -65,14 +57,21 @@ def _load_class_feature_index():
         name = feat.get("name")
         if not name:
             continue
-        desc = feat.get("desc") or []
-        if isinstance(desc, list):
-            desc_text = "\n".join(desc).strip()
-        else:
-            desc_text = str(desc).strip()
+        desc_text = _normalize_desc(feat)
         index[name.lower()] = desc_text
     _CLASS_FEATURE_INDEX = index
     return _CLASS_FEATURE_INDEX
+
+
+def _normalize_desc(data: Dict) -> str:
+    desc = data.get("desc")
+    if desc is None:
+        desc = data.get("description")
+    if isinstance(desc, list):
+        return "\n".join(desc).strip()
+    if desc is None:
+        return ""
+    return str(desc).strip()
 
 
 def _load_trait_data():
@@ -147,6 +146,46 @@ def _feature_data(name: str) -> Optional[Dict]:
         or _load_feat_data().get(key)
         or _load_class_feature_data().get(key)
     )
+
+
+def _feature_source_and_type(name: str, data: Optional[Dict]) -> Tuple[Optional[str], Optional[str]]:
+    if not name or not data:
+        return None, None
+    key = name.lower()
+    if key in _load_trait_data():
+        return _trait_source(data), "trait"
+    if key in _load_feat_data():
+        return "Feat", "feat"
+    if key in _load_class_feature_data():
+        return _class_feature_source(data), "class"
+    return None, None
+
+
+def _trait_source(data: Dict) -> Optional[str]:
+    names = []
+    for field in ("races", "subraces", "species", "subspecies"):
+        for entry in data.get(field, []) or []:
+            if isinstance(entry, dict):
+                name = entry.get("name")
+            else:
+                name = str(entry)
+            if name:
+                names.append(name)
+    if not names:
+        return "Race Trait"
+    if len(names) == 1:
+        return names[0]
+    return f"{names[0]} +{len(names) - 1}"
+
+
+def _class_feature_source(data: Dict) -> Optional[str]:
+    subclass = data.get("subclass") or {}
+    class_info = data.get("class") or {}
+    subclass_name = subclass.get("name")
+    class_name = class_info.get("name")
+    if subclass_name and class_name:
+        return f"{class_name} ({subclass_name})"
+    return subclass_name or class_name or "Class Feature"
 
 
 def _extract_ability_bonuses(data: Dict) -> Dict[str, int]:
@@ -249,8 +288,15 @@ class FeatureManager:
                 description = _feat_description(feature)
             if description is None:
                 description = _class_feature_description(feature)
-            feature_class = Feature(name=feature, description=description)
-            _apply_feature_data(engine, _feature_data(feature))
+            data = _feature_data(feature)
+            source, feature_type = _feature_source_and_type(feature, data)
+            feature_class = Feature(
+                name=feature,
+                source=source,
+                feature_type=feature_type,
+                description=description,
+            )
+            _apply_feature_data(engine, data)
             #return None # make this an error later
             #raise ValueError("Feature does not exist or has not yet been implemented in the feature registry")
         else:
