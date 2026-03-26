@@ -73,6 +73,27 @@ body {
   margin-top: 3px;
 }
 
+.spell-option-desc {
+  margin: 0 0 8px 22px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.spell-option-details {
+  margin: 2px 0 8px 22px;
+}
+
+.spell-option-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--accent);
+  list-style: none;
+}
+
+.spell-option-details summary::-webkit-details-marker {
+  display: none;
+}
+
 .modal {
   position: fixed;
   inset: 0;

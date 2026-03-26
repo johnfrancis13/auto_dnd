@@ -3,7 +3,6 @@
   character: null,
   combat: null,
 };
-
 const messagesEl = document.getElementById("messages");
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
@@ -21,6 +20,10 @@ const equipmentModal = document.getElementById("equipment-modal");
 const equipmentFormEl = document.getElementById("equipment-choices-form");
 const equipmentSubmit = document.getElementById("equipment-choices-submit");
 const equipmentErrorsEl = document.getElementById("equipment-choices-errors");
+const spellModal = document.getElementById("spell-modal");
+const spellFormEl = document.getElementById("spell-choices-form");
+const spellSubmit = document.getElementById("spell-choices-submit");
+const spellErrorsEl = document.getElementById("spell-choices-errors");
 const combatPanel = document.getElementById("combat-panel");
 const combatActionSelect = document.getElementById("combat-action");
 const combatTargetSelect = document.getElementById("combat-target");
@@ -30,13 +33,11 @@ const combatEndTurn = document.getElementById("combat-end-turn");
 const initiativeOrderEl = document.getElementById("initiative-order");
 const turnStateEl = document.getElementById("turn-state");
 const combatMapEl = document.getElementById("combat-map");
-
 let selectedTargets = [];
-
 let activeTab = "about";
 let pendingStartPayload = null;
 let pendingEquipmentChoices = [];
-
+let pendingSpellChoices = [];
 function setSessionActive(active, mode = "exploration") {
   sessionIndicator.textContent = active ? "Live" : "Idle";
   sessionIndicator.style.background = active ? "#e2b091" : "#e6e0d8";
@@ -47,17 +48,14 @@ function setSessionActive(active, mode = "exploration") {
     gameStateEl.textContent = label;
   }
 }
-
 function showSetupScreen() {
   setupScreen.classList.remove("hidden");
   gameScreen.classList.add("hidden");
 }
-
 function showGameScreen() {
   setupScreen.classList.add("hidden");
   gameScreen.classList.remove("hidden");
 }
-
 function addMessage(role, content) {
   const div = document.createElement("div");
   div.className = `message ${role}`;
@@ -65,17 +63,14 @@ function addMessage(role, content) {
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
-
 function renderCharacter(character) {
   state.character = character;
   if (!character) {
     sheetBody.innerHTML = "<div class=\"muted\">Start a game to load stats.</div>";
     return;
   }
-
   const identity = character.identity;
   const stats = character.stats;
-
   const aboutHtml = `
     <div class="entry">
       <strong>${identity.name}</strong>
@@ -107,7 +102,6 @@ function renderCharacter(character) {
       </div>
     `).join("")}
   `;
-
   const abilitiesHtml = `
     <h3>Ability Scores</h3>
     <ul>
@@ -122,7 +116,6 @@ function renderCharacter(character) {
       ${Object.entries(character.abilities.saving_throws).map(([k, v]) => `<li><span>${k}</span><strong>${v}</strong></li>`).join("")}
     </ul>
   `;
-
   const inventoryHtml = `
     ${character.inventory.items.length === 0 ? "<p>No items.</p>" : character.inventory.items.map(item => `
       <details class="entry">
@@ -134,13 +127,11 @@ function renderCharacter(character) {
       </details>
     `).join("")}
   `;
-
   const resourceList = [
     ...character.actions.resources.custom,
     ...character.actions.resources.spell_slots,
     ...character.actions.resources.spell_access,
   ];
-
   const actionsHtml = `
     <h3>Actions</h3>
     ${character.actions.actions.length === 0 ? "<p>No actions.</p>" : character.actions.actions.map(action => `
@@ -163,7 +154,6 @@ function renderCharacter(character) {
       </details>
     `).join("")}
   `;
-
   const spellsHtml = `
     <h3>Spellcasting</h3>
     <div class="entry">
@@ -177,6 +167,7 @@ function renderCharacter(character) {
         <div class="detail-body">
           <div>Level ${spell.level} · ${spell.school}</div>
           <div>${spell.cast_time} · ${spell.range} · ${spell.duration}</div>
+          ${spell.description ? `<div class="muted">${spell.description}</div>` : ""}
         </div>
       </details>
     `).join("")}
@@ -187,11 +178,11 @@ function renderCharacter(character) {
         <div class="detail-body">
           <div>Level ${spell.level} · ${spell.school}</div>
           <div>${spell.cast_time} · ${spell.range} · ${spell.duration}</div>
+          ${spell.description ? `<div class="muted">${spell.description}</div>` : ""}
         </div>
       </details>
     `).join("")}
   `;
-
   const tabContent = {
     about: aboutHtml,
     abilities: abilitiesHtml,
@@ -199,10 +190,8 @@ function renderCharacter(character) {
     actions: actionsHtml,
     spells: spellsHtml,
   };
-
   sheetBody.innerHTML = tabContent[activeTab] || aboutHtml;
 }
-
 function renderImages(images) {
   imageGrid.innerHTML = "";
   if (!images || images.length === 0) {
@@ -212,7 +201,6 @@ function renderImages(images) {
     imageGrid.appendChild(empty);
     return;
   }
-
   images.forEach((url) => {
     const card = document.createElement("div");
     card.className = "image-card";
@@ -223,7 +211,6 @@ function renderImages(images) {
     imageGrid.appendChild(card);
   });
 }
-
 function renderCombat(combat) {
   if (!combat || !combat.active) {
     combatPanel.classList.add("hidden");
@@ -231,7 +218,6 @@ function renderCombat(combat) {
     selectedTargets = [];
     return;
   }
-
   combatPanel.classList.remove("hidden");
   state.combat = combat;
   const playerName = state.character?.identity?.name || "";
@@ -239,7 +225,6 @@ function renderCombat(combat) {
   combatTurn.textContent = currentTurn
     ? `Current turn: ${currentTurn}`
     : "Current turn: Unknown";
-
   const initiative = combat.initiative_order || [];
   initiativeOrderEl.innerHTML = initiative.length
     ? initiative.map((entry) => {
@@ -247,7 +232,6 @@ function renderCombat(combat) {
         return `<span class="${active}">${entry}</span>`;
       }).join("")
     : "<span class=\"muted\">Initiative not set</span>";
-
   const turnState = combat.turn_state || { action: false, bonus: false, reaction: false };
   const moveRemaining = combat.move_remaining ?? null;
   const moveMax = combat.move_max ?? null;
@@ -259,7 +243,6 @@ function renderCombat(combat) {
       ? `<span>Move: ${moveRemaining}/${moveMax} ft</span>`
       : `<span>Move: --</span>`,
   ].join("");
-
   const actions = state.character?.actions?.actions || [];
   combatActionSelect.innerHTML = actions.length
     ? actions.map((action) => {
@@ -272,23 +255,19 @@ function renderCombat(combat) {
         return `<option value="${action.id}" ${disabled ? "disabled" : ""}>${label}</option>`;
       }).join("")
     : "<option value=\"\">No actions available</option>";
-
   const targets = combat.targets || [];
   combatTargetSelect.innerHTML = targets.length
     ? targets.map((target) => `<option value="${target}">${target}</option>`).join("")
     : "<option value=\"\">No targets available</option>";
-
   const playerTurn = !currentTurn || currentTurn === playerName;
   const canAct = playerTurn && actions.length > 0;
   combatActionSelect.disabled = !canAct;
   combatTargetSelect.disabled = !canAct || targets.length === 0;
   combatSubmit.disabled = !canAct || targets.length === 0;
   combatEndTurn.disabled = !playerTurn;
-
   renderCombatMap(combat.map, combat);
   updateTargetingHighlights(combat.map, actions, combat, targets);
 }
-
 function renderEquipmentChoices(choices) {
   pendingEquipmentChoices = choices || [];
   if (!pendingEquipmentChoices.length) {
@@ -318,7 +297,6 @@ function renderEquipmentChoices(choices) {
   equipmentModal.classList.remove("hidden");
   equipmentModal.setAttribute("aria-hidden", "false");
 }
-
 function collectEquipmentSelections() {
   const selections = {};
   pendingEquipmentChoices.forEach((group) => {
@@ -331,7 +309,71 @@ function collectEquipmentSelections() {
   });
   return selections;
 }
-
+function renderSpellChoices(choices) {
+  pendingSpellChoices = choices || [];
+  if (!pendingSpellChoices.length) {
+    spellModal.classList.add("hidden");
+    spellModal.setAttribute("aria-hidden", "true");
+    spellFormEl.innerHTML = "";
+    spellErrorsEl.textContent = "";
+    return;
+  }
+  spellErrorsEl.textContent = "";
+  spellFormEl.innerHTML = pendingSpellChoices.map((group) => {
+    const inputType = group.choose > 1 ? "checkbox" : "radio";
+    const optionsHtml = group.options.map((option) => `
+      <label class="equipment-option">
+        <input type="${inputType}" name="${group.id}" value="${option.id}" />
+        <span>${option.label}</span>
+      </label>
+      ${option.description ? `
+        <details class="spell-option-details">
+          <summary>Show details</summary>
+          <div class="spell-option-desc muted">${option.description}</div>
+        </details>
+      ` : ""}
+    `).join("");
+    return `
+      <div class="equipment-group">
+        <h3>${group.label}</h3>
+        <div class="muted">Choose ${group.choose}</div>
+        ${optionsHtml}
+      </div>
+    `;
+  }).join("");
+  spellModal.classList.remove("hidden");
+  spellModal.setAttribute("aria-hidden", "false");
+}
+function collectSpellSelections() {
+  const selections = {};
+  pendingSpellChoices.forEach((group) => {
+    const selected = Array.from(
+      spellFormEl.querySelectorAll(`input[name="${group.id}"]:checked`)
+    ).map((input) => input.value);
+    if (selected.length) {
+      selections[group.id] = selected;
+    }
+  });
+  return selections;
+}
+function enforceSpellChoiceLimits(input) {
+  if (!input || input.type !== "checkbox") {
+    return;
+  }
+  const groupId = input.name;
+  const group = pendingSpellChoices.find((g) => g.id === groupId);
+  if (!group) {
+    return;
+  }
+  const max = group.choose || 1;
+  const checked = spellFormEl.querySelectorAll(`input[name="${groupId}"]:checked`);
+  if (checked.length > max) {
+    input.checked = false;
+    spellErrorsEl.textContent = `Choose only ${max} option(s) for "${group.label}".`;
+  } else {
+    spellErrorsEl.textContent = "";
+  }
+}
 async function resetUI() {
   state.session = false;
   state.character = null;
@@ -339,6 +381,7 @@ async function resetUI() {
   activeTab = "about";
   pendingStartPayload = null;
   renderEquipmentChoices([]);
+  renderSpellChoices([]);
   sheetTabs.querySelectorAll(".tab").forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.tab === activeTab);
   });
@@ -353,7 +396,6 @@ async function resetUI() {
     addMessage("dm", `Failed to reset session: ${err}`);
   }
 }
-
 async function startGame() {
   const formData = new FormData(charForm);
   const payload = {
@@ -362,7 +404,6 @@ async function startGame() {
     think: false,
   };
   pendingStartPayload = payload;
-
   showGameScreen();
   messagesEl.innerHTML = "";
   renderCharacter(null);
@@ -370,19 +411,25 @@ async function startGame() {
   renderCombat({ active: false });
   setSessionActive(true, "exploration");
   addMessage("dm", "Starting adventure...");
-
   const res = await fetch("/api/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-
   const data = await res.json();
   if (data.requires_choices) {
     messagesEl.innerHTML = "";
     setSessionActive(false);
     renderEquipmentChoices(data.choices);
     equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+    showSetupScreen();
+    return;
+  }
+  if (data.requires_spell_choices) {
+    messagesEl.innerHTML = "";
+    setSessionActive(false);
+    renderSpellChoices(data.spell_choices);
+    spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
     showSetupScreen();
     return;
   }
@@ -401,7 +448,6 @@ async function startGame() {
   renderCombat(data.combat);
   showGameScreen();
 }
-
 async function submitEquipmentChoices() {
   if (!pendingStartPayload) {
     return;
@@ -412,6 +458,7 @@ async function submitEquipmentChoices() {
     ...pendingStartPayload,
     equipment_choices: equipmentChoices,
   };
+  pendingStartPayload = payload;
   showGameScreen();
   messagesEl.innerHTML = "";
   renderCharacter(null);
@@ -433,6 +480,14 @@ async function submitEquipmentChoices() {
     showSetupScreen();
     return;
   }
+  if (data.requires_spell_choices) {
+    messagesEl.innerHTML = "";
+    setSessionActive(false);
+    renderSpellChoices(data.spell_choices);
+    spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+    showSetupScreen();
+    return;
+  }
   if (!data.session) {
     equipmentErrorsEl.textContent = data.error || "Unable to start session.";
     setSessionActive(false);
@@ -449,14 +504,58 @@ async function submitEquipmentChoices() {
   renderCombat(data.combat);
   showGameScreen();
 }
-
+async function submitSpellChoices() {
+  if (!pendingStartPayload) {
+    return;
+  }
+  const spellChoices = collectSpellSelections();
+  renderSpellChoices([]);
+  const payload = {
+    ...pendingStartPayload,
+    spell_choices: spellChoices,
+  };
+  showGameScreen();
+  messagesEl.innerHTML = "";
+  renderCharacter(null);
+  renderImages([]);
+  renderCombat({ active: false });
+  setSessionActive(true, "exploration");
+  addMessage("dm", "Starting adventure...");
+  const res = await fetch("/api/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (data.requires_spell_choices) {
+    messagesEl.innerHTML = "";
+    setSessionActive(false);
+    renderSpellChoices(data.spell_choices);
+    spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+    showSetupScreen();
+    return;
+  }
+  if (!data.session) {
+    spellErrorsEl.textContent = data.error || "Unable to start session.";
+    setSessionActive(false);
+    showSetupScreen();
+    return;
+  }
+  state.session = data.session;
+  renderCharacter(data.character);
+  renderImages(data.images);
+  messagesEl.innerHTML = "";
+  addMessage("dm", data.narrative || "Adventure started.");
+  setSessionActive(true, data.game_state?.mode || "exploration");
+  renderCombat(data.combat);
+  showGameScreen();
+}
 async function sendMessage(content) {
   const res = await fetch("/api/message", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ content }),
   });
-
   const data = await res.json();
   if (data.error) {
     addMessage("dm", data.error);
@@ -474,14 +573,12 @@ async function sendMessage(content) {
   }
   addMessage("dm", data.narrative || "...");
 }
-
 async function sendCombatAction(actionId, targetIds) {
   const res = await fetch("/api/combat_action", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action_id: actionId, target_ids: targetIds }),
   });
-
   const data = await res.json();
   if (data.error) {
     addMessage("dm", data.error);
@@ -499,14 +596,12 @@ async function sendCombatAction(actionId, targetIds) {
   }
   addMessage("dm", data.narrative || "...");
 }
-
 async function sendCombatEndTurn() {
   const res = await fetch("/api/combat_action", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ end_turn: true }),
   });
-
   const data = await res.json();
   if (data.error) {
     addMessage("dm", data.error);
@@ -524,14 +619,12 @@ async function sendCombatEndTurn() {
   }
   addMessage("dm", data.narrative || "...");
 }
-
 async function sendCombatMove(x, y) {
   const res = await fetch("/api/combat_move", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ x, y }),
   });
-
   const data = await res.json();
   if (data.error) {
     addMessage("dm", data.error);
@@ -550,23 +643,27 @@ async function sendCombatMove(x, y) {
     addMessage("dm", data.narrative);
   }
 }
-
 startButton.addEventListener("click", () => {
   startGame().catch((err) => {
     addMessage("dm", `Failed to start: ${err}`);
   });
 });
-
 equipmentSubmit.addEventListener("click", () => {
   submitEquipmentChoices().catch((err) => {
     equipmentErrorsEl.textContent = `Failed to start: ${err}`;
   });
 });
-
+spellSubmit.addEventListener("click", () => {
+  submitSpellChoices().catch((err) => {
+    spellErrorsEl.textContent = `Failed to start: ${err}`;
+  });
+});
+spellFormEl.addEventListener("change", (event) => {
+  enforceSpellChoiceLimits(event.target);
+});
 newGameButton.addEventListener("click", () => {
   resetUI();
 });
-
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const content = chatInput.value.trim();
@@ -579,7 +676,6 @@ chatForm.addEventListener("submit", (event) => {
     addMessage("dm", `Failed to send: ${err}`);
   });
 });
-
 combatSubmit.addEventListener("click", () => {
   const actionId = combatActionSelect.value;
   const targetIds = selectedTargets.length
@@ -594,14 +690,12 @@ combatSubmit.addEventListener("click", () => {
     addMessage("dm", `Failed to resolve action: ${err}`);
   });
 });
-
 combatEndTurn.addEventListener("click", () => {
   addMessage("user", "End Turn");
   sendCombatEndTurn().catch((err) => {
     addMessage("dm", `Failed to end turn: ${err}`);
   });
 });
-
 function handleMoveCellClick(x, y) {
   const combat = getCurrentCombatPayload();
   const playerName = combat.player_name;
@@ -632,7 +726,6 @@ function handleMoveCellClick(x, y) {
     addMessage("dm", `Failed to move: ${err}`);
   });
 }
-
 sheetTabs.addEventListener("click", (event) => {
   const button = event.target.closest(".tab");
   if (!button) {
@@ -648,30 +741,24 @@ sheetTabs.addEventListener("click", (event) => {
   });
   renderCharacter(state.character);
 });
-
 setSessionActive(false);
 renderCharacter(null);
 renderImages([]);
 renderCombat({ active: false });
 showSetupScreen();
-
 function renderCombatMap(map, combat) {
   if (!map || !map.tokens) {
     combatMapEl.innerHTML = "<div class=\"muted\">Map unavailable</div>";
     return;
   }
-
   const currentTurn = combat?.current_turn || "";
   const playerName = combat?.player_name || "";
   const moveRemaining = combat?.move_remaining ?? 0;
-
   selectedTargets = selectedTargets.filter((id) => map.tokens.some((t) => t.id === id));
-
   const width = map.width || 12;
   const height = map.height || 8;
   combatMapEl.style.gridTemplateColumns = `repeat(${width}, 28px)`;
   combatMapEl.innerHTML = "";
-
   const cellIndex = {};
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
@@ -694,7 +781,6 @@ function renderCombatMap(map, combat) {
       cellIndex[`${x},${y}`] = cell;
     }
   }
-
   map.tokens.forEach((token) => {
     const cell = cellIndex[`${token.x},${token.y}`];
     if (!cell) {
@@ -717,12 +803,10 @@ function renderCombatMap(map, combat) {
     cell.appendChild(div);
   });
 }
-
 function getSelectedAction(actions) {
   const actionId = combatActionSelect.value;
   return actions.find((action) => action.id === actionId);
 }
-
 function updateTargetingHighlights(map, actions, combat, allowedTargets = []) {
   if (!map || !map.tokens) {
     return;
@@ -731,7 +815,6 @@ function updateTargetingHighlights(map, actions, combat, allowedTargets = []) {
   const playerName = combat.player_name;
   const origin = map.tokens.find((token) => token.id === playerName);
   const targets = map.tokens.filter((token) => allowedTargets.includes(token.id));
-
   const validTargets = new Set();
   if (action && origin) {
     const primary = selectedTargets.length ? selectedTargets[0] : null;
@@ -740,11 +823,9 @@ function updateTargetingHighlights(map, actions, combat, allowedTargets = []) {
   } else {
     targets.forEach((token) => validTargets.add(token.id));
   }
-
   combatTargetSelect.querySelectorAll("option").forEach((opt) => {
     opt.disabled = !validTargets.has(opt.value);
   });
-
   document.querySelectorAll(".token").forEach((tokenEl) => {
     const tokenId = tokenEl.dataset.tokenId;
     if (!tokenId || tokenId === playerName || !allowedTargets.includes(tokenId)) {
@@ -758,10 +839,8 @@ function updateTargetingHighlights(map, actions, combat, allowedTargets = []) {
       selectedTargets = selectedTargets.filter((id) => id !== tokenId);
     }
   });
-
   syncTargetSelect();
 }
-
 function toggleTargetSelection(tokenId) {
   const option = combatTargetSelect.querySelector(`option[value="${tokenId}"]`);
   if (!option || option.disabled) {
@@ -785,7 +864,6 @@ function toggleTargetSelection(tokenId) {
   const combat = getCurrentCombatPayload();
   updateTargetingHighlights(getCurrentMap(), actions, combat, combat.targets || []);
 }
-
 function syncTargetSelect() {
   combatTargetSelect.querySelectorAll("option").forEach((opt) => {
     opt.selected = selectedTargets.includes(opt.value);
@@ -799,25 +877,20 @@ function syncTargetSelect() {
     }
   });
 }
-
 function computeTargetableTokens(action, origin, targets, primaryId, gridSize) {
   const actionRange = action.range || null;
   const targeting = action.targeting || { shape: "single" };
   const shape = targeting.shape || "single";
-
   const originPos = { x: origin.x, y: origin.y };
   const primaryTarget = targets.find((token) => token.id === primaryId);
-
   if (shape === "single") {
     return targets.filter((token) => withinRange(originPos, token, actionRange, gridSize)).map((t) => t.id);
   }
-
   if (shape === "circle") {
     const radius = targeting.radius || actionRange;
     const center = targeting.origin === "target" && primaryTarget ? { x: primaryTarget.x, y: primaryTarget.y } : originPos;
     return targets.filter((token) => withinRange(center, token, radius, gridSize)).map((t) => t.id);
   }
-
   if (shape === "cone" || shape === "line") {
     const length = targeting.length || actionRange;
     if (!primaryTarget) {
@@ -825,10 +898,8 @@ function computeTargetableTokens(action, origin, targets, primaryId, gridSize) {
     }
     return targets.filter((token) => withinLinearShape(originPos, primaryTarget, token, targeting, shape, length, gridSize)).map((t) => t.id);
   }
-
   return targets.map((token) => token.id);
 }
-
 function withinRange(origin, token, range, gridSize) {
   if (!range) {
     return true;
@@ -837,7 +908,6 @@ function withinRange(origin, token, range, gridSize) {
   const dy = Math.abs(origin.y - token.y);
   return Math.max(dx, dy) * gridSize <= range;
 }
-
 function withinLinearShape(origin, primary, token, targeting, shape, length, gridSize) {
   if (!length) {
     return true;
@@ -855,12 +925,10 @@ function withinLinearShape(origin, primary, token, targeting, shape, length, gri
   if (dist > length) {
     return false;
   }
-
   const forwardLen = Math.sqrt(fx * fx + fy * fy);
   const fxNorm = fx / forwardLen;
   const fyNorm = fy / forwardLen;
   const dot = (tx * fxNorm + ty * fyNorm);
-
   if (shape === "line") {
     const width = targeting.width || gridSize;
     if (dot < 0 || dot > length / gridSize) {
@@ -869,7 +937,6 @@ function withinLinearShape(origin, primary, token, targeting, shape, length, gri
     const perp = Math.abs(tx * fyNorm - ty * fxNorm) * gridSize;
     return perp <= width / 2;
   }
-
   const angle = targeting.angle || 60;
   const half = angle / 2;
   const vLen = Math.sqrt(tx * tx + ty * ty);
@@ -880,15 +947,12 @@ function withinLinearShape(origin, primary, token, targeting, shape, length, gri
   const theta = Math.acos(cos) * (180 / Math.PI);
   return theta <= half;
 }
-
 function getCurrentMap() {
   return state.combat?.map || null;
 }
-
 function getCurrentCombatPayload() {
   return state.combat || {};
 }
-
 combatActionSelect.addEventListener("change", () => {
   const actions = state.character?.actions?.actions || [];
   selectedTargets = [];
@@ -896,7 +960,6 @@ combatActionSelect.addEventListener("change", () => {
   const combat = getCurrentCombatPayload();
   updateTargetingHighlights(getCurrentMap(), actions, combat, combat.targets || []);
 });
-
 combatTargetSelect.addEventListener("change", () => {
   selectedTargets = Array.from(combatTargetSelect.selectedOptions).map((opt) => opt.value);
   syncTargetSelect();

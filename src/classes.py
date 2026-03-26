@@ -175,6 +175,23 @@ class CharClass:
                 character.resources.update_spell_slots(
                     "Level_1", self.levelup_spell_slots[1]["slots"][1], set_max=True
                 )
+
+        # Set spellcasting ability + save DC if applicable
+        if getattr(character, "spells", None) is not None:
+            class_entry = load_srd("classes", "5e-SRD-Classes.json")
+            entry = next(
+                (c for c in class_entry or [] if c.get("name", "").lower() == self.name.lower()),
+                None,
+            )
+            if entry and entry.get("spellcasting"):
+                ability = (entry.get("spellcasting") or {}).get("spellcasting_ability") or {}
+                ability_name = ability.get("name")
+                if ability_name:
+                    character.spells.spellcasting_ability = ability_name
+                    ability_mod = character.ability_scores.modifier(ability_name)
+                    character.spells.spell_save_dc = (
+                        8 + character.proficiencies.proficiency_bonus + ability_mod
+                    )
         return
             
 

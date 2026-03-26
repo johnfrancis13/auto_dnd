@@ -27,6 +27,11 @@ from equipment_choices import (
     build_background_equipment_choices,
     validate_equipment_choices,
 )
+from spell_choices import (
+    build_spell_choice_groups,
+    validate_spell_choices,
+    apply_spell_choices,
+)
 
 
 app = FastAPI(title="Auto DnD UI")
@@ -52,6 +57,7 @@ class StartRequest(BaseModel):
     model_name: str = "qwen3:8b"
     think: bool = False
     equipment_choices: Optional[Dict[str, List[str]]] = None
+    spell_choices: Optional[Dict[str, List[str]]] = None
 
 
 class MessageRequest(BaseModel):
@@ -70,10 +76,10 @@ class CombatMoveRequest(BaseModel):
 
 
 class GameSession:
-    def __init__(self, config: StartRequest):
+    def __init__(self, config: StartRequest, pc: Optional[char.PC] = None):
         self.config = config
         self.images: List[str] = []
-        self.pc = self._build_pc(config.character)
+        self.pc = pc or self._build_pc(config.character)
         self.npc_repo = NPCRepository()
         self.gm = gm_llm(
             model_name=config.model_name,
@@ -189,6 +195,7 @@ class GameSession:
                 "components": spell.components,
                 "ritual": spell.ritual,
                 "source": spell.source,
+                "description": spell.description,
             }
 
         return {
@@ -312,6 +319,7 @@ class GameSession:
 
 
 SESSION: Optional[GameSession] = None
+PENDING: Optional[Dict[str, Any]] = None
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -329,21 +337,69 @@ def get_state() -> JSONResponse:
 
 @app.post("/api/start")
 def start_game(payload: StartRequest) -> JSONResponse:
-    global SESSION
+    global SESSION, PENDING
+
+    if PENDING is not None and payload.spell_choices:
+        pc = PENDING["pc"]
+        spell_groups = PENDING["spell_groups"]
+        ok, errors = validate_spell_choices(spell_groups, payload.spell_choices or {})
+        if not ok:
+            return JSONResponse({
+                "session": False,
+                "requires_spell_choices": True,
+                "spell_choices": spell_groups,
+                "errors": errors,
+            })
+        apply_spell_choices(pc, payload.spell_choices or {}, spell_groups)
+        SESSION = GameSession(payload, pc=pc)
+        PENDING = None
+        return JSONResponse({
+            "session": True,
+            "narrative": SESSION.last_narrative(),
+            **SESSION.state_payload(),
+        })
+
     choices = []
     choices.extend(build_class_equipment_choices(payload.character.char_class))
     choices.extend(build_background_equipment_choices(payload.character.background))
     if choices:
         ok, errors = validate_equipment_choices(choices, payload.equipment_choices or {})
         if not ok:
-            SESSION = None
+            PENDING = None
             return JSONResponse({
                 "session": False,
                 "requires_choices": True,
                 "choices": choices,
                 "errors": errors,
             })
-    SESSION = GameSession(payload)
+
+    pc = char.PCFactory().create_basic(
+        name=payload.character.name,
+        race=payload.character.race,
+        background=payload.character.background,
+        char_class=payload.character.char_class,
+        ability_method=payload.character.ability_method,
+        ability_score_assignment=payload.character.ability_score_assignment,
+        ability_score_values=payload.character.ability_score_values,
+        equipment_choices=payload.equipment_choices or {},
+    )
+    pc.short_character_description = payload.character.short_description
+
+    spell_groups = build_spell_choice_groups(pc, payload.character.char_class)
+    if spell_groups:
+        ok, errors = validate_spell_choices(spell_groups, payload.spell_choices or {})
+        if not ok:
+            PENDING = {"pc": pc, "spell_groups": spell_groups}
+            return JSONResponse({
+                "session": False,
+                "requires_spell_choices": True,
+                "spell_choices": spell_groups,
+                "errors": errors,
+            })
+        apply_spell_choices(pc, payload.spell_choices or {}, spell_groups)
+
+    SESSION = GameSession(payload, pc=pc)
+    PENDING = None
     return JSONResponse({
         "session": True,
         "narrative": SESSION.last_narrative(),
