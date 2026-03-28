@@ -5,7 +5,7 @@ This repo has two big moving parts that work together:
 1. `game_engine.py` provides the deterministic rules and combat resolution.
 2. `gm.py` provides the AI Dungeon Master that calls the rules engine and narrates the outcome.
 
-Below is a concrete map of how those pieces interact.
+Below is a concrete map of how those pieces interact, plus the action pipeline and UI roll flow.
 
 **High-level flow**
 1. The UI (FastAPI) creates a `GameSession` (`ui/server.py`).
@@ -20,11 +20,13 @@ Below is a concrete map of how those pieces interact.
   - `Dice` and `DiceHandler` handle dice rolls and modifiers.
   - `CombatTracker` manages initiative, rounds, and turn order.
   - `CombatEngine` resolves attacks and applies damage to combatants.
+  - `resolve_save_action()` and `resolve_spell_action()` handle save-based and spell actions.
   - `AttackResult`, `DamageResult`, and `CombatActionLog` are the structured outputs the DM uses to narrate.
 
 - `src/actions.py`
   - `Action` and `ActionManager` define and execute actions (attacks, skill checks, saves).
-  - Actions are used by both PCs and NPCs. Combat resolution ultimately flows through `ActionManager` into `CombatEngine`.
+  - `SpellAction` extends `Action` for spell metadata (level, school).
+  - Actions are data-first (attack/save/damage specs) to enable JSON parsing.
 
 **Where the AI DM lives**
 - `src/gm.py`
@@ -35,6 +37,8 @@ Below is a concrete map of how those pieces interact.
     - Combat narration: turns structured combat logs into flavorful text.
     - Encounter selection and NPC movement: selects NPCs and tactical moves.
   - All of those prompts are constrained with Pydantic schemas, so the model returns structured JSON.
+  - Manual rolls are appended to `turns` as `tool` messages (`tool_name: action_roll`).
+  - `CombatOrchestrator` stores manual combat logs (`manual_logs`) which are merged into combat narration.
 
 **Exploration loop (non-combat)**
 1. `gm_llm.run_turn()` is called with the player’s input.
@@ -47,6 +51,7 @@ Below is a concrete map of how those pieces interact.
    - a rolling `story_summary`
    - recent turns (player + DM + tool results)
 5. The narrator returns a `GMResponse` with an updated `GameState` and narrative text.
+6. Optional: UI can call `/api/action/roll` with `narrate=true` to roll and immediately narrate.
 
 **Combat loop**
 1. Combat is orchestrated by `CombatOrchestrator` (in `gm.py`), which owns:
@@ -63,10 +68,19 @@ Below is a concrete map of how those pieces interact.
    - a `CombatActionLog` is produced
 4. NPC turns are chosen by the DM (action selection + optional movement).
 5. The combat narrator prompt converts the structured combat log into the DM’s descriptive output.
+6. Manual roll results (from the UI) are merged into the combat log payload before narration.
+
+**Action data pipeline (weapons + spells)**
+- `src/action_factory.py` turns SRD JSON into `Action` / `SpellAction`:
+  - `weapon_action_from_item()` and `load_weapon_actions_from_srd()`
+  - `spell_action_from_spell()` and `load_spell_actions_from_srd()`
+- `Action.attack_roll` supports `ability_options` (e.g., finesse STR/DEX) and spellcasting.
+- `Action.save` is data-driven for save spells: `{ability, dc, on_success}`.
+- Scaling (cantrips / slot levels) is stored in `Action.scaling` and resolved by `CombatEngine`.
 
 **Game state and data sources**
-- `GameState` (Pydantic in `gm.py`) tracks mode (`exploration` vs `combat`), enemies, initiative, and game_over.
-- `src/character.py` constructs PCs and their stats, proficiencies, and actions.
+- `GameState` (Pydantic in `gm.py`) tracks mode (`exploration` vs `combat`), enemies, initiative, and `game_over`.
+- `src/character.py` constructs PCs and their stats, proficiencies, inventory, and actions.
 - `src/npcs.py` provides NPC definitions used in encounters.
 - `data/` stores the raw rules content (classes, items, NPCs, spells, races, backgrounds, monsters).
 
@@ -75,6 +89,14 @@ Below is a concrete map of how those pieces interact.
   - `/api/start` builds a PC and starts a session.
   - `/api/message` sends player input to the DM.
   - `/api/combat_action` and `/api/combat_move` manage combat turns and movement.
+  - `/api/inventory/equip` toggles equipped state (weapons/armor only).
+  - `/api/spells/prepare` toggles prepared state (cantrips are always prepared).
+  - `/api/action/roll` rolls action dice; with `narrate=true` it immediately calls the DM in exploration.
 - The UI always displays the DM’s latest narrative, the current `GameState`, and the player’s updated sheet.
 
-If you want a deeper dive into a specific subsystem (character creation, spells, NPC data, or map rules), tell me which one and I can document it next.
+**UI action roll UX**
+- Actions display roll breakdowns (attack / save / damage) plus a Roll button.
+- Roll controls include advantage/disadvantage and multi-target selection in combat.
+- Exploration rolls include a free-form target input and a “Roll + Narrate” button.
+- Roll results are shown as quick badges next to actions and are pushed into GM context.
+
