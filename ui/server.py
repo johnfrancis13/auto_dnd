@@ -32,6 +32,7 @@ from spell_choices import (
     validate_spell_choices,
     apply_spell_choices,
 )
+from proficiency import ProficiencyType
 
 
 app = FastAPI(title="Auto DnD UI")
@@ -73,6 +74,26 @@ class CombatActionRequest(BaseModel):
 class CombatMoveRequest(BaseModel):
     x: int
     y: int
+
+
+class InventoryToggleRequest(BaseModel):
+    item_name: str
+    equipped: bool
+
+
+class SpellToggleRequest(BaseModel):
+    spell_name: str
+    prepared: bool
+
+
+class ActionRollRequest(BaseModel):
+    action_id: str
+    target_id: Optional[str] = None
+    target_ids: Optional[List[str]] = None
+    target_text: Optional[str] = None
+    advantage: Optional[str] = None  # adv | dis
+    narrate: bool = False
+    player_text: Optional[str] = None
 
 
 class GameSession:
@@ -130,6 +151,13 @@ class GameSession:
     def _serialize_inventory(self) -> List[Dict[str, Any]]:
         items = []
         for item, qty in self.pc.inventory.items.items():
+            equipped = item in self.pc.inventory.equipped
+            equippable = False
+            if hasattr(item, "raw"):
+                category = (item.raw.get("equipment_category") or {}).get("index")
+                equippable = category in {"weapon", "armor"}
+            elif hasattr(item, "type"):
+                equippable = str(item.type).lower() in {"weapon", "armor"}
             if hasattr(item, "name"):
                 items.append({
                     "name": item.name,
@@ -137,6 +165,8 @@ class GameSession:
                     "subtype": getattr(item, "subtype", None),
                     "rarity": getattr(item, "rarity", None),
                     "quantity": qty,
+                    "equipped": equipped,
+                    "equippable": equippable,
                 })
             else:
                 items.append({
@@ -145,6 +175,8 @@ class GameSession:
                     "subtype": None,
                     "rarity": None,
                     "quantity": qty,
+                    "equipped": False,
+                    "equippable": False,
                 })
         return items
 
@@ -157,6 +189,8 @@ class GameSession:
                 "type": action.action_type.name.lower(),
                 "source": action.source,
                 "damage_roll": action.damage_roll,
+                "attack_roll": action.attack_roll,
+                "save": getattr(action, "save", None),
                 "resource_cost": action.resource_cost,
                 "proficiency_type": action.proficiency_type.name.lower() if action.proficiency_type else None,
                 "range": action.range,
@@ -196,6 +230,7 @@ class GameSession:
                 "ritual": spell.ritual,
                 "source": spell.source,
                 "description": spell.description,
+                "prepared": spell.level == 0 or spell.name in self.pc.spells.prepared_spells,
             }
 
         return {
@@ -316,6 +351,220 @@ class GameSession:
             "character": self.character_summary(),
             "combat": self.combat_payload(),
         }
+
+    def handle_toggle_equip(self, item_name: str, equipped: bool) -> Dict[str, Any]:
+        item = self.pc.inventory.get(item_name)
+        if not item:
+            return {"error": f"Item not found: {item_name}"}
+        equippable = False
+        if hasattr(item, "raw"):
+            category = (item.raw.get("equipment_category") or {}).get("index")
+            equippable = category in {"weapon", "armor"}
+        elif hasattr(item, "type"):
+            equippable = str(item.type).lower() in {"weapon", "armor"}
+        if not equippable:
+            return {"error": f"Item is not equippable: {item_name}"}
+        try:
+            self.pc.inventory.equip(item, "equip" if equipped else "unequip")
+        except Exception as exc:
+            return {"error": str(exc)}
+        return {
+            "character": self.character_summary(),
+            "combat": self.combat_payload(),
+        }
+
+    def handle_toggle_prepare(self, spell_name: str, prepared: bool) -> Dict[str, Any]:
+        spell = self.pc.spells.known_spells.get(spell_name) or self.pc.spells.prepared_spells.get(spell_name)
+        if not spell:
+            return {"error": f"Spell not found: {spell_name}"}
+        if getattr(spell, "level", 1) == 0:
+            return {"error": "Cantrips are always prepared."}
+        try:
+            self.pc.spells.prepare_spell(spell, "add" if prepared else "remove")
+        except Exception as exc:
+            return {"error": str(exc)}
+        return {
+            "character": self.character_summary(),
+            "combat": self.combat_payload(),
+        }
+
+    def handle_action_roll(
+        self,
+        action_id: str,
+        target_id: Optional[str] = None,
+        target_ids: Optional[List[str]] = None,
+        target_text: Optional[str] = None,
+        advantage: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        try:
+            action = self.pc.actions.get(action_id)
+        except Exception:
+            action = None
+        if not action:
+            return {"error": "Invalid action."}
+        roll_payload = self._resolve_action_roll(action, target_id, target_ids, target_text, advantage)
+        if roll_payload.get("error"):
+            return roll_payload
+        roll_text = roll_payload.get("summary") or json.dumps(roll_payload, indent=2)
+        self.gm.turns.append({
+            "role": "tool",
+            "tool_name": "action_roll",
+            "content": roll_text,
+        })
+        if self.gm.game_state.mode == "combat":
+            self._add_manual_combat_log(roll_payload)
+        return {
+            "result": roll_payload,
+            "character": self.character_summary(),
+            "combat": self.combat_payload(),
+        }
+
+    def _resolve_action_roll(
+        self,
+        action,
+        target_id: Optional[str],
+        target_ids: Optional[List[str]],
+        target_text: Optional[str],
+        advantage: Optional[str],
+    ):
+        from game_engine import Dice, DiceHandler, DamageResult
+        handler = DiceHandler()
+
+        def resolve_prof_bonus():
+            prof_type = action.proficiency_type or (action.attack_roll or {}).get("proficiency_type")
+            if not prof_type:
+                return 0
+            if isinstance(prof_type, str):
+                key = prof_type.strip().lower()
+                if key in {"spell", "spellcasting", "spell attack", "spell_attack"}:
+                    return self.pc.proficiencies.proficiency_bonus
+                return self.pc.proficiencies.proficiency_bonus if self.pc.proficiencies.has_proficiency(
+                    ProficiencyType.WEAPON, key
+                ) else 0
+            return 0
+
+        result: Dict[str, Any] = {
+            "action_id": action.id,
+            "action_name": action.name,
+            "target": target_id,
+            "targets": target_ids or [],
+            "target_text": target_text,
+        }
+
+        attack = action.attack_roll or None
+        save = getattr(action, "save", None)
+
+        if attack:
+            ability = attack.get("ability")
+            ability_options = attack.get("ability_options") or []
+            ability_mod = handler._resolve_ability_modifier(self.pc, ability, ability_options)
+            prof = resolve_prof_bonus()
+            bonus = int(attack.get("bonus") or 0)
+            roll = handler.roll(
+                dice_specs=[(20, 1)],
+                modifiers=ability_mod + bonus + prof,
+                features=self.pc.features._features,
+                advantage=advantage,
+            )
+            result["attack_roll"] = {
+                "total": roll.total,
+                "dice": roll.dice,
+                "modifiers": roll.modifiers,
+                "advantage": roll.advantage,
+            }
+
+        if save:
+            save_ability = str(save.get("ability") or "").upper()
+            save_dc = save.get("dc")
+            if isinstance(save_dc, str) and save_dc == "spell_save_dc":
+                save_dc = self.pc.spells.spell_save_dc
+            result["save"] = {
+                "ability": save_ability or None,
+                "dc": save_dc,
+                "on_success": save.get("on_success"),
+            }
+
+        damage_rolls = []
+        if action.damage_roll:
+            dmg_result = DamageResult()
+            for val in action.damage_roll:
+                temp = Dice.roll(sides=val["dice_type"], count=val["dice_amount"])
+                if self.pc.features._features:
+                    for feature in self.pc.features._features:
+                        if getattr(feature, "feature_type", None) == "affects_rolls":
+                            temp = feature(temp)
+                if val.get("precomputed"):
+                    temp.add_modifier(val["bonus"])
+                else:
+                    dmg_ability = val.get("ability")
+                    dmg_options = val.get("ability_options") or []
+                    dmg_mod = handler._resolve_ability_modifier(self.pc, dmg_ability, dmg_options)
+                    temp.add_modifier(val.get("bonus", 0) + dmg_mod)
+                dmg_result.add_damage(val["dmg_type"], temp)
+                damage_rolls.append({
+                    "type": val["dmg_type"],
+                    "dice": temp.dice,
+                    "total": temp.total,
+                })
+            result["damage_rolls"] = damage_rolls
+            result["damage_total"] = dmg_result.total
+
+        result["summary"] = _format_action_roll_summary(result)
+        return result
+
+    def handle_action_roll_and_narrate(
+        self,
+        action_id: str,
+        target_id: Optional[str],
+        target_ids: Optional[List[str]],
+        target_text: Optional[str],
+        advantage: Optional[str],
+        player_text: Optional[str],
+    ) -> Dict[str, Any]:
+        roll_result = self.handle_action_roll(action_id, target_id, target_ids, target_text, advantage)
+        if roll_result.get("error"):
+            return roll_result
+        if self.gm.game_state.mode == "combat":
+            return roll_result
+        action = self.pc.actions.get(action_id)
+        if action:
+            base_text = player_text or f"I use {action.name}."
+        else:
+            base_text = player_text or "I take an action."
+        self.gm.run_turn(base_text)
+        return {
+            **roll_result,
+            "narrative": self.last_narrative(),
+            "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
+            "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
+        }
+
+    def _add_manual_combat_log(self, roll_payload: Dict[str, Any]):
+        combat = getattr(self.gm, "combat", None)
+        if not combat or not hasattr(combat, "add_manual_log"):
+            return
+
+        attack = roll_payload.get("attack_roll") or {}
+        save = roll_payload.get("save") or {}
+        breakdown: Dict[str, int] = {}
+        for entry in roll_payload.get("damage_rolls") or []:
+            dmg_type = str(entry.get("type"))
+            breakdown[dmg_type] = breakdown.get(dmg_type, 0) + int(entry.get("total") or 0)
+
+        log = {
+            "actor": self.pc.identity.name,
+            "action_id": roll_payload.get("action_id"),
+            "action_name": roll_payload.get("action_name"),
+            "target": roll_payload.get("target"),
+            "targets": roll_payload.get("targets") or None,
+            "attack_total": attack.get("total"),
+            "damage_total": roll_payload.get("damage_total"),
+            "damage_breakdown": breakdown or None,
+            "save_ability": save.get("ability"),
+            "save_dc": save.get("dc"),
+            "notes": "Manual roll (no engine resolution).",
+        }
+        combat.add_manual_log(log)
 
 
 SESSION: Optional[GameSession] = None
@@ -446,8 +695,81 @@ def combat_move(payload: CombatMoveRequest) -> JSONResponse:
     })
 
 
+@app.post("/api/inventory/equip")
+def toggle_inventory(payload: InventoryToggleRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    result = SESSION.handle_toggle_equip(payload.item_name, payload.equipped)
+    if result.get("error"):
+        return JSONResponse(result, status_code=400)
+    return JSONResponse(result)
+
+
+@app.post("/api/spells/prepare")
+def toggle_spell(payload: SpellToggleRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    result = SESSION.handle_toggle_prepare(payload.spell_name, payload.prepared)
+    if result.get("error"):
+        return JSONResponse(result, status_code=400)
+    return JSONResponse(result)
+
+
+@app.post("/api/action/roll")
+def roll_action(payload: ActionRollRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    if payload.narrate:
+        result = SESSION.handle_action_roll_and_narrate(
+            payload.action_id,
+            payload.target_id,
+            payload.target_ids,
+            payload.target_text,
+            payload.advantage,
+            payload.player_text,
+        )
+    else:
+        result = SESSION.handle_action_roll(
+            payload.action_id,
+            payload.target_id,
+            payload.target_ids,
+            payload.target_text,
+            payload.advantage,
+        )
+    if result.get("error"):
+        return JSONResponse(result, status_code=400)
+    return JSONResponse(result)
+
+
 @app.post("/api/reset")
 def reset_session() -> JSONResponse:
     global SESSION
     SESSION = None
     return JSONResponse({"session": False})
+def _format_action_roll_summary(payload: Dict[str, Any]) -> str:
+    parts = [f"[ACTION ROLL] {payload.get('action_name')}"]
+    if payload.get("targets"):
+        parts.append(f"Targets: {', '.join(payload.get('targets') or [])}")
+    elif payload.get("target"):
+        parts.append(f"Target: {payload.get('target')}")
+    elif payload.get("target_text"):
+        parts.append(f"Target: {payload.get('target_text')}")
+    attack = payload.get("attack_roll")
+    if attack:
+        adv = attack.get("advantage")
+        adv_label = f" {adv}" if adv else ""
+        parts.append(
+            f"Attack roll:{adv_label} {attack.get('total')} (dice={attack.get('dice')} mods={attack.get('modifiers')})"
+        )
+    save = payload.get("save")
+    if save:
+        parts.append(
+            f"Save: {save.get('ability')} vs DC {save.get('dc')} (on success: {save.get('on_success')})"
+        )
+    if payload.get("damage_rolls"):
+        dmg_chunks = []
+        for roll in payload.get("damage_rolls"):
+            dmg_chunks.append(f"{roll.get('total')} {roll.get('type')} (dice={roll.get('dice')})")
+        parts.append(f"Damage: {', '.join(dmg_chunks)}")
+        parts.append(f"Damage total: {payload.get('damage_total')}")
+    return " | ".join([p for p in parts if p])

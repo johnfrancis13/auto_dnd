@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, List, Dict, Any
 from game_engine import Dice, DiceHandler
 from proficiency import ProficiencyType
 
@@ -22,14 +22,23 @@ class Action:
     source: Optional[str] = None  # "Race", "Monk", "Longsword", etc.
     execute: Optional[Callable] = None #
     request_save: Optional[Callable] = None # create a request with the users spell save dc
-    attack_roll: Optional[Callable] = None # add any modifiers
-    damage_roll: Optional[dict] = None # each damage type needs its own dice
+    attack_roll: Optional[Dict[str, Any]] = None # add any modifiers
+    damage_roll: Optional[List[Dict[str, Any]]] = None # each damage type needs its own dice
     effects: Optional[dict] = None # each effect should be listed separately
     proficiency_type: Optional[ProficiencyType] = None
     resource_cost: Optional[dict] = None
     range: Optional[int] = None  # feet
     targeting: Optional[dict] = None  # {shape, radius/length/width/origin}
     max_targets: Optional[int] = None
+    save: Optional[Dict[str, Any]] = None  # {ability, dc, on_success}
+    scaling: Optional[Dict[str, Any]] = None  # {mode, table, key}
+
+
+@dataclass
+class SpellAction(Action):
+    spell_level: int = 0
+    school: Optional[str] = None
+    is_spell: bool = True
 
 class ActionManager:
     def __init__(self, owner):
@@ -62,8 +71,15 @@ class ActionManager:
     def request_save(self, action_id, source, target=None):
         action = self.get(action_id)
         if action.request_save:
-            return {"save_request":action.request_save(source, target),
-                    "damage":action.damage_roll(source, target)}
+            return {
+                "save_request": action.request_save(source, target),
+                "damage": action.damage_roll(source, target) if callable(action.damage_roll) else action.damage_roll,
+            }
+        if action.save:
+            return {
+                "save_request": action.save,
+                "damage": action.damage_roll,
+            }
         
     def roll_ability_check(self, ability,advantage=None):
         return DiceHandler().roll(dice_specs = [(20,1)],

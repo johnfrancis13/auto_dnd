@@ -2,6 +2,9 @@
   session: false,
   character: null,
   combat: null,
+  actionRolls: {},
+  pendingRolls: new Set(),
+  pendingRollGlobal: false,
 };
 const messagesEl = document.getElementById("messages");
 const chatForm = document.getElementById("chat-form");
@@ -118,13 +121,18 @@ function renderCharacter(character) {
   `;
   const inventoryHtml = `
     ${character.inventory.items.length === 0 ? "<p>No items.</p>" : character.inventory.items.map(item => `
-      <details class="entry">
-        <summary><strong>${item.name}</strong></summary>
-        <div class="detail-body">
-          <div>${item.type || "Item"}${item.subtype ? ` · ${item.subtype}` : ""}${item.rarity ? ` · ${item.rarity}` : ""}</div>
-          <div>Qty: ${item.quantity}</div>
+      <div class="entry">
+        <div class="entry-row">
+          <strong>${item.name}</strong>
+          ${item.equippable ? `
+            <button type="button" class="toggle-button ${item.equipped ? "on" : "off"}" data-equip-toggle data-item-name="${item.name}" data-equipped="${item.equipped}">
+              ${item.equipped ? "Equipped" : "Equip"}
+            </button>
+          ` : `<span class="muted">Not equippable</span>`}
         </div>
-      </details>
+        <div class="muted">${item.type || "Item"}${item.subtype ? ` · ${item.subtype}` : ""}${item.rarity ? ` · ${item.rarity}` : ""}</div>
+        <div class="muted">Qty: ${item.quantity}</div>
+      </div>
     `).join("")}
   `;
   const resourceList = [
@@ -139,7 +147,10 @@ function renderCharacter(character) {
         <summary><strong>${action.name}</strong></summary>
         <div class="detail-body">
           <div>${action.type} ${action.source ? `· ${action.source}` : ""}</div>
+          ${renderActionBadges(action)}
           ${action.proficiency_type ? `<div>Proficiency: ${action.proficiency_type}</div>` : ""}
+          ${renderActionRollInfo(action, character)}
+          ${renderActionControls(action)}
         </div>
       </details>
     `).join("")}
@@ -163,18 +174,14 @@ function renderCharacter(character) {
     <h3>Known Spells</h3>
     ${character.spells.known.length === 0 ? "<p>No known spells.</p>" : character.spells.known.map(spell => `
       <details class="entry">
-        <summary><strong>${spell.name}</strong></summary>
-        <div class="detail-body">
-          <div>Level ${spell.level} · ${spell.school}</div>
-          <div>${spell.cast_time} · ${spell.range} · ${spell.duration}</div>
-          ${spell.description ? `<div class="muted">${spell.description}</div>` : ""}
-        </div>
-      </details>
-    `).join("")}
-    <h3>Prepared Spells</h3>
-    ${character.spells.prepared.length === 0 ? "<p>No prepared spells.</p>" : character.spells.prepared.map(spell => `
-      <details class="entry">
-        <summary><strong>${spell.name}</strong></summary>
+        <summary>
+          <div class="entry-row">
+            <strong>${spell.name}</strong>
+            <button type="button" class="toggle-button ${spell.level === 0 ? "on" : (spell.prepared ? "on" : "off")}" data-prepare-toggle data-spell-name="${spell.name}" data-prepared="${spell.prepared}" ${spell.level === 0 ? "disabled" : ""}>
+              ${spell.level === 0 ? "Cantrip" : (spell.prepared ? "Prepared" : "Prepare")}
+            </button>
+          </div>
+        </summary>
         <div class="detail-body">
           <div>Level ${spell.level} · ${spell.school}</div>
           <div>${spell.cast_time} · ${spell.range} · ${spell.duration}</div>
@@ -191,6 +198,111 @@ function renderCharacter(character) {
     spells: spellsHtml,
   };
   sheetBody.innerHTML = tabContent[activeTab] || aboutHtml;
+}
+
+function renderActionRollInfo(action, character) {
+  const lines = [];
+  if (action.attack_roll) {
+    const ability = formatAbility(action.attack_roll.ability, character);
+    const bonus = action.attack_roll.bonus || 0;
+    lines.push(`Attack: d20 + ${ability}${bonus ? ` + ${bonus}` : ""}${action.proficiency_type ? " + prof" : ""}`);
+  }
+  if (action.save) {
+    const dc = action.save.dc === "spell_save_dc" ? character.spells.spell_save_dc : action.save.dc;
+    lines.push(`Save: ${action.save.ability} vs DC ${dc || "?"} (${action.save.on_success || "none"} on success)`);
+  }
+  if (action.damage_roll && action.damage_roll.length) {
+    const dmgLine = action.damage_roll.map((dmg) => {
+      const ability = formatAbility(dmg.ability, character);
+      const bonus = dmg.bonus || 0;
+      const modPart = ability ? ` + ${ability}` : "";
+      const bonusPart = bonus ? ` + ${bonus}` : "";
+      return `${dmg.dice_amount}d${dmg.dice_type}${modPart}${bonusPart} ${dmg.dmg_type}`;
+    }).join(" + ");
+    lines.push(`Damage: ${dmgLine}`);
+  }
+  if (!lines.length) {
+    return `<div class="muted">No rolls available.</div>`;
+  }
+  return lines.map((line) => `<div>${line}</div>`).join("");
+}
+
+function formatAbility(value, character) {
+  if (!value) {
+    return "";
+  }
+  const upper = String(value).toUpperCase();
+  if (upper === "SPELLCASTING" || upper === "SPELL") {
+    return character.spells.spellcasting_ability || "Spellcasting";
+  }
+  return upper;
+}
+
+function renderActionControls(action) {
+  const targets = state.combat?.targets || [];
+  const inCombat = state.combat?.active;
+  const maxTargets = action.max_targets ?? null;
+  const targetSelect = targets.length
+    ? `
+      <label class="roll-control">
+        Target
+        <select data-roll-target="${action.id}" data-max-targets="${maxTargets ?? ""}" multiple size="4">
+          ${targets.map((t) => `<option value="${t}">${t}</option>`).join("")}
+        </select>
+        ${maxTargets ? `<div class="muted">Max targets: ${maxTargets}</div>` : ""}
+      </label>
+    `
+    : "";
+  const targetText = !inCombat
+    ? `
+      <label class="roll-control">
+        Target (optional)
+        <input type="text" data-roll-target-text="${action.id}" placeholder="e.g., the guard, the door" />
+      </label>
+    `
+    : "";
+  const narrateButton = !inCombat
+    ? `<button type="button" class="roll-button primary" data-roll-action="${action.id}" data-roll-narrate="true">Roll + Narrate</button>`
+    : "";
+  return `
+    <div class="roll-controls" data-roll-controls="${action.id}">
+      <label class="roll-control">
+        Advantage
+        <select data-roll-advantage="${action.id}">
+          <option value="">Normal</option>
+          <option value="adv">Advantage</option>
+          <option value="dis">Disadvantage</option>
+        </select>
+      </label>
+      ${targetSelect}
+      ${targetText}
+      <div class="roll-status" data-roll-status="${action.id}"></div>
+      <div class="roll-buttons">
+        <button type="button" class="roll-button" data-roll-action="${action.id}">Roll</button>
+        ${narrateButton}
+      </div>
+    </div>
+  `;
+}
+function renderActionBadges(action) {
+  const roll = state.actionRolls?.[action.id];
+  if (!roll) {
+    return "";
+  }
+  const chips = [];
+  if (roll.attack_roll?.total !== undefined) {
+    chips.push(`Atk ${roll.attack_roll.total}`);
+  }
+  if (roll.save?.dc !== undefined && roll.save?.dc !== null) {
+    chips.push(`Save DC ${roll.save.dc}`);
+  }
+  if (roll.damage_total !== undefined && roll.damage_total !== null) {
+    chips.push(`Dmg ${roll.damage_total}`);
+  }
+  if (!chips.length) {
+    return "";
+  }
+  return `<div class="chip-list">${chips.map((c) => `<span class="chip">${c}</span>`).join("")}</div>`;
 }
 function renderImages(images) {
   imageGrid.innerHTML = "";
@@ -356,6 +468,55 @@ function collectSpellSelections() {
   });
   return selections;
 }
+function enforceMaxTargets(selectEl) {
+  const max = Number(selectEl.dataset.maxTargets || 0);
+  if (!max) {
+    return;
+  }
+  const selected = Array.from(selectEl.selectedOptions);
+  if (selected.length <= max) {
+    return;
+  }
+  selected[selected.length - 1].selected = false;
+  addMessage("dm", `Max targets for this action is ${max}.`);
+}
+
+function setRollPending(actionId, pending) {
+  if (pending) {
+    state.pendingRolls.add(actionId);
+    state.pendingRollGlobal = true;
+  } else {
+    state.pendingRolls.delete(actionId);
+    if (state.pendingRolls.size === 0) {
+      state.pendingRollGlobal = false;
+    }
+  }
+  updateRollPendingUI(actionId, pending);
+}
+
+function updateRollPendingUI(activeActionId, pending) {
+  const allControls = sheetBody.querySelectorAll("[data-roll-controls]");
+  allControls.forEach((controls) => {
+    const isActive = controls.dataset.rollControls === activeActionId;
+    if (state.pendingRollGlobal) {
+      controls.classList.add("pending");
+    } else {
+      controls.classList.remove("pending");
+    }
+    controls.querySelectorAll("button, select, input").forEach((el) => {
+      el.disabled = state.pendingRollGlobal;
+    });
+    const status = controls.querySelector("[data-roll-status]");
+    if (!status) {
+      return;
+    }
+    if (pending && isActive) {
+      status.innerHTML = `<span class="spinner"></span> Rolling...`;
+    } else {
+      status.textContent = "";
+    }
+  });
+}
 function enforceSpellChoiceLimits(input) {
   if (!input || input.type !== "checkbox") {
     return;
@@ -377,6 +538,9 @@ function enforceSpellChoiceLimits(input) {
 async function resetUI() {
   state.session = false;
   state.character = null;
+  state.actionRolls = {};
+  state.pendingRolls = new Set();
+  state.pendingRollGlobal = false;
   messagesEl.innerHTML = "";
   activeTab = "about";
   pendingStartPayload = null;
@@ -676,6 +840,51 @@ chatForm.addEventListener("submit", (event) => {
     addMessage("dm", `Failed to send: ${err}`);
   });
 });
+sheetBody.addEventListener("click", (event) => {
+  const equipBtn = event.target.closest("[data-equip-toggle]");
+  if (equipBtn) {
+    const itemName = equipBtn.dataset.itemName;
+    const equipped = equipBtn.dataset.equipped === "true";
+    toggleEquip(itemName, !equipped).catch((err) => {
+      addMessage("dm", `Failed to equip: ${err}`);
+    });
+    return;
+  }
+  const prepareBtn = event.target.closest("[data-prepare-toggle]");
+  if (prepareBtn) {
+    const spellName = prepareBtn.dataset.spellName;
+    const prepared = prepareBtn.dataset.prepared === "true";
+    togglePrepare(spellName, !prepared).catch((err) => {
+      addMessage("dm", `Failed to prepare: ${err}`);
+    });
+    return;
+  }
+  const rollBtn = event.target.closest("[data-roll-action]");
+  if (rollBtn) {
+    const actionId = rollBtn.dataset.rollAction;
+    if (state.pendingRollGlobal || state.pendingRolls.has(actionId)) {
+      return;
+    }
+    const narrate = rollBtn.dataset.rollNarrate === "true";
+    const advSelect = sheetBody.querySelector(`[data-roll-advantage="${actionId}"]`);
+    const targetSelect = sheetBody.querySelector(`[data-roll-target="${actionId}"]`);
+    const targetTextEl = sheetBody.querySelector(`[data-roll-target-text="${actionId}"]`);
+    const advantage = advSelect ? advSelect.value : "";
+    const targetIds = targetSelect
+      ? Array.from(targetSelect.selectedOptions).map((opt) => opt.value)
+      : [];
+    const targetText = targetTextEl ? targetTextEl.value.trim() : "";
+    rollAction(actionId, { advantage, targetIds, targetText, narrate }).catch((err) => {
+      addMessage("dm", `Failed to roll: ${err}`);
+    });
+  }
+});
+sheetBody.addEventListener("change", (event) => {
+  const targetSelect = event.target.closest("[data-roll-target]");
+  if (targetSelect) {
+    enforceMaxTargets(targetSelect);
+  }
+});
 combatSubmit.addEventListener("click", () => {
   const actionId = combatActionSelect.value;
   const targetIds = selectedTargets.length
@@ -964,3 +1173,83 @@ combatTargetSelect.addEventListener("change", () => {
   selectedTargets = Array.from(combatTargetSelect.selectedOptions).map((opt) => opt.value);
   syncTargetSelect();
 });
+
+async function toggleEquip(itemName, equipped) {
+  const res = await fetch("/api/inventory/equip", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ item_name: itemName, equipped }),
+  });
+  const data = await res.json();
+  if (data.error) {
+    addMessage("dm", data.error);
+    return;
+  }
+  if (data.character) {
+    renderCharacter(data.character);
+  }
+  if (data.combat) {
+    renderCombat(data.combat);
+  }
+}
+
+async function togglePrepare(spellName, prepared) {
+  const res = await fetch("/api/spells/prepare", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ spell_name: spellName, prepared }),
+  });
+  const data = await res.json();
+  if (data.error) {
+    addMessage("dm", data.error);
+    return;
+  }
+  if (data.character) {
+    renderCharacter(data.character);
+  }
+  if (data.combat) {
+    renderCombat(data.combat);
+  }
+}
+
+async function rollAction(actionId, options = {}) {
+  setRollPending(actionId, true);
+  try {
+    const payload = {
+      action_id: actionId,
+      advantage: options.advantage || null,
+      target_ids: options.targetIds || [],
+      target_text: options.targetText || null,
+      narrate: !!options.narrate,
+    };
+    const res = await fetch("/api/action/roll", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    if (data.result?.summary) {
+      addMessage("user", data.result.summary);
+    } else {
+      addMessage("user", `Rolled ${actionId}.`);
+    }
+    if (data.result) {
+      state.actionRolls[actionId] = data.result;
+    }
+    if (data.narrative) {
+      addMessage("dm", data.narrative);
+    }
+    if (data.character) {
+      renderCharacter(data.character);
+    }
+    if (data.combat) {
+      renderCombat(data.combat);
+    }
+  } finally {
+    setRollPending(actionId, false);
+  }
+}

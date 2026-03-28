@@ -219,14 +219,29 @@ class DiceHandler:
 
         # Apply modifiers
         if action.attack_roll.get("precomputed"):
-            attack_result.add_modifier(action.attack_roll["bonus"] )
+            attack_result.add_modifier(action.attack_roll["bonus"])
         else:
             prof_type = action.proficiency_type or action.attack_roll.get("proficiency_type")
-            if prof_type and source.proficiencies.has_proficiency(ProficiencyType.WEAPON, prof_type):
-                prof = source.proficiencies.proficiency_bonus
-            else:
-                prof = 0
-            attack_result.add_modifier(source.ability_scores.modifier(action.attack_roll["ability"]) + action.attack_roll["bonus"] + prof )
+            prof = 0
+            if prof_type:
+                if isinstance(prof_type, ProficiencyType):
+                    has_prof = source.proficiencies.has_proficiency(ProficiencyType.WEAPON, prof_type)
+                    prof = source.proficiencies.proficiency_bonus if has_prof else 0
+                else:
+                    prof_key = str(prof_type).strip().lower()
+                    if prof_key in {"spell", "spellcasting", "spell attack", "spell_attack"}:
+                        prof = source.proficiencies.proficiency_bonus
+                    else:
+                        has_prof = source.proficiencies.has_proficiency(
+                            ProficiencyType.WEAPON, prof_key
+                        )
+                        prof = source.proficiencies.proficiency_bonus if has_prof else 0
+
+            ability = action.attack_roll.get("ability")
+            ability_options = action.attack_roll.get("ability_options") or []
+            ability_mod = self._resolve_ability_modifier(source, ability, ability_options)
+
+            attack_result.add_modifier(ability_mod + action.attack_roll["bonus"] + prof )
 
         if attack_result.total>= target.stats.armor_class():
             dmg_result = DamageResult()
@@ -240,7 +255,10 @@ class DiceHandler:
                 if val.get("precomputed"):
                     temp_dmg_result.add_modifier(val["bonus"])
                 else:
-                    temp_dmg_result.add_modifier(val["bonus"] + source.ability_scores.modifier(val["ability"]))
+                    dmg_ability = val.get("ability")
+                    dmg_options = val.get("ability_options") or []
+                    dmg_mod = self._resolve_ability_modifier(source, dmg_ability, dmg_options)
+                    temp_dmg_result.add_modifier(val["bonus"] + dmg_mod)
                 dmg_result.add_damage(val["dmg_type"],temp_dmg_result)
 
             return AttackResult(attack_roll=attack_result,
@@ -252,6 +270,32 @@ class DiceHandler:
                                 hit=False,
                                 is_critical=attack_result.is_critical,
                                 damage=None)
+
+    def _resolve_ability_modifier(self, source, ability, ability_options=None) -> int:
+        ability_options = ability_options or []
+        resolved_options = []
+        for opt in ability_options:
+            if not opt:
+                continue
+            opt_name = str(opt).strip().upper()
+            if opt_name in {"SPELL", "SPELLCASTING"}:
+                spell_ability = getattr(source.spells, "spellcasting_ability", None)
+                if spell_ability:
+                    resolved_options.append(spell_ability)
+            else:
+                resolved_options.append(opt_name)
+
+        if ability:
+            ability_name = str(ability).strip().upper()
+            if ability_name in {"SPELL", "SPELLCASTING"}:
+                ability_name = getattr(source.spells, "spellcasting_ability", None)
+            if ability_name:
+                resolved_options.append(ability_name)
+
+        if not resolved_options:
+            return 0
+
+        return max(source.ability_scores.modifier(opt) for opt in resolved_options)
 
 
 
@@ -362,6 +406,10 @@ class CombatActionLog:
     damage_breakdown: Optional[Dict[str, int]] = None
     target_hp_before: Optional[int] = None
     target_hp_after: Optional[int] = None
+    save_ability: Optional[str] = None
+    save_total: Optional[int] = None
+    save_dc: Optional[int] = None
+    save_success: Optional[bool] = None
     notes: Optional[str] = None
 
 
@@ -431,6 +479,8 @@ class CombatEngine:
         action_id: str,
         target_id: str,
         advantage: Optional[str] = None,
+        slot_level: Optional[int] = None,
+        caster_level: Optional[int] = None,
     ) -> CombatActionLog:
         attacker = self.combatants.get(attacker_id)
         target = self.combatants.get(target_id)
@@ -461,9 +511,8 @@ class CombatEngine:
         target_hp_before = self._get_hp(target)
         log.target_hp_before = target_hp_before
 
-        attack_result = attacker.actions.attack_roll(
-            action_id, attacker, target, adv=advantage
-        )
+        scaled_action = self._with_scaled_damage(action, attacker, slot_level, caster_level)
+        attack_result = DiceHandler().roll_attack(scaled_action, attacker, target, advantage=advantage)
 
         if attack_result is None:
             log.notes = "Action did not produce an attack result."
@@ -486,6 +535,245 @@ class CombatEngine:
             log.target_hp_after = target_hp_before
 
         return log
+
+    def resolve_save_action(
+        self,
+        attacker_id: str,
+        action_id: str,
+        target_id: str,
+        slot_level: Optional[int] = None,
+        caster_level: Optional[int] = None,
+    ) -> CombatActionLog:
+        attacker = self.combatants.get(attacker_id)
+        target = self.combatants.get(target_id)
+        if attacker is None or target is None:
+            return CombatActionLog(
+                actor=attacker_id,
+                action_id=action_id,
+                action_name=action_id,
+                target=target_id,
+                notes="Invalid attacker or target.",
+            )
+
+        try:
+            action = attacker.actions.get(action_id)
+        except KeyError:
+            action = None
+
+        log = CombatActionLog(
+            actor=attacker_id,
+            action_id=action_id,
+            action_name=action.name if action else action_id,
+            target=target_id,
+        )
+
+        if action is None or not getattr(action, "save", None):
+            log.notes = "Save action not supported by combat engine."
+            return log
+
+        save = action.save or {}
+        save_ability = str(save.get("ability") or "").upper() or None
+        save_dc = save.get("dc")
+        if isinstance(save_dc, str) and save_dc == "spell_save_dc":
+            save_dc = self._get_spell_save_dc(attacker)
+        if not isinstance(save_dc, int):
+            save_dc = None
+
+        log.save_ability = save_ability
+        log.save_dc = save_dc
+
+        save_mod = self._get_save_modifier(target, save_ability)
+        save_roll = DiceHandler().roll(dice_specs=[(20, 1)], modifiers=save_mod)
+        log.save_total = save_roll.total
+
+        save_success = save_dc is not None and save_roll.total >= save_dc
+        log.save_success = save_success
+
+        target_hp_before = self._get_hp(target)
+        log.target_hp_before = target_hp_before
+
+        scaled_action = self._with_scaled_damage(action, attacker, slot_level, caster_level)
+        if scaled_action.damage_roll:
+            dmg_result = DamageResult()
+            for val in scaled_action.damage_roll:
+                temp_dmg_result = Dice.roll(sides=val["dice_type"], count=val["dice_amount"])
+                if attacker.features._features:
+                    for feature in attacker.features._features:
+                        if getattr(feature, "feature_type", None) == "affects_rolls":
+                            temp_dmg_result = feature(temp_dmg_result)
+                if val.get("precomputed"):
+                    temp_dmg_result.add_modifier(val["bonus"])
+                else:
+                    dmg_ability = val.get("ability")
+                    dmg_options = val.get("ability_options") or []
+                    dmg_mod = DiceHandler()._resolve_ability_modifier(attacker, dmg_ability, dmg_options)
+                    temp_dmg_result.add_modifier(val["bonus"] + dmg_mod)
+                dmg_result.add_damage(val["dmg_type"], temp_dmg_result)
+
+            total_damage = dmg_result.total
+            on_success = str(save.get("on_success") or "").lower()
+            if save_success and on_success in {"half", "half damage"}:
+                total_damage = total_damage // 2
+            elif save_success and on_success in {"none", "no", "negate"}:
+                total_damage = 0
+
+            log.damage_total = total_damage
+            log.damage_breakdown = {
+                str(dmg_type): subtotal
+                for dmg_type, subtotal in dmg_result.breakdown().items()
+            }
+            if total_damage:
+                self.apply_damage(target, total_damage)
+            log.target_hp_after = self._get_hp(target)
+        else:
+            log.damage_total = 0
+            log.target_hp_after = target_hp_before
+
+        return log
+
+    def resolve_spell_action(
+        self,
+        attacker_id: str,
+        action_id: str,
+        target_id: str,
+        advantage: Optional[str] = None,
+        slot_level: Optional[int] = None,
+        caster_level: Optional[int] = None,
+    ) -> CombatActionLog:
+        attacker = self.combatants.get(attacker_id)
+        if attacker is None:
+            return CombatActionLog(
+                actor=attacker_id,
+                action_id=action_id,
+                action_name=action_id,
+                target=target_id,
+                notes="Invalid attacker.",
+            )
+        try:
+            action = attacker.actions.get(action_id)
+        except KeyError:
+            action = None
+
+        if action is None:
+            return CombatActionLog(
+                actor=attacker_id,
+                action_id=action_id,
+                action_name=action_id,
+                target=target_id,
+                notes="Action not found.",
+            )
+
+        if action.save:
+            return self.resolve_save_action(
+                attacker_id,
+                action_id,
+                target_id,
+                slot_level=slot_level,
+                caster_level=caster_level,
+            )
+        return self.resolve_attack_action(
+            attacker_id,
+            action_id,
+            target_id,
+            advantage=advantage,
+            slot_level=slot_level,
+            caster_level=caster_level,
+        )
+
+    def _get_save_modifier(self, target, ability: Optional[str]) -> int:
+        if not ability:
+            return 0
+        ability = str(ability).upper()
+        if hasattr(target, "saving_throws") and ability in target.saving_throws:
+            return target.saving_throws[ability]
+        if hasattr(target, "ability_scores"):
+            try:
+                return target.ability_scores.modifier(ability)
+            except Exception:
+                return 0
+        return 0
+
+    def _get_spell_save_dc(self, source) -> Optional[int]:
+        if hasattr(source, "spells") and getattr(source.spells, "spell_save_dc", None):
+            return source.spells.spell_save_dc
+        ability = None
+        if hasattr(source, "spells"):
+            ability = getattr(source.spells, "spellcasting_ability", None)
+        if ability and hasattr(source, "ability_scores"):
+            try:
+                ability_mod = source.ability_scores.modifier(ability)
+            except Exception:
+                ability_mod = 0
+        else:
+            ability_mod = 0
+        prof = getattr(getattr(source, "proficiencies", None), "proficiency_bonus", 0)
+        return 8 + prof + ability_mod
+
+    def _with_scaled_damage(
+        self,
+        action,
+        caster,
+        slot_level: Optional[int],
+        caster_level: Optional[int],
+    ):
+        if not getattr(action, "damage_roll", None):
+            return action
+
+        scaling = getattr(action, "scaling", None)
+        if not scaling:
+            return action
+
+        mode = scaling.get("mode")
+        table = scaling.get("table") or {}
+        if not table:
+            return action
+
+        effective_level = None
+        if mode == "slot_level":
+            effective_level = slot_level or getattr(action, "spell_level", None)
+        elif mode == "character_level":
+            if caster_level is None and hasattr(caster, "classes"):
+                try:
+                    caster_level = caster.classes.pc_level()
+                except Exception:
+                    caster_level = None
+            effective_level = caster_level
+
+        if effective_level is None:
+            return action
+
+        try:
+            keys = sorted(int(k) for k in table.keys())
+        except ValueError:
+            return action
+
+        chosen = None
+        for key in keys:
+            if key <= effective_level:
+                chosen = key
+        if chosen is None:
+            chosen = keys[0]
+
+        dice_str = table.get(str(chosen))
+        if not dice_str or "d" not in dice_str:
+            return action
+
+        parts = dice_str.lower().split("d", 1)
+        try:
+            dice_amount = int(parts[0]) if parts[0] else 1
+            dice_type = int(parts[1])
+        except ValueError:
+            return action
+
+        action_copy = action.__class__(**action.__dict__)
+        new_damage_roll = []
+        for val in action.damage_roll:
+            new_val = dict(val)
+            new_val["dice_amount"] = dice_amount
+            new_val["dice_type"] = dice_type
+            new_damage_roll.append(new_val)
+        action_copy.damage_roll = new_damage_roll
+        return action_copy
 
 
 # @dataclass

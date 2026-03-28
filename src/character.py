@@ -256,9 +256,12 @@ class Inventory:
             if equip_or_unequip=="equip":
                 self.equipped.add(item)
                 # need a function that runs here to ensure equipped item effects are applied properly
+                self._maybe_add_item_action(item)
             elif equip_or_unequip=="unequip":
-                self.equipped.remove(item)
+                if item in self.equipped:
+                    self.equipped.remove(item)
                 # need a function that runs here to ensure equipped item effects are applied properly
+                self._maybe_remove_item_action(item)
             else:
                 raise ValueError(f"equip_or_unequip must be one of equip or unequip, not {equip_or_unequip}")
 
@@ -266,7 +269,12 @@ class Inventory:
             raise ValueError("Cannot equip or unequip an item that is not in inventory.")
 
     def get(self, item_name):
-        return next((obj for obj in self.items if obj.name == item_name), None)
+        for obj in self.items:
+            if hasattr(obj, "name") and obj.name == item_name:
+                return obj
+            if str(obj) == item_name:
+                return obj
+        return None
         
     def add_item(self, item, quantity=1):
         self.items[item] = self.items.get(item, 0) + quantity
@@ -278,6 +286,45 @@ class Inventory:
         self.items[item] -= quantity
         if self.items[item] <= 0:
             del self.items[item]
+            if item in self.equipped:
+                self.equipped.remove(item)
+                self._maybe_remove_item_action(item)
+
+    def _maybe_add_item_action(self, item):
+        if not getattr(self.owner, "actions", None):
+            return
+        try:
+            from action_factory import weapon_action_from_item, weapon_action_from_name
+        except Exception:
+            return
+
+        action = None
+        if hasattr(item, "raw"):
+            action = weapon_action_from_item(item.raw)
+        if action is None:
+            name = getattr(item, "name", None) or str(item)
+            action = weapon_action_from_name(name)
+
+        if action and action.id not in self.owner.actions._actions:
+            self.owner.actions.add(action)
+
+    def _maybe_remove_item_action(self, item):
+        if not getattr(self.owner, "actions", None):
+            return
+        try:
+            from action_factory import weapon_action_from_item, weapon_action_from_name
+        except Exception:
+            return
+
+        action = None
+        if hasattr(item, "raw"):
+            action = weapon_action_from_item(item.raw)
+        if action is None:
+            name = getattr(item, "name", None) or str(item)
+            action = weapon_action_from_name(name)
+
+        if action:
+            self.owner.actions.remove(action.id)
 
 
 

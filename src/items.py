@@ -4,6 +4,7 @@ from srd_loader import load_srd
 
 class Item:
     def __init__(self, data):
+        self.raw = data
         self.name = data["name"].replace(" (Copy)", "").strip()
         desc = data.get("desc") or []
         self.description = "\n".join(desc).strip()

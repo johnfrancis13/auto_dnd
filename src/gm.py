@@ -502,6 +502,7 @@ class CombatOrchestrator:
         self._last_turn_id = None
         self.combat_map = None
         self.turn_movement = {}
+        self.manual_logs = []
 
     def combat_state_payload(self) -> CombatState:
         return self.combat_handler.combat_state_payload()
@@ -1136,7 +1137,12 @@ class CombatOrchestrator:
         return None
 
     def _narrate_combat(self, logs):
-        combat_log_payload = [log.__dict__ for log in logs]
+        combat_log_payload = []
+        for log in logs:
+            combat_log_payload.append(log.__dict__ if hasattr(log, "__dict__") else log)
+        if self.manual_logs:
+            combat_log_payload.extend(self.manual_logs)
+            self.manual_logs = []
         self.owner.turns.append({
             "role": "tool",
             "tool_name": "combat_engine",
@@ -1187,6 +1193,10 @@ class CombatOrchestrator:
         wrap_text(parsed.narrative)
 
         return None
+
+    def add_manual_log(self, log):
+        if log:
+            self.manual_logs.append(log)
 
 class GMActionHandler:
     def __init__(self, pc):

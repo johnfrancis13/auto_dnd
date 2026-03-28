@@ -5,6 +5,7 @@ from srd_loader import load_srd
 
 class Spell:
     def __init__(self, data):
+        self.raw = data
         self.name = data["name"].replace(" (Copy)", "").strip()
         desc = data.get("desc") or []
         higher = data.get("higher_level") or []
@@ -34,8 +35,10 @@ class Spellcasting:
     def manage_spells(self, spell: Spell,action="add"):
         if action=="add":
             self.known_spells[spell.name] = spell
+            self._maybe_add_spell_action(spell, prepared=False)
         elif action=="remove":
             self.known_spells.pop(spell.name, None)
+            self._maybe_remove_spell_action(spell, prepared=False)
         else:
             raise ValueError("action must be one of remove or add")
 
@@ -43,10 +46,49 @@ class Spellcasting:
     def prepare_spell(self, spell: Spell, action="add"):
         if action=="add":
             self.prepared_spells[spell.name] = spell
+            self._maybe_add_spell_action(spell, prepared=True)
         elif action=="remove":
             self.prepared_spells.pop(spell.name, None)
+            self._maybe_remove_spell_action(spell, prepared=True)
         else:
             raise ValueError("action must be one of remove or add")
+
+    def _maybe_add_spell_action(self, spell: Spell, prepared: bool):
+        if not getattr(self.owner, "actions", None):
+            return
+        if not prepared and getattr(spell, "level", 1) != 0:
+            return
+        try:
+            from action_factory import spell_action_from_spell, spell_action_from_name
+        except Exception:
+            return
+        action = None
+        if getattr(spell, "raw", None):
+            action = spell_action_from_spell(spell.raw)
+        if action is None:
+            action = spell_action_from_name(spell.name)
+        if action and action.id not in self.owner.actions._actions:
+            self.owner.actions.add(action)
+
+    def _maybe_remove_spell_action(self, spell: Spell, prepared: bool):
+        if not getattr(self.owner, "actions", None):
+            return
+        if not prepared and getattr(spell, "level", 1) != 0:
+            return
+        if prepared and getattr(spell, "level", 1) == 0:
+            if spell.name in self.known_spells:
+                return
+        try:
+            from action_factory import spell_action_from_spell, spell_action_from_name
+        except Exception:
+            return
+        action = None
+        if getattr(spell, "raw", None):
+            action = spell_action_from_spell(spell.raw)
+        if action is None:
+            action = spell_action_from_name(spell.name)
+        if action:
+            self.owner.actions.remove(action.id)
 
 
 
