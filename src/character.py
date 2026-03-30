@@ -12,11 +12,11 @@ from classes import CharClass
 from proficiency import ProficiencyManager, ProficiencyType
 from races import Race
 from items import Item
-from resources import ResourcePool
+from resources import ResourcePool, ResourceCategory
 from actions import ActionManager
 from classes import ClassProgression
 from srd_loader import load_srd
-from equipment_choices import build_choice_groups, apply_equipment_choices
+from equipment_choices import build_choice_groups, apply_equipment_choices, add_equipment_to_inventory
 from items import ItemRepository
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
@@ -278,6 +278,20 @@ class Inventory:
         
     def add_item(self, item, quantity=1):
         self.items[item] = self.items.get(item, 0) + quantity
+        if not getattr(self.owner, "resources", None):
+            return
+        raw = getattr(item, "raw", None) or {}
+        desc = raw.get("desc")
+        if isinstance(desc, list):
+            desc = " ".join(desc)
+        if desc:
+            category = ResourceCategory.ITEM_CHARGE
+            self.owner.resources.apply_text_resource(
+                name=getattr(item, "name", None) or str(item),
+                text=desc,
+                source=getattr(item, "name", None),
+                category=category,
+            )
 
     def remove_item(self, item, quantity=1):
         if item not in self.items:
@@ -371,8 +385,7 @@ class Background:
             qty = entry.get("quantity", 1)
             if not name:
                 continue
-            obj = equipment_repo.get(name) or name
-            character.inventory.add_item(obj, qty)
+            add_equipment_to_inventory(character, equipment_repo, name, qty)
 
         option_blocks = []
         option_blocks.extend(self.background_data.get("starting_equipment_options") or [])

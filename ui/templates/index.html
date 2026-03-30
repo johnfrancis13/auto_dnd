@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Auto DnD</title>
-    <link rel="stylesheet" href="/static/app.css?v=20260325d" />
-    <script defer src="/static/app.js?v=20260325d"></script>
+    <link rel="stylesheet" href="/static/app.css?v=20260328d" />
+    <script defer src="/static/app.js?v=20260328d"></script>
   </head>
   <body>
     <div id="setup-screen" class="setup-screen">
@@ -68,7 +68,7 @@
           </label>
           <label>
             Short Description
-            <textarea name="short_description" rows="4">A compact halfling cleric with a travel-worn staff and calm eyes.</textarea>
+            <textarea name="short_description" rows="4">A dark haired traveller with a well-worn staff and calm eyes.</textarea>
           </label>
           <button type="button" id="start-game">Start Adventure</button>
         </form>
@@ -128,6 +128,14 @@
         </header>
 
         <section id="messages" class="messages"></section>
+        <div id="thinking-indicator" class="thinking hidden" aria-live="polite">
+          <span class="thinking-label">DM is thinking</span>
+          <span class="thinking-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
 
         <section id="combat-panel" class="combat-panel hidden">
           <div class="combat-header">
@@ -184,6 +192,7 @@
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="spell-modal-title">
         <h2 id="spell-modal-title">Choose Spells</h2>
         <p class="muted">Select your starting spells to begin the adventure.</p>
+        <div id="spell-choices-summary" class="muted"></div>
         <div id="spell-choices-errors" class="muted"></div>
         <form id="spell-choices-form" class="equipment-form"></form>
         <div class="modal-actions">

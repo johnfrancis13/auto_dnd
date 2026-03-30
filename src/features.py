@@ -306,6 +306,21 @@ class FeatureManager:
         if feature_class not in self._features:
             self._features.append(feature_class)
             feature_class.on_attach(engine) # add permanent character level changes
+            desc_text = description
+            if desc_text is None:
+                data = _feature_data(feature)
+                raw_desc = data.get("desc") if isinstance(data, dict) else None
+                if isinstance(raw_desc, list):
+                    desc_text = " ".join(raw_desc)
+                elif isinstance(raw_desc, str):
+                    desc_text = raw_desc
+            if desc_text and getattr(engine, "resources", None):
+                engine.resources.apply_text_resource(
+                    name=feature_class.name,
+                    text=desc_text,
+                    source=feature_class.source,
+                    category=resources.ResourceCategory.FEATURE_USE,
+                )
 
     def on_level_up(self, engine, new_level: int):
         for feature in self._features:

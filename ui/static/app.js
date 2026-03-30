@@ -19,6 +19,7 @@ const sheetTabs = document.getElementById("sheet-tabs");
 const sheetBody = document.getElementById("sheet-body");
 const setupScreen = document.getElementById("setup-screen");
 const gameScreen = document.getElementById("game-screen");
+const thinkingIndicator = document.getElementById("thinking-indicator");
 const equipmentModal = document.getElementById("equipment-modal");
 const equipmentFormEl = document.getElementById("equipment-choices-form");
 const equipmentSubmit = document.getElementById("equipment-choices-submit");
@@ -26,6 +27,7 @@ const equipmentErrorsEl = document.getElementById("equipment-choices-errors");
 const spellModal = document.getElementById("spell-modal");
 const spellFormEl = document.getElementById("spell-choices-form");
 const spellSubmit = document.getElementById("spell-choices-submit");
+const spellSummaryEl = document.getElementById("spell-choices-summary");
 const spellErrorsEl = document.getElementById("spell-choices-errors");
 const combatPanel = document.getElementById("combat-panel");
 const combatActionSelect = document.getElementById("combat-action");
@@ -41,6 +43,20 @@ let activeTab = "about";
 let pendingStartPayload = null;
 let pendingEquipmentChoices = [];
 let pendingSpellChoices = [];
+let llmPendingCount = 0;
+let spellFilterPreparedOnly = false;
+let spellFilterLevel = "all";
+
+function setLlmPending(active) {
+  llmPendingCount += active ? 1 : -1;
+  if (llmPendingCount < 0) {
+    llmPendingCount = 0;
+  }
+  const isActive = llmPendingCount > 0;
+  if (thinkingIndicator) {
+    thinkingIndicator.classList.toggle("hidden", !isActive);
+  }
+}
 function setSessionActive(active, mode = "exploration") {
   sessionIndicator.textContent = active ? "Live" : "Idle";
   sessionIndicator.style.background = active ? "#e2b091" : "#e6e0d8";
@@ -131,6 +147,7 @@ function renderCharacter(character) {
           ` : `<span class="muted">Not equippable</span>`}
         </div>
         <div class="muted">${item.type || "Item"}${item.subtype ? ` · ${item.subtype}` : ""}${item.rarity ? ` · ${item.rarity}` : ""}</div>
+        ${item.description ? `<div class="muted">${item.description}</div>` : ""}
         <div class="muted">Qty: ${item.quantity}</div>
       </div>
     `).join("")}
@@ -139,7 +156,7 @@ function renderCharacter(character) {
     ...character.actions.resources.custom,
     ...character.actions.resources.spell_slots,
     ...character.actions.resources.spell_access,
-  ];
+  ].filter((res) => !((res.current ?? 0) === 0 && (res.maximum ?? 0) === 0));
   const actionsHtml = `
     <h3>Actions</h3>
     ${character.actions.actions.length === 0 ? "<p>No actions.</p>" : character.actions.actions.map(action => `
@@ -150,29 +167,62 @@ function renderCharacter(character) {
           ${renderActionBadges(action)}
           ${action.proficiency_type ? `<div>Proficiency: ${action.proficiency_type}</div>` : ""}
           ${renderActionRollInfo(action, character)}
-          ${renderActionControls(action)}
+          ${renderActionControls(action, character)}
         </div>
       </details>
     `).join("")}
     <h3>Resources</h3>
     ${resourceList.length === 0 ? "<p>No resources.</p>" : resourceList.map(res => `
       <details class="entry">
-        <summary><strong>${res.name}</strong></summary>
+        <summary>
+          <div class="entry-row">
+            <strong>${res.name}</strong>
+            <button type="button" class="toggle-button" data-resource-use data-resource-id="${res.id}" data-resource-name="${res.name}" ${res.current > 0 ? "" : "disabled"}>
+              Use (${res.current}/${res.maximum})
+            </button>
+          </div>
+        </summary>
         <div class="detail-body">
-          <div>${res.category} · ${res.recharge} · ${res.source || "Unknown"}</div>
+          <div>${formatResourceMeta(res)}</div>
           <div>${res.current}/${res.maximum}</div>
         </div>
       </details>
     `).join("")}
   `;
+  const preparedLimit = character.spells.prepared_limit;
+  const preparedCount = character.spells.prepared.length;
+  const preparedMeta = preparedLimit
+    ? `<div class="muted">Prepared: ${preparedCount}/${preparedLimit}</div>`
+    : "";
+  let knownSpells = spellFilterPreparedOnly
+    ? character.spells.known.filter((spell) => spell.prepared)
+    : character.spells.known;
+  if (spellFilterLevel === "cantrip") {
+    knownSpells = knownSpells.filter((spell) => spell.level === 0);
+  } else if (spellFilterLevel === "leveled") {
+    knownSpells = knownSpells.filter((spell) => spell.level > 0);
+  }
   const spellsHtml = `
     <h3>Spellcasting</h3>
     <div class="entry">
       <div class="muted">Ability: ${character.spells.spellcasting_ability || "Unknown"}</div>
       <div class="muted">Save DC: ${character.spells.spell_save_dc || "Unknown"}</div>
+      ${preparedMeta}
+      <label class="spell-filter">
+        <input type="checkbox" data-spell-filter ${spellFilterPreparedOnly ? "checked" : ""} />
+        Show prepared only
+      </label>
+      <label class="spell-filter">
+        Filter
+        <select data-spell-filter-level>
+          <option value="all" ${spellFilterLevel === "all" ? "selected" : ""}>All</option>
+          <option value="cantrip" ${spellFilterLevel === "cantrip" ? "selected" : ""}>Cantrips</option>
+          <option value="leveled" ${spellFilterLevel === "leveled" ? "selected" : ""}>Leveled</option>
+        </select>
+      </label>
     </div>
     <h3>Known Spells</h3>
-    ${character.spells.known.length === 0 ? "<p>No known spells.</p>" : character.spells.known.map(spell => `
+    ${knownSpells.length === 0 ? "<p>No spells to show.</p>" : knownSpells.map(spell => `
       <details class="entry">
         <summary>
           <div class="entry-row">
@@ -238,10 +288,28 @@ function formatAbility(value, character) {
   return upper;
 }
 
-function renderActionControls(action) {
+function formatResourceMeta(res) {
+  const parts = [];
+  if (res.category) {
+    const label = String(res.category).replace(/_/g, " ");
+    parts.push(label.replace(/\b\w/g, (c) => c.toUpperCase()));
+  }
+  if (res.recharge && res.recharge !== "none") {
+    const label = String(res.recharge).replace(/_/g, " ");
+    parts.push(label.replace(/\b\w/g, (c) => c.toUpperCase()));
+  }
+  if (res.source) {
+    parts.push(res.source);
+  }
+  return parts.length ? parts.join(" · ") : "Resource";
+}
+
+function renderActionControls(action, character) {
   const targets = state.combat?.targets || [];
   const inCombat = state.combat?.active;
   const maxTargets = action.max_targets ?? null;
+  const slotResource = getSpellSlotResource(character, action.spell_level);
+  const hasSlots = !action.spell_level || (slotResource && slotResource.current > 0);
   const targetSelect = targets.length
     ? `
       <label class="roll-control">
@@ -264,6 +332,9 @@ function renderActionControls(action) {
   const narrateButton = !inCombat
     ? `<button type="button" class="roll-button primary" data-roll-action="${action.id}" data-roll-narrate="true">Roll + Narrate</button>`
     : "";
+  const slotNote = action.spell_level && slotResource
+    ? `<div class="muted">Spell slots (Level ${action.spell_level}): ${slotResource.current}/${slotResource.maximum}</div>`
+    : (action.spell_level ? `<div class="muted">Spell slots (Level ${action.spell_level}): 0/0</div>` : "");
   return `
     <div class="roll-controls" data-roll-controls="${action.id}">
       <label class="roll-control">
@@ -277,9 +348,10 @@ function renderActionControls(action) {
       ${targetSelect}
       ${targetText}
       <div class="roll-status" data-roll-status="${action.id}"></div>
+      ${slotNote}
       <div class="roll-buttons">
-        <button type="button" class="roll-button" data-roll-action="${action.id}">Roll</button>
-        ${narrateButton}
+        <button type="button" class="roll-button" data-roll-action="${action.id}" ${hasSlots ? "" : "disabled"}>Roll</button>
+        ${hasSlots ? narrateButton : ""}
       </div>
     </div>
   `;
@@ -303,6 +375,15 @@ function renderActionBadges(action) {
     return "";
   }
   return `<div class="chip-list">${chips.map((c) => `<span class="chip">${c}</span>`).join("")}</div>`;
+}
+
+function getSpellSlotResource(character, spellLevel) {
+  if (!character || !spellLevel || spellLevel <= 0) {
+    return null;
+  }
+  const slots = character.actions?.resources?.spell_slots || [];
+  const name = `Level_${spellLevel} Spell Slots`;
+  return slots.find((slot) => slot.name === name) || null;
 }
 function renderImages(images) {
   imageGrid.innerHTML = "";
@@ -428,9 +509,20 @@ function renderSpellChoices(choices) {
     spellModal.setAttribute("aria-hidden", "true");
     spellFormEl.innerHTML = "";
     spellErrorsEl.textContent = "";
+    if (spellSummaryEl) {
+      spellSummaryEl.textContent = "";
+    }
     return;
   }
   spellErrorsEl.textContent = "";
+  if (spellSummaryEl) {
+    const summaryLines = pendingSpellChoices.map((group) => {
+      const total = (group.options || []).length;
+      const label = group.label || "Spells";
+      return `${label}: choose ${group.choose} of ${total}`;
+    });
+    spellSummaryEl.textContent = summaryLines.join(" · ");
+  }
   spellFormEl.innerHTML = pendingSpellChoices.map((group) => {
     const inputType = group.choose > 1 ? "checkbox" : "radio";
     const optionsHtml = group.options.map((option) => `
@@ -544,6 +636,10 @@ async function resetUI() {
   messagesEl.innerHTML = "";
   activeTab = "about";
   pendingStartPayload = null;
+  llmPendingCount = 0;
+  if (thinkingIndicator) {
+    thinkingIndicator.classList.add("hidden");
+  }
   renderEquipmentChoices([]);
   renderSpellChoices([]);
   sheetTabs.querySelectorAll(".tab").forEach((tab) => {
@@ -561,56 +657,61 @@ async function resetUI() {
   }
 }
 async function startGame() {
+  setLlmPending(true);
   const formData = new FormData(charForm);
   const payload = {
     character: Object.fromEntries(formData.entries()),
     model_name: "qwen3:8b",
     think: false,
   };
-  pendingStartPayload = payload;
-  showGameScreen();
-  messagesEl.innerHTML = "";
-  renderCharacter(null);
-  renderImages([]);
-  renderCombat({ active: false });
-  setSessionActive(true, "exploration");
-  addMessage("dm", "Starting adventure...");
-  const res = await fetch("/api/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
-  if (data.requires_choices) {
+  try {
+    pendingStartPayload = payload;
+    showGameScreen();
     messagesEl.innerHTML = "";
-    setSessionActive(false);
-    renderEquipmentChoices(data.choices);
-    equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
-    showSetupScreen();
-    return;
-  }
-  if (data.requires_spell_choices) {
+    renderCharacter(null);
+    renderImages([]);
+    renderCombat({ active: false });
+    setSessionActive(true, "exploration");
+    addMessage("dm", "Starting adventure...");
+    const res = await fetch("/api/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.requires_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderEquipmentChoices(data.choices);
+      equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderSpellChoices(data.spell_choices);
+      spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (!data.session) {
+      equipmentErrorsEl.textContent = data.error || "Unable to start session.";
+      setSessionActive(false);
+      showSetupScreen();
+      return;
+    }
+    state.session = data.session;
+    renderCharacter(data.character);
+    renderImages(data.images);
     messagesEl.innerHTML = "";
-    setSessionActive(false);
-    renderSpellChoices(data.spell_choices);
-    spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
-    showSetupScreen();
-    return;
+    addMessage("dm", data.narrative || "Adventure started.");
+    setSessionActive(true, data.game_state?.mode || "exploration");
+    renderCombat(data.combat);
+    showGameScreen();
+  } finally {
+    setLlmPending(false);
   }
-  if (!data.session) {
-    equipmentErrorsEl.textContent = data.error || "Unable to start session.";
-    setSessionActive(false);
-    showSetupScreen();
-    return;
-  }
-  state.session = data.session;
-  renderCharacter(data.character);
-  renderImages(data.images);
-  messagesEl.innerHTML = "";
-  addMessage("dm", data.narrative || "Adventure started.");
-  setSessionActive(true, data.game_state?.mode || "exploration");
-  renderCombat(data.combat);
-  showGameScreen();
 }
 async function submitEquipmentChoices() {
   if (!pendingStartPayload) {
@@ -630,43 +731,48 @@ async function submitEquipmentChoices() {
   renderCombat({ active: false });
   setSessionActive(true, "exploration");
   addMessage("dm", "Starting adventure...");
-  const res = await fetch("/api/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
-  if (data.requires_choices) {
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.requires_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderEquipmentChoices(data.choices);
+      equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderSpellChoices(data.spell_choices);
+      spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (!data.session) {
+      equipmentErrorsEl.textContent = data.error || "Unable to start session.";
+      setSessionActive(false);
+      showSetupScreen();
+      return;
+    }
+    renderEquipmentChoices([]);
+    state.session = data.session;
+    renderCharacter(data.character);
+    renderImages(data.images);
     messagesEl.innerHTML = "";
-    setSessionActive(false);
-    renderEquipmentChoices(data.choices);
-    equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
-    showSetupScreen();
-    return;
+    addMessage("dm", data.narrative || "Adventure started.");
+    setSessionActive(true, data.game_state?.mode || "exploration");
+    renderCombat(data.combat);
+    showGameScreen();
+  } finally {
+    setLlmPending(false);
   }
-  if (data.requires_spell_choices) {
-    messagesEl.innerHTML = "";
-    setSessionActive(false);
-    renderSpellChoices(data.spell_choices);
-    spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
-    showSetupScreen();
-    return;
-  }
-  if (!data.session) {
-    equipmentErrorsEl.textContent = data.error || "Unable to start session.";
-    setSessionActive(false);
-    showSetupScreen();
-    return;
-  }
-  renderEquipmentChoices([]);
-  state.session = data.session;
-  renderCharacter(data.character);
-  renderImages(data.images);
-  messagesEl.innerHTML = "";
-  addMessage("dm", data.narrative || "Adventure started.");
-  setSessionActive(true, data.game_state?.mode || "exploration");
-  renderCombat(data.combat);
-  showGameScreen();
 }
 async function submitSpellChoices() {
   if (!pendingStartPayload) {
@@ -685,126 +791,151 @@ async function submitSpellChoices() {
   renderCombat({ active: false });
   setSessionActive(true, "exploration");
   addMessage("dm", "Starting adventure...");
-  const res = await fetch("/api/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
-  if (data.requires_spell_choices) {
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.requires_spell_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderSpellChoices(data.spell_choices);
+      spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (!data.session) {
+      spellErrorsEl.textContent = data.error || "Unable to start session.";
+      setSessionActive(false);
+      showSetupScreen();
+      return;
+    }
+    state.session = data.session;
+    renderCharacter(data.character);
+    renderImages(data.images);
     messagesEl.innerHTML = "";
-    setSessionActive(false);
-    renderSpellChoices(data.spell_choices);
-    spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
-    showSetupScreen();
-    return;
+    addMessage("dm", data.narrative || "Adventure started.");
+    setSessionActive(true, data.game_state?.mode || "exploration");
+    renderCombat(data.combat);
+    showGameScreen();
+  } finally {
+    setLlmPending(false);
   }
-  if (!data.session) {
-    spellErrorsEl.textContent = data.error || "Unable to start session.";
-    setSessionActive(false);
-    showSetupScreen();
-    return;
-  }
-  state.session = data.session;
-  renderCharacter(data.character);
-  renderImages(data.images);
-  messagesEl.innerHTML = "";
-  addMessage("dm", data.narrative || "Adventure started.");
-  setSessionActive(true, data.game_state?.mode || "exploration");
-  renderCombat(data.combat);
-  showGameScreen();
 }
 async function sendMessage(content) {
-  const res = await fetch("/api/message", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content }),
-  });
-  const data = await res.json();
-  if (data.error) {
-    addMessage("dm", data.error);
-    return;
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    selectedTargets = [];
+    if (data.character) {
+      renderCharacter(data.character);
+    }
+    if (data.game_state?.mode) {
+      setSessionActive(true, data.game_state.mode);
+    }
+    if (data.combat) {
+      renderCombat(data.combat);
+    }
+    addMessage("dm", data.narrative || "...");
+  } finally {
+    setLlmPending(false);
   }
-  selectedTargets = [];
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.game_state?.mode) {
-    setSessionActive(true, data.game_state.mode);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  addMessage("dm", data.narrative || "...");
 }
 async function sendCombatAction(actionId, targetIds) {
-  const res = await fetch("/api/combat_action", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action_id: actionId, target_ids: targetIds }),
-  });
-  const data = await res.json();
-  if (data.error) {
-    addMessage("dm", data.error);
-    return;
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/combat_action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action_id: actionId, target_ids: targetIds }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    selectedTargets = [];
+    if (data.character) {
+      renderCharacter(data.character);
+    }
+    if (data.game_state?.mode) {
+      setSessionActive(true, data.game_state.mode);
+    }
+    if (data.combat) {
+      renderCombat(data.combat);
+    }
+    addMessage("dm", data.narrative || "...");
+  } finally {
+    setLlmPending(false);
   }
-  selectedTargets = [];
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.game_state?.mode) {
-    setSessionActive(true, data.game_state.mode);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  addMessage("dm", data.narrative || "...");
 }
 async function sendCombatEndTurn() {
-  const res = await fetch("/api/combat_action", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ end_turn: true }),
-  });
-  const data = await res.json();
-  if (data.error) {
-    addMessage("dm", data.error);
-    return;
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/combat_action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ end_turn: true }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    selectedTargets = [];
+    if (data.character) {
+      renderCharacter(data.character);
+    }
+    if (data.game_state?.mode) {
+      setSessionActive(true, data.game_state.mode);
+    }
+    if (data.combat) {
+      renderCombat(data.combat);
+    }
+    addMessage("dm", data.narrative || "...");
+  } finally {
+    setLlmPending(false);
   }
-  selectedTargets = [];
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.game_state?.mode) {
-    setSessionActive(true, data.game_state.mode);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  addMessage("dm", data.narrative || "...");
 }
 async function sendCombatMove(x, y) {
-  const res = await fetch("/api/combat_move", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ x, y }),
-  });
-  const data = await res.json();
-  if (data.error) {
-    addMessage("dm", data.error);
-    return;
-  }
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.game_state?.mode) {
-    setSessionActive(true, data.game_state.mode);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  if (data.narrative) {
-    addMessage("dm", data.narrative);
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/combat_move", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ x, y }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    if (data.character) {
+      renderCharacter(data.character);
+    }
+    if (data.game_state?.mode) {
+      setSessionActive(true, data.game_state.mode);
+    }
+    if (data.combat) {
+      renderCombat(data.combat);
+    }
+    if (data.narrative) {
+      addMessage("dm", data.narrative);
+    }
+  } finally {
+    setLlmPending(false);
   }
 }
 startButton.addEventListener("click", () => {
@@ -850,6 +981,15 @@ sheetBody.addEventListener("click", (event) => {
     });
     return;
   }
+  const resourceBtn = event.target.closest("[data-resource-use]");
+  if (resourceBtn) {
+    const resourceId = resourceBtn.dataset.resourceId;
+    const resourceName = resourceBtn.dataset.resourceName || "Resource";
+    useResource(resourceId, resourceName).catch((err) => {
+      addMessage("dm", `Failed to use resource: ${err}`);
+    });
+    return;
+  }
   const prepareBtn = event.target.closest("[data-prepare-toggle]");
   if (prepareBtn) {
     const spellName = prepareBtn.dataset.spellName;
@@ -880,6 +1020,18 @@ sheetBody.addEventListener("click", (event) => {
   }
 });
 sheetBody.addEventListener("change", (event) => {
+  const spellFilter = event.target.closest("[data-spell-filter]");
+  if (spellFilter) {
+    spellFilterPreparedOnly = !!spellFilter.checked;
+    renderCharacter(state.character);
+    return;
+  }
+  const spellFilterLevelSelect = event.target.closest("[data-spell-filter-level]");
+  if (spellFilterLevelSelect) {
+    spellFilterLevel = spellFilterLevelSelect.value || "all";
+    renderCharacter(state.character);
+    return;
+  }
   const targetSelect = event.target.closest("[data-roll-target]");
   if (targetSelect) {
     enforceMaxTargets(targetSelect);
@@ -1214,6 +1366,10 @@ async function togglePrepare(spellName, prepared) {
 
 async function rollAction(actionId, options = {}) {
   setRollPending(actionId, true);
+  const shouldShowThinking = !!options.narrate;
+  if (shouldShowThinking) {
+    setLlmPending(true);
+  }
   try {
     const payload = {
       action_id: actionId,
@@ -1250,6 +1406,33 @@ async function rollAction(actionId, options = {}) {
       renderCombat(data.combat);
     }
   } finally {
+    if (shouldShowThinking) {
+      setLlmPending(false);
+    }
     setRollPending(actionId, false);
+  }
+}
+
+async function useResource(resourceId, resourceName) {
+  if (!resourceId) {
+    return;
+  }
+  const res = await fetch("/api/resource/use", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resource_id: resourceId, amount: 1 }),
+  });
+  const data = await res.json();
+  if (data.error) {
+    addMessage("dm", data.error);
+    return;
+  }
+  addMessage("user", `Use ${resourceName}`);
+  addMessage("dm", `${resourceName} used.`);
+  if (data.character) {
+    renderCharacter(data.character);
+  }
+  if (data.combat) {
+    renderCombat(data.combat);
   }
 }

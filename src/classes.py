@@ -1,6 +1,6 @@
 ﻿from collections import defaultdict
 from proficiency import ProficiencyType
-from equipment_choices import build_choice_groups, apply_equipment_choices
+from equipment_choices import build_choice_groups, apply_equipment_choices, add_equipment_to_inventory
 from items import ItemRepository
  
 from srd_loader import load_srd
@@ -157,8 +157,7 @@ class CharClass:
             quantity = item.get("quantity", 1)
             if not name:
                 continue
-            obj = equipment_repo.get(name) or name
-            character.inventory.add_item(obj, quantity)
+            add_equipment_to_inventory(character, equipment_repo, name, quantity)
 
         choice_groups = build_choice_groups(self.starting_equipment_options, f"class:{self.index}")
         apply_equipment_choices(character, equipment_choices or {}, choice_groups)
@@ -192,6 +191,7 @@ class CharClass:
                     character.spells.spell_save_dc = (
                         8 + character.proficiencies.proficiency_bonus + ability_mod
                     )
+        character.resources.apply_class_resources(self.index, 1)
         return
             
 
@@ -215,6 +215,7 @@ class CharClass:
                 f"Level_{lvl}",self.levelup_spell_slots[level]["slots"][lvl],set_max=True)
 
         character.features.on_level_up(character, level)
+        character.resources.apply_class_resources(self.index, level)
 
         
 class CharClassRepository:

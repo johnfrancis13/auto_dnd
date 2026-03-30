@@ -106,6 +106,7 @@ def build_spell_choice_groups(pc, class_name: str) -> List[Dict[str, Any]]:
             "label": "Prepare Spells",
             "choose": prepared_count,
             "type": "prepared",
+            "auto_known": True,
             "options": _spell_options(level_one, f"spells:{class_index}:prepared"),
         })
     elif class_key == "wizard":
@@ -153,6 +154,12 @@ def apply_spell_choices(
         group_id = group.get("id")
         group_type = group.get("type")
         selected = set(selection_map.get(group_id, []) or [])
+        if group.get("auto_known"):
+            for option in group.get("options", []) or []:
+                spell_name = option.get("spell")
+                spell_obj = lookup.get(spell_name)
+                if spell_obj:
+                    pc.spells.manage_spells(spell_obj, action="add")
         if not selected:
             continue
         for option in group.get("options", []):

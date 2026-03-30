@@ -58,6 +58,68 @@ def _items_from_option(option: Dict[str, Any]) -> List[Dict[str, Any]]:
     return []
 
 
+def _expand_choice(choice: Dict[str, Any], categories: Dict[str, List[Dict[str, Any]]]) -> List[List[Dict[str, Any]]]:
+    from_block = choice.get("from") or {}
+    option_set_type = from_block.get("option_set_type")
+    choose = int(choice.get("choose") or 1)
+    expanded: List[List[Dict[str, Any]]] = []
+
+    if option_set_type == "equipment_category":
+        category = from_block.get("equipment_category") or {}
+        cat_index = category.get("index")
+        equipment = categories.get(cat_index, [])
+        names = [item.get("name") for item in equipment if item.get("name")]
+        if choose <= 1:
+            for name in names:
+                expanded.append([_make_item(name, 1)])
+            return expanded
+
+        def build_combos(items, k, start=0, prefix=None):
+            if prefix is None:
+                prefix = []
+            if k == 0:
+                expanded.append([_make_item(n, 1) for n in prefix])
+                return
+            for i in range(start, len(items) - k + 1):
+                build_combos(items, k - 1, i + 1, prefix + [items[i]])
+
+        build_combos(names, choose)
+        return expanded
+
+    if option_set_type == "options_array":
+        for opt in from_block.get("options") or []:
+            expanded.extend(_expand_option(opt, categories))
+        return expanded
+
+    return expanded
+
+
+def _expand_option(option: Dict[str, Any], categories: Dict[str, List[Dict[str, Any]]]) -> List[List[Dict[str, Any]]]:
+    option_type = option.get("option_type")
+    if option_type == "choice":
+        return _expand_choice(option.get("choice") or {}, categories)
+    if option_type == "multiple":
+        items = option.get("items", []) or []
+        if not items:
+            return []
+        combos: List[List[Dict[str, Any]]] = [[]]
+        for sub in items:
+            sub_expanded = _expand_option(sub, categories)
+            if not sub_expanded:
+                return []
+            new_combos: List[List[Dict[str, Any]]] = []
+            for base in combos:
+                for sub_items in sub_expanded:
+                    new_combos.append(base + sub_items)
+            combos = new_combos
+        return combos
+
+    items = _items_from_option(option)
+    if items:
+        return [items]
+    return []
+
+
 def build_choice_groups(
     option_blocks: List[Dict[str, Any]],
     group_prefix: str,
@@ -71,18 +133,21 @@ def build_choice_groups(
         from_block = block.get("from") or {}
         option_set_type = from_block.get("option_set_type")
         options: List[Dict[str, Any]] = []
+        option_counter = 0
 
         if option_set_type == "options_array":
-            for opt_idx, opt in enumerate(from_block.get("options") or []):
-                items = _items_from_option(opt)
-                if not items:
-                    continue
-                option_id = f"{group_prefix}:{idx}:{opt_idx}"
-                options.append({
-                    "id": option_id,
-                    "label": _option_label(items),
-                    "items": items,
-                })
+            for opt in from_block.get("options") or []:
+                expanded = _expand_option(opt, categories)
+                for items in expanded:
+                    if not items:
+                        continue
+                    option_id = f"{group_prefix}:{idx}:{option_counter}"
+                    option_counter += 1
+                    options.append({
+                        "id": option_id,
+                        "label": _option_label(items),
+                        "items": items,
+                    })
         elif option_set_type == "equipment_category":
             category = from_block.get("equipment_category") or {}
             cat_index = category.get("index")
@@ -180,5 +245,30 @@ def apply_equipment_choices(
                 if kind == "money":
                     character.inventory.add_item(f"{quantity} {name}", 1)
                     continue
-                obj = item_repo.get(name) or name
-                character.inventory.add_item(obj, quantity)
+                add_equipment_to_inventory(character, item_repo, name, quantity)
+
+
+def _is_pack(item) -> bool:
+    raw = getattr(item, "raw", None) or {}
+    gear = raw.get("gear_category")
+    if isinstance(gear, dict) and gear.get("index") == "equipment-packs":
+        return True
+    if raw.get("contents"):
+        return True
+    return False
+
+
+def add_equipment_to_inventory(character, item_repo: ItemRepository, name: Optional[str], quantity: int = 1) -> None:
+    if not name or quantity <= 0:
+        return
+    obj = item_repo.get(name)
+    if obj and _is_pack(obj):
+        contents = obj.raw.get("contents") or []
+        if contents:
+            for entry in contents:
+                item_ref = entry.get("item") or {}
+                item_name = item_ref.get("name")
+                count = int(entry.get("quantity", 1) or 1)
+                add_equipment_to_inventory(character, item_repo, item_name, count * quantity)
+            return
+    character.inventory.add_item(obj or name, quantity)

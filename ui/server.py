@@ -50,7 +50,7 @@ class CharacterConfig(BaseModel):
     ability_method: str = "roll"  # standard | roll | point_buy
     ability_score_assignment: Optional[List[str]] = None
     ability_score_values: Optional[List[int]] = None
-    short_description: str = "A compact halfling cleric with a travel-worn staff and calm eyes."
+    short_description: str = "A dark haired traveller with a well-worn staff and calm eyes."
 
 
 class StartRequest(BaseModel):
@@ -94,6 +94,11 @@ class ActionRollRequest(BaseModel):
     advantage: Optional[str] = None  # adv | dis
     narrate: bool = False
     player_text: Optional[str] = None
+
+
+class ResourceUseRequest(BaseModel):
+    resource_id: str
+    amount: int = 1
 
 
 class GameSession:
@@ -164,6 +169,7 @@ class GameSession:
                     "type": getattr(item, "type", None),
                     "subtype": getattr(item, "subtype", None),
                     "rarity": getattr(item, "rarity", None),
+                    "description": getattr(item, "description", None),
                     "quantity": qty,
                     "equipped": equipped,
                     "equippable": equippable,
@@ -174,6 +180,7 @@ class GameSession:
                     "type": None,
                     "subtype": None,
                     "rarity": None,
+                    "description": None,
                     "quantity": qty,
                     "equipped": False,
                     "equippable": False,
@@ -196,6 +203,7 @@ class GameSession:
                 "range": action.range,
                 "targeting": action.targeting,
                 "max_targets": action.max_targets,
+                "spell_level": getattr(action, "spell_level", 0),
             })
         return actions
 
@@ -218,6 +226,18 @@ class GameSession:
         }
 
     def _serialize_spells(self) -> Dict[str, Any]:
+        prepared_limit = None
+        class_names = [c.lower() for c in (self.pc.classes.classes or [])]
+        if class_names:
+            primary_class = class_names[0]
+            if primary_class in {"cleric", "druid"}:
+                ability = self.pc.spells.spellcasting_ability
+                if ability:
+                    ability_mod = self.pc.ability_scores.modifier(ability)
+                else:
+                    ability_mod = 0
+                class_level = len(self.pc.classes.classes)
+                prepared_limit = max(1, ability_mod + class_level)
         def pack_spell(spell):
             return {
                 "name": spell.name,
@@ -238,6 +258,7 @@ class GameSession:
             "prepared": [pack_spell(s) for s in self.pc.spells.prepared_spells.values()],
             "spellcasting_ability": self.pc.spells.spellcasting_ability,
             "spell_save_dc": self.pc.spells.spell_save_dc,
+            "prepared_limit": prepared_limit,
         }
 
     def character_summary(self) -> Dict[str, Any]:
@@ -402,6 +423,12 @@ class GameSession:
             action = None
         if not action:
             return {"error": "Invalid action."}
+        spell_level = getattr(action, "spell_level", 0) or 0
+        if spell_level > 0:
+            try:
+                self.pc.resources.update_spell_slots(f"Level_{spell_level}", amount=1, use_spell=True)
+            except Exception as exc:
+                return {"error": str(exc)}
         roll_payload = self._resolve_action_roll(action, target_id, target_ids, target_text, advantage)
         if roll_payload.get("error"):
             return roll_payload
@@ -739,6 +766,20 @@ def roll_action(payload: ActionRollRequest) -> JSONResponse:
     if result.get("error"):
         return JSONResponse(result, status_code=400)
     return JSONResponse(result)
+
+
+@app.post("/api/resource/use")
+def use_resource(payload: ResourceUseRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    try:
+        SESSION.pc.resources.spend(payload.resource_id, payload.amount or 1)
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=400)
+    return JSONResponse({
+        "character": SESSION.character_summary(),
+        "combat": SESSION.combat_payload(),
+    })
 
 
 @app.post("/api/reset")
