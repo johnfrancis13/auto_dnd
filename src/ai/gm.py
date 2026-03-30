@@ -2,9 +2,9 @@
 from ollama import chat
 from pydantic import BaseModel, ValidationError
 from typing import Optional, List, Literal
-from one_shot_adventures import one_shot_adventures
-from game_engine import CombatEngine
-from actions import ActionType
+from content.one_shot_adventures import one_shot_adventures
+from engine.game_engine import CombatEngine
+from rules.actions import ActionType
 import random
 import json
 import textwrap
@@ -90,6 +90,29 @@ class gm_llm:
         self.think=think
         self.actions = GMActionHandler(self.pc)
         self.npc_names = npc_names or []
+        self.adventure_npc_names = []
+        self.baseline_npc_names = [
+            "Commoner",
+            "Guard",
+            "Bandit",
+            "Thug",
+            "Scout",
+            "Acolyte",
+            "Priest",
+            "Noble",
+            "Cultist",
+            "Bandit Captain",
+            "Veteran",
+            "Knight",
+            "Spy",
+            "Assassin",
+            "Mage",
+            "Archmage",
+            "Druid",
+            "Gladiator",
+            "Berserker",
+            "Tribal Warrior",
+        ]
         self.combat = CombatOrchestrator(
             owner=self,
             model_name=self.model_name,
@@ -100,6 +123,7 @@ class gm_llm:
         )
     def choose_new_adventure(self):
         self.adventure_data = random.choice(one_shot_adventures)
+        self.adventure_npc_names = self.adventure_data.get("npc_options") or []
     # Iterate the model to respond to the latest game state
     def start_adventure(self):
         wrap_text("\n-Setting up the game...")
@@ -139,6 +163,12 @@ class gm_llm:
         self.game_state = parsed.game_state
     
     def create_prompts(self):
+        npc_hint = ""
+        if self.adventure_npc_names or self.baseline_npc_names:
+            npc_hint = (
+                f"\n            NPC OPTIONS (use for combat when possible): "
+                f"{self.adventure_npc_names + self.baseline_npc_names}"
+            )
         self.narrator_system_prompt = f"""
             ### Dungeon Master
             You are a 5e Dungeon Master with access to all the source books and the ability to homebrew content as necessary.
@@ -166,6 +196,7 @@ class gm_llm:
             - Assume 3-5 scenes maximum
             The current one shot you are running is:
             {self.adventure_data}
+            {npc_hint}
             """
         self.rules_system_prompt = """
             You are a D&D 5e rules engine responsible ONLY for mechanics.
@@ -504,6 +535,44 @@ class CombatOrchestrator:
         self.turn_movement = {}
         self.manual_logs = []
 
+    def _available_npc_names(self) -> List[str]:
+        base = list(getattr(self.owner, "baseline_npc_names", []) or [])
+        scoped = list(getattr(self.owner, "adventure_npc_names", []) or [])
+        repo = list(self.owner.npc_names or [])
+        if scoped or base:
+            combined = scoped + base
+            seen = set()
+            deduped = []
+            for name in combined:
+                if name in seen:
+                    continue
+                seen.add(name)
+                deduped.append(name)
+            if repo:
+                repo_set = set(repo)
+                deduped = [name for name in deduped if name in repo_set]
+            return deduped if deduped else repo
+        return repo
+
+    def _filter_enemies(self, enemies: List[str], available: List[str]) -> List[str]:
+        if not enemies or not available:
+            return []
+        lookup = {name.lower(): name for name in available}
+        resolved = []
+        for enemy in enemies:
+            if not enemy:
+                continue
+            key = str(enemy).strip()
+            if not key:
+                continue
+            if key in available:
+                resolved.append(key)
+                continue
+            matched = lookup.get(key.lower())
+            if matched:
+                resolved.append(matched)
+        return resolved
+
     def combat_state_payload(self) -> CombatState:
         return self.combat_handler.combat_state_payload()
 
@@ -639,6 +708,15 @@ class CombatOrchestrator:
             return True
         game_state = self.owner.game_state
         enemies = game_state.enemies or ([game_state.enemy] if game_state.enemy else [])
+        available = self._available_npc_names()
+        if enemies:
+            enemies = self._filter_enemies(enemies, available)
+            if enemies:
+                game_state.enemies = enemies
+                game_state.enemy = None
+            else:
+                game_state.enemies = None
+                game_state.enemy = None
         if not enemies:
             context = f"""
             GAME STATE:
@@ -684,7 +762,7 @@ class CombatOrchestrator:
         return response
 
     def select_combat_encounter(self, context: str):
-        available = self.owner.npc_names
+        available = self._available_npc_names()
         if not available:
             return []
 

@@ -1,10 +1,10 @@
-from game_engine import Dice
-from proficiency import ProficiencyType
-import resources
-import actions
+from engine.game_engine import Dice
+from systems.proficiency import ProficiencyType
+import systems.resources as resources
+import rules.actions as actions
 from typing import Optional, Callable, Dict, Tuple
 import random
-from srd_loader import load_srd
+from data.srd_loader import load_srd
 
 
 _TRAIT_INDEX = None

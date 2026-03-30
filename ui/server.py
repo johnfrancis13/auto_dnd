@@ -19,20 +19,20 @@ if str(SRC) not in sys.path:
 # Ensure relative data paths resolve from repo root
 os.chdir(ROOT)
 
-import character as char
-from gm import gm_llm
-from npcs import NPCRepository
-from equipment_choices import (
+import systems.character as char
+from ai.gm import gm_llm
+from data.npcs import NPCRepository
+from systems.equipment_choices import (
     build_class_equipment_choices,
     build_background_equipment_choices,
     validate_equipment_choices,
 )
-from spell_choices import (
+from systems.spell_choices import (
     build_spell_choice_groups,
     validate_spell_choices,
     apply_spell_choices,
 )
-from proficiency import ProficiencyType
+from systems.proficiency import ProficiencyType
 
 
 app = FastAPI(title="Auto DnD UI")
@@ -454,7 +454,7 @@ class GameSession:
         target_text: Optional[str],
         advantage: Optional[str],
     ):
-        from game_engine import Dice, DiceHandler, DamageResult
+        from engine.game_engine import Dice, DiceHandler, DamageResult
         handler = DiceHandler()
 
         def resolve_prof_bonus():

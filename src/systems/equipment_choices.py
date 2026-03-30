@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Any, Tuple
 
-from srd_loader import load_srd
-from items import ItemRepository
+from data.srd_loader import load_srd
+from systems.items import ItemRepository
 
 
 def _load_equipment_categories() -> Dict[str, List[Dict[str, Any]]]:

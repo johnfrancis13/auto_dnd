@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from actions import Action, ActionType, SpellAction
-from srd_loader import load_srd
+from rules.actions import Action, ActionType, SpellAction
+from data.srd_loader import load_srd
 
 
 def _parse_dice(dice: str) -> Optional[Tuple[int, int]]:

@@ -6,7 +6,7 @@ from typing import Optional, Callable, Dict, Any, Tuple
 import json
 import re
 
-from srd_loader import load_srd
+from data.srd_loader import load_srd
 
 # Types of resources one could have
 class ResourceCategory(Enum):

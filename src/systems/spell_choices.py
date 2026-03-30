@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Any, Tuple
 
-from srd_loader import load_srd
-from spellcasting import SpellRepository, Spell
+from data.srd_loader import load_srd
+from systems.spellcasting import SpellRepository, Spell
 
 
 PREPARED_CASTERS = {"cleric", "druid"}

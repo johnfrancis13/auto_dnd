@@ -1,9 +1,9 @@
 ﻿from collections import defaultdict
-from proficiency import ProficiencyType
-from equipment_choices import build_choice_groups, apply_equipment_choices, add_equipment_to_inventory
-from items import ItemRepository
+from systems.proficiency import ProficiencyType
+from systems.equipment_choices import build_choice_groups, apply_equipment_choices, add_equipment_to_inventory
+from systems.items import ItemRepository
  
-from srd_loader import load_srd
+from data.srd_loader import load_srd
 
 
 def _srd_skill_name(value):

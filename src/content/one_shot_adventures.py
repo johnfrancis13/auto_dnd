@@ -37,6 +37,7 @@ one_shot_adventures = adventures = [
         "Distortion spreads.",
         "Keeper freed."
     ],
+    "npc_options": ["Ghost", "Specter", "Will-o'-Wisp"],
     "reward": {
         "gold": 75,
         "item": "Lantern Shard (1 use: reveal invisible for 1 min)",
@@ -86,6 +87,7 @@ one_shot_adventures = adventures = [
         "Orchard transformed.",
         "Village addicted."
     ],
+    "npc_options": ["Dryad", "Sprite", "Satyr", "Blink Dog"],
     "reward": {
         "gold": 75,
         "item": "Fey Apple Seed (plant once for safe shelter overnight)",
@@ -134,6 +136,7 @@ one_shot_adventures = adventures = [
         "Tower dismantled.",
         "Time stabilized partially."
     ],
+    "npc_options": ["Shadow", "Specter", "Wraith"],
     "reward": {
         "gold": 75,
         "item": "Moment Token (1 use: reroll a failed check)",
@@ -168,6 +171,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Ink spreads.", "Location shifts."],
     "outcomes": ["Map completed.", "Map burned.", "Map bonded to PC."],
+    "npc_options": ["Animated Armor", "Flying Sword", "Rug of Smothering"],
     "reward": {
         "gold": 75,
         "item": "Self-Updating Map (marks nearest settlement once/day)",
@@ -197,6 +201,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Room seals.", "Furniture moves."],
     "outcomes": ["Entity befriended.", "House escapes town.", "Entity dispersed."],
+    "npc_options": ["Mimic", "Rug of Smothering", "Animated Armor"],
     "reward": {
         "gold": 75,
         "item": "Key of Familiar Doors (once: open known door within 60 ft)",
@@ -226,6 +231,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Sudden surge.", "Villagers argue."],
     "outcomes": ["Balance restored.", "Permanent reversal.", "Spirit angered."],
+    "npc_options": ["Water Elemental", "Steam Mephit", "Merfolk"],
     "reward": {
         "gold": 75,
         "item": "Vial of Reversed Water (1 use: reverse gravity on small object briefly)",
@@ -255,6 +261,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Statue cracks.", "Secret revealed."],
     "outcomes": ["Souls freed.", "Garden destroyed.", "Curator exposed."],
+    "npc_options": ["Gargoyle", "Animated Armor", "Rug of Smothering"],
     "reward": {
         "gold": 75,
         "item": "Stone Whisper (1 use: ask a statue one question)",
@@ -284,6 +291,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Memory bleed.", "Time stutter."],
     "outcomes": ["Loop ended.", "Loop refined.", "PC trapped temporarily."],
+    "npc_options": ["Satyr", "Sprite", "Blink Dog"],
     "reward": {
         "gold": 75,
         "item": "Ribbon of Recall (1 use: remember prior failed interaction)",
@@ -313,6 +321,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Exit disappears.", "Book traps reader."],
     "outcomes": ["Entity bargained with.", "Library collapsed.", "PC marked as author."],
+    "npc_options": ["Specter", "Ghost", "Mimic"],
     "reward": {
         "gold": 75,
         "item": "Bookmark of Return (1 use: retrace last hour path instantly)",
@@ -342,6 +351,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["False vision spreads.", "Reflection acts independently."],
     "outcomes": ["Spirit clarified.", "Mirror shattered.", "Visions embraced."],
+    "npc_options": ["Doppelganger", "Shadow", "Specter"],
     "reward": {
         "gold": 75,
         "item": "Shard of Foresight (1 use: glimpse likely outcome of action)",
@@ -371,6 +381,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Story manifests.", "Listener interrupts."],
     "outcomes": ["Guardian satisfied.", "Guardian tricked.", "Bridge collapses."],
+    "npc_options": ["Ogre", "Troll", "Bandit"],
     "reward": {
         "gold": 75,
         "item": "Token of Telling (1 use: compel honest answer to a question)",
@@ -397,6 +408,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Clock chimes out of sequence.", "Blueprint missing.", "Clockmaker evades."],
     "outcomes": ["Secret revealed.", "Clock repaired.", "Tower sealed."],
+    "npc_options": ["Animated Armor", "Flying Sword", "Thug"],
     "reward": {"gold": 75, "item": "Pocket Cog (1 use: slow small moving mechanism briefly)", "reputation": "Respected problem-solver."},
     "escalation": ["Chimes desynchronize.", "Crowd panics.", "Festival disrupted."]
 },
@@ -420,6 +432,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Whispers mislead PC.", "Fog rolls in.", "Coastguard interrupts."],
     "outcomes": ["Spirits guided to peace.", "Energy dissipates.", "Whispers amplified."],
+    "npc_options": ["Ghost", "Specter", "Will-o'-Wisp"],
     "reward": {"gold": 75, "item": "Shell of Calm (1 use: quiet mental interference for 1 minute)", "reputation": "Mariners trust you."},
     "escalation": ["Whispers intensify.", "Sailors endangered.", "Light malfunctions."]
 },
@@ -443,6 +456,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Parts scattered.", "Automaton behaves oddly.", "Caretaker misleads."] ,
     "outcomes": ["Menagerie repaired.", "Automata escape.", "Noble satisfied or displeased."],
+    "npc_options": ["Animated Armor", "Flying Sword", "Rug of Smothering"],
     "reward": {"gold": 75, "item": "Clockwork Key (1 use: temporarily control small automaton)", "reputation": "Respected tinker."},
     "escalation": ["Automata malfunction.", "Garden damages escalate.", "Noble pressures PC."]
 },
@@ -466,6 +480,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Music hypnotizes.", "Tent shifts.", "Guard misfires."] ,
     "outcomes": ["Glamour removed.", "Children rescued.", "Spirit placated."],
+    "npc_options": ["Owlbear", "Doppelganger", "Sprite"],
     "reward": {"gold": 75, "item": "Carnival Coin (1 use: charm one creature briefly)", "reputation": "Hero to children."},
     "escalation": ["Illusions intensify.", "Children lost.", "Town panic."]
 },
@@ -489,6 +504,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Ship drifts unpredictably.", "Crew reacts emotionally.", "Fog reduces visibility."],
     "outcomes": ["Captain freed.", "Ship dissipates.", "Tether remains partially."],
+    "npc_options": ["Ghost", "Specter", "Wraith", "Skeleton"],
     "reward": {"gold": 75, "item": "Nautical Compass (1 use: detect ghostly presence)", "reputation": "Sailors trust you."},
     "escalation": ["Ship drifts into harbor.", "Mariners panic.", "Trade delayed further."]
 },
@@ -512,6 +528,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Letters rearrange.", "Pages vanish.", "Poltergeist appears visibly."],
     "outcomes": ["Poltergeist placated.", "History corrected.", "Tower sealed."],
+    "npc_options": ["Ghost", "Specter", "Shadow"],
     "reward": {"gold": 75, "item": "Ink of Truth (1 use: detect written lies once)", "reputation": "Trusted historian."},
     "escalation": ["Letters proliferate.", "False claims spread.", "Poltergeist agitation rises."]
 },
@@ -535,6 +552,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Goods tumble.", "Current shifts.", "Elemental tests PC."] ,
     "outcomes": ["Currents stabilized.", "Market floats freely.", "Partial goods lost."],
+    "npc_options": ["Water Elemental", "Merfolk", "Sahuagin"],
     "reward": {"gold": 75, "item": "Water Token (1 use: calm moving water briefly)", "reputation": "Trusted by merchants."},
     "escalation": ["Currents strengthen.", "Goods lost.", "Merchant panic."]
 },
@@ -558,6 +576,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Shadows hide books.", "PC gets lost.", "Shadows merge."],
     "outcomes": ["Shadows returned.", "Experiment contained.", "Library partially ruined."],
+    "npc_options": ["Shadow", "Specter", "Ghost"],
     "reward": {"gold": 75, "item": "Shadow Thread (1 use: control shadow briefly)", "reputation": "Keeper of knowledge."},
     "escalation": ["Shadows grow.", "Books lost.", "Visitors panic."]
 },
@@ -581,6 +600,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Lanterns fall.", "Spirit moves away.", "Crowd panics."],
     "outcomes": ["Spirit appeased.", "Lanterns float.", "Festival partial success."],
+    "npc_options": ["Invisible Stalker", "Air Elemental", "Will-o'-Wisp"],
     "reward": {"gold": 75, "item": "Lantern Charm (1 use: levitate small object 1 min)", "reputation": "Festival hero."},
     "escalation": ["Lanterns fail.", "Spirit leaves.", "Crowd frustrated."]
 },
@@ -604,6 +624,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Artifact shifts.", "Astral energy flares.", "Ghost misleads."],
     "outcomes": ["Alignment restored.", "Artifact neutralized.", "Ghost remains."],
+    "npc_options": ["Will-o'-Wisp", "Specter", "Gargoyle"],
     "reward": {"gold": 75, "item": "Star Shard (1 use: glimpse direction at night)", "reputation": "Trusted navigator."},
     "escalation": ["Stars shift.", "Telescopes break.", "Traders panic."]
 },
@@ -627,6 +648,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Goods vanish mid-trade.", "Stalls shift.", "Temporal anomaly spreads."],
     "outcomes": ["Items retrieved.", "Anomaly sealed.", "Pocket remains unstable."],
+    "npc_options": ["Dust Mephit", "Ice Mephit", "Magma Mephit", "Steam Mephit"],
     "reward": {"gold": 75, "item": "Time Coin (1 use: retrieve object lost in last minute)", "reputation": "Curator of lost things."},
     "escalation": ["Items vanish more frequently.", "Market chaos.", "Pocket grows."]
 },
@@ -650,6 +672,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Echoes mislead.", "Structures unstable.", "Fragments animate."],
     "outcomes": ["Memories preserved.", "Echo fades.", "Artifacts lost."],
+    "npc_options": ["Skeleton", "Zombie", "Ghoul", "Wight", "Specter"],
     "reward": {"gold": 75, "item": "Whisper Gem (1 use: hear one past event clearly)", "reputation": "Trusted historian."},
     "escalation": ["Whispers intensify.", "Corridors collapse.", "Artifacts damaged."]
 },
@@ -673,6 +696,7 @@ one_shot_adventures = adventures = [
     ],
     "complications": ["Reflections mislead.", "Maze shifts.", "Water mirror floods."],
     "outcomes": ["Magic freed.", "Garden stabilized.", "Some mirrors remain enchanted."],
+    "npc_options": ["Doppelganger", "Shadow", "Specter"],
     "reward": {"gold": 75, "item": "Mirror Shard (1 use: see reflection of distant area)", "reputation": "Master of perception."},
     "escalation": ["Reflections act independently.", "Paths rearrange.", "Visitors panic."]
 }

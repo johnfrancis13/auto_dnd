@@ -1,8 +1,8 @@
 from enum import Enum, auto
 from dataclasses import dataclass
 from typing import Callable, Optional, List, Dict, Any
-from game_engine import Dice, DiceHandler
-from proficiency import ProficiencyType
+from engine.game_engine import Dice, DiceHandler
+from systems.proficiency import ProficiencyType
 
 class ActionType(Enum):
     ACTION = auto()

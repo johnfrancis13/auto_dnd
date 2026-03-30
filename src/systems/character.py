@@ -4,20 +4,20 @@ from typing import Dict, List
 import math
 import random as random
 
-from features import FeatureManager
-from conditions import ConditionManager
-from effects import EffectsManager
-from spellcasting import Spellcasting
-from classes import CharClass
-from proficiency import ProficiencyManager, ProficiencyType
-from races import Race
-from items import Item
-from resources import ResourcePool, ResourceCategory
-from actions import ActionManager
-from classes import ClassProgression
-from srd_loader import load_srd
-from equipment_choices import build_choice_groups, apply_equipment_choices, add_equipment_to_inventory
-from items import ItemRepository
+from systems.features import FeatureManager
+from rules.conditions import ConditionManager
+from rules.effects import EffectsManager
+from systems.spellcasting import Spellcasting
+from systems.classes import CharClass
+from systems.proficiency import ProficiencyManager, ProficiencyType
+from systems.races import Race
+from systems.items import Item
+from systems.resources import ResourcePool, ResourceCategory
+from rules.actions import ActionManager
+from systems.classes import ClassProgression
+from data.srd_loader import load_srd
+from systems.equipment_choices import build_choice_groups, apply_equipment_choices, add_equipment_to_inventory
+from systems.items import ItemRepository
 
 ABILITY_NAMES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"

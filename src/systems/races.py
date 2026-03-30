@@ -1,5 +1,5 @@
-from proficiency import ProficiencyType
-from srd_loader import load_srd
+from systems.proficiency import ProficiencyType
+from data.srd_loader import load_srd
 
 
 def _merge_by_key(base, override):

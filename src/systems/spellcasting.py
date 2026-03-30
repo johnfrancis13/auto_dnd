@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from srd_loader import load_srd
+from data.srd_loader import load_srd
 
 
 class Spell:

@@ -2,7 +2,7 @@ import random as random
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, List
 from dataclasses import dataclass, field
-from proficiency import ProficiencyType
+from systems.proficiency import ProficiencyType
 from enum import Enum, auto
 
 
