@@ -12,6 +12,7 @@ export const uiState = {
   activeTab: "about",
   pendingStartPayload: null,
   pendingEquipmentChoices: [],
+  pendingLanguageChoices: [],
   pendingSpellChoices: [],
   llmPendingCount: 0,
   spellFilterPreparedOnly: false,

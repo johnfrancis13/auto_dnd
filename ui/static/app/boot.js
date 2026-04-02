@@ -2,8 +2,10 @@ import { appState, uiState } from "./state.js";
 import {
   startButton,
   equipmentSubmit,
+  languageSubmit,
   spellSubmit,
   spellFormEl,
+  languageFormEl,
   newGameButton,
   chatForm,
   chatInput,
@@ -24,12 +26,13 @@ import {
   updateTargetingHighlights,
   syncTargetSelect,
 } from "./combat.js";
-import { enforceSpellChoiceLimits } from "./forms.js";
+import { enforceSpellChoiceLimits, enforceLanguageChoiceLimits } from "./forms.js";
 import { enforceMaxTargets } from "./rolls.js";
 import {
   resetUI,
   startGame,
   submitEquipmentChoices,
+  submitLanguageChoices,
   submitSpellChoices,
   sendMessage,
   sendCombatAction,
@@ -85,6 +88,11 @@ export function boot() {
       addMessage("dm", `Failed to start: ${err}`);
     });
   });
+  languageSubmit.addEventListener("click", () => {
+    submitLanguageChoices().catch((err) => {
+      addMessage("dm", `Failed to start: ${err}`);
+    });
+  });
   spellSubmit.addEventListener("click", () => {
     submitSpellChoices().catch((err) => {
       addMessage("dm", `Failed to start: ${err}`);
@@ -92,6 +100,9 @@ export function boot() {
   });
   spellFormEl.addEventListener("change", (event) => {
     enforceSpellChoiceLimits(event.target);
+  });
+  languageFormEl.addEventListener("change", (event) => {
+    enforceLanguageChoiceLimits(event.target);
   });
   newGameButton.addEventListener("click", () => {
     resetUI();

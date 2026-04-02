@@ -308,7 +308,7 @@ class Inventory:
         if not getattr(self.owner, "actions", None):
             return
         try:
-            from action_factory import weapon_action_from_item, weapon_action_from_name
+            from rules.action_factory import weapon_action_from_item, weapon_action_from_name
         except Exception:
             return
 
@@ -326,7 +326,7 @@ class Inventory:
         if not getattr(self.owner, "actions", None):
             return
         try:
-            from action_factory import weapon_action_from_item, weapon_action_from_name
+            from rules.action_factory import weapon_action_from_item, weapon_action_from_name
         except Exception:
             return
 
@@ -355,7 +355,11 @@ class Background:
 
 
     def apply(self, character, equipment_choices=None):
-        profs = {ProficiencyType.SKILL: set(), ProficiencyType.TOOL: set()}
+        profs = {
+            ProficiencyType.SKILL: set(),
+            ProficiencyType.TOOL: set(),
+            ProficiencyType.LANGUAGE: set(),
+        }
 
         starting = self.background_data.get("starting_proficiencies") or []
         profs_list = self.background_data.get("proficiencies") or []
@@ -366,6 +370,16 @@ class Background:
                 profs[ProficiencyType.SKILL].add(name.replace("Skill:", "").strip().lower())
             elif name.startswith("Tool:"):
                 profs[ProficiencyType.TOOL].add(name.replace("Tool:", "").strip().lower())
+            elif name.startswith("Language:"):
+                profs[ProficiencyType.LANGUAGE].add(name.replace("Language:", "").strip())
+
+        for lang in self.background_data.get("languages") or []:
+            if isinstance(lang, dict):
+                name = lang.get("name")
+            else:
+                name = str(lang)
+            if name:
+                profs[ProficiencyType.LANGUAGE].add(name)
 
         for prof_type, values in list(profs.items()):
             if not values:

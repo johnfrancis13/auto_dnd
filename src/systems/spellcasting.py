@@ -59,7 +59,7 @@ class Spellcasting:
         if not prepared and getattr(spell, "level", 1) != 0:
             return
         try:
-            from action_factory import spell_action_from_spell, spell_action_from_name
+            from rules.action_factory import spell_action_from_spell, spell_action_from_name
         except Exception:
             return
         action = None
@@ -79,7 +79,7 @@ class Spellcasting:
             if spell.name in self.known_spells:
                 return
         try:
-            from action_factory import spell_action_from_spell, spell_action_from_name
+            from rules.action_factory import spell_action_from_spell, spell_action_from_name
         except Exception:
             return
         action = None

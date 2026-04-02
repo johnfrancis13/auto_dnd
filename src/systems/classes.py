@@ -117,6 +117,7 @@ class CharClass:
             armor = [p["name"] for p in self.proficiencies if "Armor" in p["name"]]
             weapons = [p["name"] for p in self.proficiencies if "Weapons" in p["name"]]
             tools = [p["name"] for p in self.proficiencies if "Tools" in p["name"]]
+            languages = [p["name"] for p in self.proficiencies if p.get("name", "").startswith("Language:")]
             if armor:
                 class_profs[ProficiencyType.ARMOR] = set(_srd_prof_name(a) for a in armor)
             if weapons:
@@ -128,6 +129,10 @@ class CharClass:
                 class_profs[ProficiencyType.WEAPON] = weapon_set
             if tools:
                 class_profs[ProficiencyType.TOOL] = set(_srd_prof_name(t) for t in tools)
+            if languages:
+                class_profs[ProficiencyType.LANGUAGE] = set(
+                    name.replace("Language:", "").strip() for name in languages
+                )
 
         if self.saving_throws:
             class_profs[ProficiencyType.SAVE] = set(

@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Auto DnD</title>
-    <link rel="stylesheet" href="/static/app.css?v=20260328d" />
-    <script type="module" defer src="/static/app.js?v=20260328d"></script>
+    <link rel="stylesheet" href="/static/app.css?v=20260401d" />
+    <script type="module" defer src="/static/app.js?v=20260401d"></script>
   </head>
   <body>
     <div id="setup-screen" class="setup-screen">
@@ -197,6 +197,19 @@
         <form id="spell-choices-form" class="equipment-form"></form>
         <div class="modal-actions">
           <button type="button" id="spell-choices-submit">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="language-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="language-modal-title">
+        <h2 id="language-modal-title">Choose Languages</h2>
+        <p class="muted">Select any additional languages granted by your race or background.</p>
+        <div id="language-choices-errors" class="muted"></div>
+        <form id="language-choices-form" class="equipment-form"></form>
+        <div class="modal-actions">
+          <button type="button" id="language-choices-submit">Continue</button>
         </div>
       </div>
     </div>

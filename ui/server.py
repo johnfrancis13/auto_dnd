@@ -32,6 +32,11 @@ from systems.spell_choices import (
     validate_spell_choices,
     apply_spell_choices,
 )
+from systems.language_choices import (
+    build_language_choice_groups,
+    validate_language_choices,
+    apply_language_choices,
+)
 from systems.proficiency import ProficiencyType
 
 
@@ -59,6 +64,7 @@ class StartRequest(BaseModel):
     think: bool = False
     equipment_choices: Optional[Dict[str, List[str]]] = None
     spell_choices: Optional[Dict[str, List[str]]] = None
+    language_choices: Optional[Dict[str, List[str]]] = None
 
 
 class MessageRequest(BaseModel):
@@ -601,7 +607,10 @@ PENDING: Optional[Dict[str, Any]] = None
 @app.get("/", response_class=HTMLResponse)
 def index() -> HTMLResponse:
     html_path = TEMPLATES_DIR / "index.html"
-    return HTMLResponse(html_path.read_text(encoding="utf-8"))
+    return HTMLResponse(
+        html_path.read_text(encoding="utf-8"),
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/api/state")
@@ -614,8 +623,41 @@ def get_state() -> JSONResponse:
 @app.post("/api/start")
 def start_game(payload: StartRequest) -> JSONResponse:
     global SESSION, PENDING
+    pc = None
+    language_choices_applied = False
 
-    if PENDING is not None and payload.spell_choices:
+    if PENDING is not None and PENDING.get("language_groups") and not payload.language_choices:
+        return JSONResponse({
+            "session": False,
+            "requires_language_choices": True,
+            "language_choices": PENDING["language_groups"],
+            "errors": ["Language choices required."],
+        })
+
+    if PENDING is not None and PENDING.get("language_groups") and payload.language_choices:
+        pc = PENDING["pc"]
+        language_groups = PENDING["language_groups"]
+        ok, errors = validate_language_choices(language_groups, payload.language_choices or {})
+        if not ok:
+            return JSONResponse({
+                "session": False,
+                "requires_language_choices": True,
+                "language_choices": language_groups,
+                "errors": errors,
+            })
+        apply_language_choices(pc, payload.language_choices or {}, language_groups)
+        PENDING = None
+        language_choices_applied = True
+
+    if PENDING is not None and PENDING.get("spell_groups") and not payload.spell_choices:
+        return JSONResponse({
+            "session": False,
+            "requires_spell_choices": True,
+            "spell_choices": PENDING["spell_groups"],
+            "errors": ["Spell choices required."],
+        })
+
+    if PENDING is not None and PENDING.get("spell_groups") and payload.spell_choices:
         pc = PENDING["pc"]
         spell_groups = PENDING["spell_groups"]
         ok, errors = validate_spell_choices(spell_groups, payload.spell_choices or {})
@@ -635,31 +677,50 @@ def start_game(payload: StartRequest) -> JSONResponse:
             **SESSION.state_payload(),
         })
 
-    choices = []
-    choices.extend(build_class_equipment_choices(payload.character.char_class))
-    choices.extend(build_background_equipment_choices(payload.character.background))
-    if choices:
-        ok, errors = validate_equipment_choices(choices, payload.equipment_choices or {})
-        if not ok:
-            PENDING = None
-            return JSONResponse({
-                "session": False,
-                "requires_choices": True,
-                "choices": choices,
-                "errors": errors,
-            })
+    if pc is None:
+        choices = []
+        choices.extend(build_class_equipment_choices(payload.character.char_class))
+        choices.extend(build_background_equipment_choices(payload.character.background))
+        if choices:
+            ok, errors = validate_equipment_choices(choices, payload.equipment_choices or {})
+            if not ok:
+                PENDING = None
+                return JSONResponse({
+                    "session": False,
+                    "requires_choices": True,
+                    "choices": choices,
+                    "errors": errors,
+                })
 
-    pc = char.PCFactory().create_basic(
-        name=payload.character.name,
-        race=payload.character.race,
-        background=payload.character.background,
-        char_class=payload.character.char_class,
-        ability_method=payload.character.ability_method,
-        ability_score_assignment=payload.character.ability_score_assignment,
-        ability_score_values=payload.character.ability_score_values,
-        equipment_choices=payload.equipment_choices or {},
-    )
-    pc.short_character_description = payload.character.short_description
+        pc = char.PCFactory().create_basic(
+            name=payload.character.name,
+            race=payload.character.race,
+            background=payload.character.background,
+            char_class=payload.character.char_class,
+            ability_method=payload.character.ability_method,
+            ability_score_assignment=payload.character.ability_score_assignment,
+            ability_score_values=payload.character.ability_score_values,
+            equipment_choices=payload.equipment_choices or {},
+        )
+        pc.short_character_description = payload.character.short_description
+
+    if not language_choices_applied:
+        language_groups = build_language_choice_groups(
+            payload.character.race,
+            payload.character.background,
+            payload.character.char_class,
+        )
+        if language_groups:
+            ok, errors = validate_language_choices(language_groups, payload.language_choices or {})
+            if not ok:
+                PENDING = {"pc": pc, "language_groups": language_groups}
+                return JSONResponse({
+                    "session": False,
+                    "requires_language_choices": True,
+                    "language_choices": language_groups,
+                    "errors": errors,
+                })
+            apply_language_choices(pc, payload.language_choices or {}, language_groups)
 
     spell_groups = build_spell_choice_groups(pc, payload.character.char_class)
     if spell_groups:

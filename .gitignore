@@ -8,3 +8,7 @@ data/local/
 
 data/
 data/srd/
+
+*__pycache__
+*__pycache__
+ui/__pycache__/

@@ -3,6 +3,7 @@ import {
   messagesEl,
   charForm,
   equipmentErrorsEl,
+  languageErrorsEl,
   spellErrorsEl,
   sheetTabs,
   thinkingIndicator,
@@ -12,8 +13,10 @@ import { renderCharacter, renderImages } from "./render.js";
 import { renderCombat } from "./combat.js";
 import {
   renderEquipmentChoices,
+  renderLanguageChoices,
   renderSpellChoices,
   collectEquipmentSelections,
+  collectLanguageSelections,
   collectSpellSelections,
 } from "./forms.js";
 import { setRollPending } from "./rolls.js";
@@ -32,6 +35,7 @@ export async function resetUI() {
     thinkingIndicator.classList.add("hidden");
   }
   renderEquipmentChoices([]);
+  renderLanguageChoices([]);
   renderSpellChoices([]);
   sheetTabs.querySelectorAll(".tab").forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.tab === uiState.activeTab);
@@ -76,6 +80,14 @@ export async function startGame() {
       setSessionActive(false);
       renderEquipmentChoices(data.choices);
       equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_language_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderLanguageChoices(data.language_choices);
+      languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
@@ -140,6 +152,14 @@ export async function submitEquipmentChoices() {
       showSetupScreen();
       return;
     }
+    if (data.requires_language_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderLanguageChoices(data.language_choices);
+      languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
     if (data.requires_spell_choices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
@@ -178,6 +198,7 @@ export async function submitSpellChoices() {
     ...uiState.pendingStartPayload,
     spell_choices: spellChoices,
   };
+  uiState.pendingStartPayload = payload;
   showGameScreen();
   messagesEl.innerHTML = "";
   renderCharacter(null);
@@ -193,6 +214,14 @@ export async function submitSpellChoices() {
       body: JSON.stringify(payload),
     });
     const data = await res.json();
+    if (data.requires_language_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderLanguageChoices(data.language_choices);
+      languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
     if (data.requires_spell_choices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
@@ -203,6 +232,67 @@ export async function submitSpellChoices() {
     }
     if (!data.session) {
       spellErrorsEl.textContent = data.error || "Unable to start session.";
+      setSessionActive(false);
+      showSetupScreen();
+      return;
+    }
+    appState.session = data.session;
+    renderCharacter(data.character);
+    renderImages(data.images);
+    messagesEl.innerHTML = "";
+    addMessage("dm", data.narrative || "Adventure started.");
+    setSessionActive(true, data.game_state?.mode || "exploration");
+    renderCombat(data.combat);
+    showGameScreen();
+  } finally {
+    setLlmPending(false);
+  }
+}
+
+export async function submitLanguageChoices() {
+  if (!uiState.pendingStartPayload) {
+    return;
+  }
+  const languageChoices = collectLanguageSelections();
+  renderLanguageChoices([]);
+  const payload = {
+    ...uiState.pendingStartPayload,
+    language_choices: languageChoices,
+  };
+  uiState.pendingStartPayload = payload;
+  showGameScreen();
+  messagesEl.innerHTML = "";
+  renderCharacter(null);
+  renderImages([]);
+  renderCombat({ active: false });
+  setSessionActive(true, "exploration");
+  addMessage("dm", "Starting adventure...");
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.requires_language_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderLanguageChoices(data.language_choices);
+      languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      renderSpellChoices(data.spell_choices);
+      spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (!data.session) {
+      languageErrorsEl.textContent = data.error || "Unable to start session.";
       setSessionActive(false);
       showSetupScreen();
       return;
