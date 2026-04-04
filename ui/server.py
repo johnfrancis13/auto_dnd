@@ -1,6 +1,7 @@
 ﻿from __future__ import annotations
 
 import os
+import logging
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any, List
@@ -37,10 +38,29 @@ from systems.language_choices import (
     validate_language_choices,
     apply_language_choices,
 )
+from systems.proficiency_choices import (
+    build_class_proficiency_choice_groups,
+    validate_proficiency_choices,
+    apply_proficiency_choices,
+)
 from systems.proficiency import ProficiencyType
 
 
 app = FastAPI(title="Auto DnD UI")
+logging.basicConfig(
+    level=os.environ.get("AUTO_DND_LOG_LEVEL", "INFO"),
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+logger = logging.getLogger("auto_dnd.ui")
+
+
+@app.middleware("http")
+async def add_no_store_headers(request, call_next):
+    response = await call_next(request)
+    path = request.url.path or ""
+    if path == "/" or path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -63,6 +83,7 @@ class StartRequest(BaseModel):
     model_name: str = "qwen3:8b"
     think: bool = False
     equipment_choices: Optional[Dict[str, List[str]]] = None
+    proficiency_choices: Optional[Dict[str, List[str]]] = None
     spell_choices: Optional[Dict[str, List[str]]] = None
     language_choices: Optional[Dict[str, List[str]]] = None
 
@@ -105,6 +126,12 @@ class ActionRollRequest(BaseModel):
 class ResourceUseRequest(BaseModel):
     resource_id: str
     amount: int = 1
+
+
+class ClientLogRequest(BaseModel):
+    level: str = "info"
+    message: str
+    data: Optional[Dict[str, Any]] = None
 
 
 class GameSession:
@@ -620,13 +647,49 @@ def get_state() -> JSONResponse:
     return JSONResponse({"session": True, **SESSION.state_payload()})
 
 
+@app.get("/api/pending")
+def get_pending() -> JSONResponse:
+    if not PENDING:
+        return JSONResponse({"pending": False})
+    if PENDING.get("proficiency_groups"):
+        return JSONResponse({
+            "pending": True,
+            "requires_proficiency_choices": True,
+            "proficiency_choices": PENDING["proficiency_groups"],
+        })
+    if PENDING.get("language_groups"):
+        return JSONResponse({
+            "pending": True,
+            "requires_language_choices": True,
+            "language_choices": PENDING["language_groups"],
+        })
+    if PENDING.get("spell_groups"):
+        return JSONResponse({
+            "pending": True,
+            "requires_spell_choices": True,
+            "spell_choices": PENDING["spell_groups"],
+        })
+    return JSONResponse({"pending": False})
+
+
 @app.post("/api/start")
 def start_game(payload: StartRequest) -> JSONResponse:
     global SESSION, PENDING
+    logger.info(
+        "POST /api/start | pending=%s | has_equipment=%s | has_proficiency=%s | has_language=%s | has_spell=%s",
+        bool(PENDING),
+        bool(payload.equipment_choices),
+        bool(payload.proficiency_choices),
+        bool(payload.language_choices),
+        bool(payload.spell_choices),
+    )
     pc = None
+    proficiency_choices_applied = False
     language_choices_applied = False
 
     if PENDING is not None and PENDING.get("language_groups") and not payload.language_choices:
+        logger.info("Start blocked: missing language choices (pending).")
+        logger.info("Returning language_groups (pending) count=%s", len(PENDING["language_groups"]))
         return JSONResponse({
             "session": False,
             "requires_language_choices": True,
@@ -634,11 +697,39 @@ def start_game(payload: StartRequest) -> JSONResponse:
             "errors": ["Language choices required."],
         })
 
+    if PENDING is not None and PENDING.get("proficiency_groups") and not payload.proficiency_choices:
+        logger.info("Start blocked: missing proficiency choices (pending).")
+        logger.info("Returning proficiency_groups (pending) count=%s", len(PENDING["proficiency_groups"]))
+        return JSONResponse({
+            "session": False,
+            "requires_proficiency_choices": True,
+            "proficiency_choices": PENDING["proficiency_groups"],
+            "errors": ["Proficiency choices required."],
+        })
+
+    if PENDING is not None and PENDING.get("proficiency_groups") and payload.proficiency_choices:
+        pc = PENDING["pc"]
+        proficiency_groups = PENDING["proficiency_groups"]
+        ok, errors = validate_proficiency_choices(proficiency_groups, payload.proficiency_choices or {})
+        if not ok:
+            logger.info("Start blocked: invalid proficiency choices | errors=%s", errors)
+            return JSONResponse({
+                "session": False,
+                "requires_proficiency_choices": True,
+                "proficiency_choices": proficiency_groups,
+                "errors": errors,
+            })
+        apply_proficiency_choices(pc, payload.proficiency_choices or {}, proficiency_groups)
+        PENDING = None
+        proficiency_choices_applied = True
+        logger.info("Proficiency choices applied (pending).")
+
     if PENDING is not None and PENDING.get("language_groups") and payload.language_choices:
         pc = PENDING["pc"]
         language_groups = PENDING["language_groups"]
         ok, errors = validate_language_choices(language_groups, payload.language_choices or {})
         if not ok:
+            logger.info("Start blocked: invalid language choices | errors=%s", errors)
             return JSONResponse({
                 "session": False,
                 "requires_language_choices": True,
@@ -648,8 +739,11 @@ def start_game(payload: StartRequest) -> JSONResponse:
         apply_language_choices(pc, payload.language_choices or {}, language_groups)
         PENDING = None
         language_choices_applied = True
+        logger.info("Language choices applied (pending).")
 
     if PENDING is not None and PENDING.get("spell_groups") and not payload.spell_choices:
+        logger.info("Start blocked: missing spell choices (pending).")
+        logger.info("Returning spell_groups (pending) count=%s", len(PENDING["spell_groups"]))
         return JSONResponse({
             "session": False,
             "requires_spell_choices": True,
@@ -662,6 +756,7 @@ def start_game(payload: StartRequest) -> JSONResponse:
         spell_groups = PENDING["spell_groups"]
         ok, errors = validate_spell_choices(spell_groups, payload.spell_choices or {})
         if not ok:
+            logger.info("Start blocked: invalid spell choices | errors=%s", errors)
             return JSONResponse({
                 "session": False,
                 "requires_spell_choices": True,
@@ -671,6 +766,7 @@ def start_game(payload: StartRequest) -> JSONResponse:
         apply_spell_choices(pc, payload.spell_choices or {}, spell_groups)
         SESSION = GameSession(payload, pc=pc)
         PENDING = None
+        logger.info("Spell choices applied (pending). Adventure started.")
         return JSONResponse({
             "session": True,
             "narrative": SESSION.last_narrative(),
@@ -684,6 +780,9 @@ def start_game(payload: StartRequest) -> JSONResponse:
         if choices:
             ok, errors = validate_equipment_choices(choices, payload.equipment_choices or {})
             if not ok:
+                logger.info("Start blocked: invalid equipment choices | errors=%s", errors)
+                logger.info("Equipment choices payload keys: %s", list((payload.equipment_choices or {}).keys()))
+                logger.info("Returning equipment choices count=%s", len(choices))
                 PENDING = None
                 return JSONResponse({
                     "session": False,
@@ -704,6 +803,22 @@ def start_game(payload: StartRequest) -> JSONResponse:
         )
         pc.short_character_description = payload.character.short_description
 
+    if not proficiency_choices_applied:
+        proficiency_groups = build_class_proficiency_choice_groups(payload.character.char_class)
+        if proficiency_groups:
+            ok, errors = validate_proficiency_choices(proficiency_groups, payload.proficiency_choices or {})
+            if not ok:
+                logger.info("Start blocked: missing/invalid proficiency choices | errors=%s", errors)
+                logger.info("Returning proficiency_groups count=%s", len(proficiency_groups))
+                PENDING = {"pc": pc, "proficiency_groups": proficiency_groups}
+                return JSONResponse({
+                    "session": False,
+                    "requires_proficiency_choices": True,
+                    "proficiency_choices": proficiency_groups,
+                    "errors": errors,
+                })
+            apply_proficiency_choices(pc, payload.proficiency_choices or {}, proficiency_groups)
+
     if not language_choices_applied:
         language_groups = build_language_choice_groups(
             payload.character.race,
@@ -713,6 +828,8 @@ def start_game(payload: StartRequest) -> JSONResponse:
         if language_groups:
             ok, errors = validate_language_choices(language_groups, payload.language_choices or {})
             if not ok:
+                logger.info("Start blocked: missing/invalid language choices | errors=%s", errors)
+                logger.info("Returning language_groups count=%s", len(language_groups))
                 PENDING = {"pc": pc, "language_groups": language_groups}
                 return JSONResponse({
                     "session": False,
@@ -726,6 +843,8 @@ def start_game(payload: StartRequest) -> JSONResponse:
     if spell_groups:
         ok, errors = validate_spell_choices(spell_groups, payload.spell_choices or {})
         if not ok:
+            logger.info("Start blocked: missing/invalid spell choices | errors=%s", errors)
+            logger.info("Returning spell_groups count=%s", len(spell_groups))
             PENDING = {"pc": pc, "spell_groups": spell_groups}
             return JSONResponse({
                 "session": False,
@@ -737,6 +856,7 @@ def start_game(payload: StartRequest) -> JSONResponse:
 
     SESSION = GameSession(payload, pc=pc)
     PENDING = None
+    logger.info("Adventure started.")
     return JSONResponse({
         "session": True,
         "narrative": SESSION.last_narrative(),
@@ -841,6 +961,19 @@ def use_resource(payload: ResourceUseRequest) -> JSONResponse:
         "character": SESSION.character_summary(),
         "combat": SESSION.combat_payload(),
     })
+
+
+@app.post("/api/log")
+def client_log(payload: ClientLogRequest) -> JSONResponse:
+    level = (payload.level or "info").lower()
+    data = payload.data or {}
+    if level == "warning":
+        logger.warning("CLIENT | %s | %s", payload.message, data)
+    elif level == "error":
+        logger.error("CLIENT | %s | %s", payload.message, data)
+    else:
+        logger.info("CLIENT | %s | %s", payload.message, data)
+    return JSONResponse({"ok": True})
 
 
 @app.post("/api/reset")

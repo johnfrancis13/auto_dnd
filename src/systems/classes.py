@@ -150,8 +150,7 @@ class CharClass:
                 item = option.get("item") or {}
                 if item.get("name", "").startswith("Skill:"):
                     skill_choices.append(_srd_skill_name(item.get("name")))
-        if skill_choices:
-            class_profs[ProficiencyType.SKILL] = set(skill_choices[:choose or len(skill_choices)])
+        # Class skill choices are handled by the UI selection flow.
 
         if class_profs:
             character.proficiencies.add_proficiencies(class_profs)

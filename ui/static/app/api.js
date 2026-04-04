@@ -3,8 +3,10 @@ import {
   messagesEl,
   charForm,
   equipmentErrorsEl,
+  proficiencyErrorsEl,
   languageErrorsEl,
   spellErrorsEl,
+  startErrorsEl,
   sheetTabs,
   thinkingIndicator,
 } from "./dom.js";
@@ -13,13 +15,37 @@ import { renderCharacter, renderImages } from "./render.js";
 import { renderCombat } from "./combat.js";
 import {
   renderEquipmentChoices,
+  validateEquipmentSelections,
+  renderProficiencyChoices,
   renderLanguageChoices,
   renderSpellChoices,
   collectEquipmentSelections,
+  collectProficiencySelections,
   collectLanguageSelections,
   collectSpellSelections,
 } from "./forms.js";
 import { setRollPending } from "./rolls.js";
+
+function logClient(message, data = {}, level = "info") {
+  try {
+    const payload = JSON.stringify({ message, data, level });
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: "application/json" });
+      const ok = navigator.sendBeacon("/api/log", blob);
+      if (ok) {
+        return;
+      }
+    }
+    fetch("/api/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    }).catch(() => {});
+  } catch (err) {
+    console.warn("Failed to send client log", err);
+  }
+}
 
 export async function resetUI() {
   appState.session = false;
@@ -34,7 +60,11 @@ export async function resetUI() {
   if (thinkingIndicator) {
     thinkingIndicator.classList.add("hidden");
   }
+  if (startErrorsEl) {
+    startErrorsEl.textContent = "";
+  }
   renderEquipmentChoices([]);
+  renderProficiencyChoices([]);
   renderLanguageChoices([]);
   renderSpellChoices([]);
   sheetTabs.querySelectorAll(".tab").forEach((tab) => {
@@ -52,6 +82,42 @@ export async function resetUI() {
   }
 }
 
+export async function checkPendingChoices() {
+  try {
+    const res = await fetch("/api/pending");
+    const data = await res.json();
+    if (!data || !data.pending) {
+      return;
+    }
+    if (data.requires_proficiency_choices && Array.isArray(data.proficiency_choices)) {
+      renderProficiencyChoices(data.proficiency_choices);
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_language_choices && Array.isArray(data.language_choices)) {
+      renderLanguageChoices(data.language_choices);
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices && Array.isArray(data.spell_choices)) {
+      renderSpellChoices(data.spell_choices);
+      showSetupScreen();
+    }
+  } catch (err) {
+    console.warn("Failed to check pending choices", err);
+  }
+}
+
+function beginStartLoading(message = "Starting adventure...") {
+  showGameScreen();
+  messagesEl.innerHTML = "";
+  renderCharacter(null);
+  renderImages([]);
+  renderCombat({ active: false });
+  setSessionActive(true, "exploration");
+  addMessage("dm", message);
+}
+
 export async function startGame() {
   setLlmPending(true);
   const formData = new FormData(charForm);
@@ -61,39 +127,114 @@ export async function startGame() {
     think: false,
   };
   try {
+    logClient("StartGame: submit", {
+      character: payload.character,
+    });
     uiState.pendingStartPayload = payload;
-    showGameScreen();
-    messagesEl.innerHTML = "";
-    renderCharacter(null);
-    renderImages([]);
-    renderCombat({ active: false });
-    setSessionActive(true, "exploration");
-    addMessage("dm", "Starting adventure...");
+    if (startErrorsEl) {
+      startErrorsEl.textContent = "";
+    }
     const res = await fetch("/api/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    logClient("StartGame: response status", { status: res.status, ok: res.ok });
     const data = await res.json();
-    if (data.requires_choices) {
+    logClient("StartGame: response data", {
+      keys: Object.keys(data || {}),
+      requires_choices: !!data.requires_choices,
+      requires_proficiency_choices: !!data.requires_proficiency_choices,
+      requires_language_choices: !!data.requires_language_choices,
+      requires_spell_choices: !!data.requires_spell_choices,
+      choices_len: Array.isArray(data.choices) ? data.choices.length : 0,
+      proficiency_len: Array.isArray(data.proficiency_choices) ? data.proficiency_choices.length : 0,
+      language_len: Array.isArray(data.language_choices) ? data.language_choices.length : 0,
+      spell_len: Array.isArray(data.spell_choices) ? data.spell_choices.length : 0,
+      session: !!data.session,
+      error: data.error || null,
+    });
+    console.log("Start response", data);
+    const hasEquipmentChoices = Array.isArray(data.choices) && data.choices.length > 0;
+    const hasProficiencyChoices = Array.isArray(data.proficiency_choices) && data.proficiency_choices.length > 0;
+    const hasLanguageChoices = Array.isArray(data.language_choices) && data.language_choices.length > 0;
+    const hasSpellChoices = Array.isArray(data.spell_choices) && data.spell_choices.length > 0;
+    if (
+      data.requires_choices ||
+      data.requires_proficiency_choices ||
+      data.requires_language_choices ||
+      data.requires_spell_choices ||
+      hasEquipmentChoices ||
+      hasProficiencyChoices ||
+      hasLanguageChoices ||
+      hasSpellChoices
+    ) {
+      console.warn("Start response requires additional choices.", {
+        requires_choices: !!data.requires_choices,
+        requires_proficiency_choices: !!data.requires_proficiency_choices,
+        requires_language_choices: !!data.requires_language_choices,
+        requires_spell_choices: !!data.requires_spell_choices,
+      });
+    }
+    if (data.requires_choices || hasEquipmentChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Starting equipment choices required.";
+      }
+      if (!hasEquipmentChoices) {
+        equipmentErrorsEl.textContent = "Equipment choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderEquipmentChoices(data.choices);
       equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
-    if (data.requires_language_choices) {
+    if (data.requires_proficiency_choices || hasProficiencyChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Class proficiency choices required.";
+      }
+      if (!hasProficiencyChoices) {
+        proficiencyErrorsEl.textContent = "Proficiency choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderProficiencyChoices(data.proficiency_choices);
+      proficiencyErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_language_choices || hasLanguageChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Language choices required.";
+      }
+      if (!hasLanguageChoices) {
+        languageErrorsEl.textContent = "Language choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderLanguageChoices(data.language_choices);
       languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
-    if (data.requires_spell_choices) {
+    if (data.requires_spell_choices || hasSpellChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Spell choices required.";
+      }
+      if (!hasSpellChoices) {
+        spellErrorsEl.textContent = "Spell choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderSpellChoices(data.spell_choices);
       spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
@@ -101,14 +242,18 @@ export async function startGame() {
     }
     if (!data.session) {
       equipmentErrorsEl.textContent = data.error || "Unable to start session.";
+      if (startErrorsEl) {
+        startErrorsEl.textContent = data.error || "Unable to start session.";
+      }
       setSessionActive(false);
       showSetupScreen();
+      await checkPendingChoices();
       return;
     }
     appState.session = data.session;
+    messagesEl.innerHTML = "";
     renderCharacter(data.character);
     renderImages(data.images);
-    messagesEl.innerHTML = "";
     addMessage("dm", data.narrative || "Adventure started.");
     setSessionActive(true, data.game_state?.mode || "exploration");
     renderCombat(data.combat);
@@ -122,20 +267,37 @@ export async function submitEquipmentChoices() {
   if (!uiState.pendingStartPayload) {
     return;
   }
+  if (!uiState.pendingEquipmentChoices || uiState.pendingEquipmentChoices.length === 0) {
+    console.warn("No pending equipment choices at submit time.");
+    if (startErrorsEl) {
+      startErrorsEl.textContent = "No equipment choices were loaded. Please restart the flow.";
+    }
+    return;
+  }
+  const validation = validateEquipmentSelections();
+  if (!validation.ok) {
+    equipmentErrorsEl.textContent = validation.errors.join(" ");
+    if (startErrorsEl) {
+      startErrorsEl.textContent = "Please finish all equipment selections.";
+    }
+    return;
+  }
+  const checkedInputs = Array.from(
+    document.querySelectorAll("#equipment-choices-form input:checked")
+  ).map((el) => `${el.name}=${el.value}`);
+  console.log("Equipment checked inputs", checkedInputs);
   const equipmentChoices = collectEquipmentSelections();
+  console.log("Equipment choices payload", equipmentChoices);
   renderEquipmentChoices([]);
   const payload = {
     ...uiState.pendingStartPayload,
     equipment_choices: equipmentChoices,
   };
   uiState.pendingStartPayload = payload;
-  showGameScreen();
-  messagesEl.innerHTML = "";
-  renderCharacter(null);
-  renderImages([]);
-  renderCombat({ active: false });
-  setSessionActive(true, "exploration");
-  addMessage("dm", "Starting adventure...");
+  if (startErrorsEl) {
+    startErrorsEl.textContent = "";
+  }
+  beginStartLoading();
   setLlmPending(true);
   try {
     const res = await fetch("/api/start", {
@@ -143,26 +305,104 @@ export async function submitEquipmentChoices() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    logClient("EquipmentSubmit: response status", { status: res.status, ok: res.ok });
     const data = await res.json();
-    if (data.requires_choices) {
+    logClient("EquipmentSubmit: response data", {
+      keys: Object.keys(data || {}),
+      requires_choices: !!data.requires_choices,
+      requires_proficiency_choices: !!data.requires_proficiency_choices,
+      requires_language_choices: !!data.requires_language_choices,
+      requires_spell_choices: !!data.requires_spell_choices,
+      choices_len: Array.isArray(data.choices) ? data.choices.length : 0,
+      proficiency_len: Array.isArray(data.proficiency_choices) ? data.proficiency_choices.length : 0,
+      language_len: Array.isArray(data.language_choices) ? data.language_choices.length : 0,
+      spell_len: Array.isArray(data.spell_choices) ? data.spell_choices.length : 0,
+      session: !!data.session,
+      error: data.error || null,
+    });
+    console.log("Start response (equipment)", data);
+    const hasEquipmentChoices = Array.isArray(data.choices) && data.choices.length > 0;
+    const hasProficiencyChoices = Array.isArray(data.proficiency_choices) && data.proficiency_choices.length > 0;
+    const hasLanguageChoices = Array.isArray(data.language_choices) && data.language_choices.length > 0;
+    const hasSpellChoices = Array.isArray(data.spell_choices) && data.spell_choices.length > 0;
+    if (
+      data.requires_choices ||
+      data.requires_proficiency_choices ||
+      data.requires_language_choices ||
+      data.requires_spell_choices ||
+      hasEquipmentChoices ||
+      hasProficiencyChoices ||
+      hasLanguageChoices ||
+      hasSpellChoices
+    ) {
+      console.warn("Start response requires additional choices.", {
+        requires_choices: !!data.requires_choices,
+        requires_proficiency_choices: !!data.requires_proficiency_choices,
+        requires_language_choices: !!data.requires_language_choices,
+        requires_spell_choices: !!data.requires_spell_choices,
+      });
+    }
+    if (data.requires_choices || hasEquipmentChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = data.errors
+          ? `Starting equipment choices required: ${data.errors.join(" ")}`
+          : "Starting equipment choices required.";
+      }
+      if (!hasEquipmentChoices) {
+        equipmentErrorsEl.textContent = "Equipment choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderEquipmentChoices(data.choices);
       equipmentErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
-    if (data.requires_language_choices) {
+    if (data.requires_proficiency_choices || hasProficiencyChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Class proficiency choices required.";
+      }
+      if (!hasProficiencyChoices) {
+        proficiencyErrorsEl.textContent = "Proficiency choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderProficiencyChoices(data.proficiency_choices);
+      proficiencyErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_language_choices || hasLanguageChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Language choices required.";
+      }
+      if (!hasLanguageChoices) {
+        languageErrorsEl.textContent = "Language choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderLanguageChoices(data.language_choices);
       languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
-    if (data.requires_spell_choices) {
+    if (data.requires_spell_choices || hasSpellChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Spell choices required.";
+      }
+      if (!hasSpellChoices) {
+        spellErrorsEl.textContent = "Spell choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderSpellChoices(data.spell_choices);
       spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
@@ -170,15 +410,19 @@ export async function submitEquipmentChoices() {
     }
     if (!data.session) {
       equipmentErrorsEl.textContent = data.error || "Unable to start session.";
+      if (startErrorsEl) {
+        startErrorsEl.textContent = data.error || "Unable to start session.";
+      }
       setSessionActive(false);
       showSetupScreen();
+      await checkPendingChoices();
       return;
     }
     renderEquipmentChoices([]);
     appState.session = data.session;
+    messagesEl.innerHTML = "";
     renderCharacter(data.character);
     renderImages(data.images);
-    messagesEl.innerHTML = "";
     addMessage("dm", data.narrative || "Adventure started.");
     setSessionActive(true, data.game_state?.mode || "exploration");
     renderCombat(data.combat);
@@ -199,13 +443,10 @@ export async function submitSpellChoices() {
     spell_choices: spellChoices,
   };
   uiState.pendingStartPayload = payload;
-  showGameScreen();
-  messagesEl.innerHTML = "";
-  renderCharacter(null);
-  renderImages([]);
-  renderCombat({ active: false });
-  setSessionActive(true, "exploration");
-  addMessage("dm", "Starting adventure...");
+  if (startErrorsEl) {
+    startErrorsEl.textContent = "";
+  }
+  beginStartLoading();
   setLlmPending(true);
   try {
     const res = await fetch("/api/start", {
@@ -214,17 +455,71 @@ export async function submitSpellChoices() {
       body: JSON.stringify(payload),
     });
     const data = await res.json();
-    if (data.requires_language_choices) {
+    console.log("Start response (spells)", data);
+    const hasEquipmentChoices = Array.isArray(data.choices) && data.choices.length > 0;
+    const hasProficiencyChoices = Array.isArray(data.proficiency_choices) && data.proficiency_choices.length > 0;
+    const hasLanguageChoices = Array.isArray(data.language_choices) && data.language_choices.length > 0;
+    const hasSpellChoices = Array.isArray(data.spell_choices) && data.spell_choices.length > 0;
+    if (
+      data.requires_choices ||
+      data.requires_proficiency_choices ||
+      data.requires_language_choices ||
+      data.requires_spell_choices ||
+      hasEquipmentChoices ||
+      hasProficiencyChoices ||
+      hasLanguageChoices ||
+      hasSpellChoices
+    ) {
+      console.warn("Start response requires additional choices.", {
+        requires_choices: !!data.requires_choices,
+        requires_proficiency_choices: !!data.requires_proficiency_choices,
+        requires_language_choices: !!data.requires_language_choices,
+        requires_spell_choices: !!data.requires_spell_choices,
+      });
+    }
+    if (data.requires_language_choices || hasLanguageChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Language choices required.";
+      }
+      if (!hasLanguageChoices) {
+        languageErrorsEl.textContent = "Language choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderLanguageChoices(data.language_choices);
       languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
-    if (data.requires_spell_choices) {
+    if (data.requires_proficiency_choices || hasProficiencyChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Class proficiency choices required.";
+      }
+      if (!hasProficiencyChoices) {
+        proficiencyErrorsEl.textContent = "Proficiency choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderProficiencyChoices(data.proficiency_choices);
+      proficiencyErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices || hasSpellChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Spell choices required.";
+      }
+      if (!hasSpellChoices) {
+        spellErrorsEl.textContent = "Spell choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderSpellChoices(data.spell_choices);
       spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
@@ -232,14 +527,18 @@ export async function submitSpellChoices() {
     }
     if (!data.session) {
       spellErrorsEl.textContent = data.error || "Unable to start session.";
+      if (startErrorsEl) {
+        startErrorsEl.textContent = data.error || "Unable to start session.";
+      }
       setSessionActive(false);
       showSetupScreen();
+      await checkPendingChoices();
       return;
     }
     appState.session = data.session;
+    messagesEl.innerHTML = "";
     renderCharacter(data.character);
     renderImages(data.images);
-    messagesEl.innerHTML = "";
     addMessage("dm", data.narrative || "Adventure started.");
     setSessionActive(true, data.game_state?.mode || "exploration");
     renderCombat(data.combat);
@@ -260,13 +559,10 @@ export async function submitLanguageChoices() {
     language_choices: languageChoices,
   };
   uiState.pendingStartPayload = payload;
-  showGameScreen();
-  messagesEl.innerHTML = "";
-  renderCharacter(null);
-  renderImages([]);
-  renderCombat({ active: false });
-  setSessionActive(true, "exploration");
-  addMessage("dm", "Starting adventure...");
+  if (startErrorsEl) {
+    startErrorsEl.textContent = "";
+  }
+  beginStartLoading();
   setLlmPending(true);
   try {
     const res = await fetch("/api/start", {
@@ -275,17 +571,71 @@ export async function submitLanguageChoices() {
       body: JSON.stringify(payload),
     });
     const data = await res.json();
-    if (data.requires_language_choices) {
+    console.log("Start response (languages)", data);
+    const hasEquipmentChoices = Array.isArray(data.choices) && data.choices.length > 0;
+    const hasProficiencyChoices = Array.isArray(data.proficiency_choices) && data.proficiency_choices.length > 0;
+    const hasLanguageChoices = Array.isArray(data.language_choices) && data.language_choices.length > 0;
+    const hasSpellChoices = Array.isArray(data.spell_choices) && data.spell_choices.length > 0;
+    if (
+      data.requires_choices ||
+      data.requires_proficiency_choices ||
+      data.requires_language_choices ||
+      data.requires_spell_choices ||
+      hasEquipmentChoices ||
+      hasProficiencyChoices ||
+      hasLanguageChoices ||
+      hasSpellChoices
+    ) {
+      console.warn("Start response requires additional choices.", {
+        requires_choices: !!data.requires_choices,
+        requires_proficiency_choices: !!data.requires_proficiency_choices,
+        requires_language_choices: !!data.requires_language_choices,
+        requires_spell_choices: !!data.requires_spell_choices,
+      });
+    }
+    if (data.requires_language_choices || hasLanguageChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Language choices required.";
+      }
+      if (!hasLanguageChoices) {
+        languageErrorsEl.textContent = "Language choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderLanguageChoices(data.language_choices);
       languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
       return;
     }
-    if (data.requires_spell_choices) {
+    if (data.requires_proficiency_choices || hasProficiencyChoices) {
       messagesEl.innerHTML = "";
       setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Class proficiency choices required.";
+      }
+      if (!hasProficiencyChoices) {
+        proficiencyErrorsEl.textContent = "Proficiency choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderProficiencyChoices(data.proficiency_choices);
+      proficiencyErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices || hasSpellChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Spell choices required.";
+      }
+      if (!hasSpellChoices) {
+        spellErrorsEl.textContent = "Spell choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
       renderSpellChoices(data.spell_choices);
       spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
       showSetupScreen();
@@ -293,14 +643,134 @@ export async function submitLanguageChoices() {
     }
     if (!data.session) {
       languageErrorsEl.textContent = data.error || "Unable to start session.";
+      if (startErrorsEl) {
+        startErrorsEl.textContent = data.error || "Unable to start session.";
+      }
       setSessionActive(false);
       showSetupScreen();
+      await checkPendingChoices();
       return;
     }
     appState.session = data.session;
+    messagesEl.innerHTML = "";
     renderCharacter(data.character);
     renderImages(data.images);
+    addMessage("dm", data.narrative || "Adventure started.");
+    setSessionActive(true, data.game_state?.mode || "exploration");
+    renderCombat(data.combat);
+    showGameScreen();
+  } finally {
+    setLlmPending(false);
+  }
+}
+
+export async function submitProficiencyChoices() {
+  if (!uiState.pendingStartPayload) {
+    return;
+  }
+  const proficiencyChoices = collectProficiencySelections();
+  renderProficiencyChoices([]);
+  const payload = {
+    ...uiState.pendingStartPayload,
+    proficiency_choices: proficiencyChoices,
+  };
+  uiState.pendingStartPayload = payload;
+  if (startErrorsEl) {
+    startErrorsEl.textContent = "";
+  }
+  beginStartLoading();
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    console.log("Start response (proficiencies)", data);
+    const hasEquipmentChoices = Array.isArray(data.choices) && data.choices.length > 0;
+    const hasProficiencyChoices = Array.isArray(data.proficiency_choices) && data.proficiency_choices.length > 0;
+    const hasLanguageChoices = Array.isArray(data.language_choices) && data.language_choices.length > 0;
+    const hasSpellChoices = Array.isArray(data.spell_choices) && data.spell_choices.length > 0;
+    if (
+      data.requires_choices ||
+      data.requires_proficiency_choices ||
+      data.requires_language_choices ||
+      data.requires_spell_choices ||
+      hasEquipmentChoices ||
+      hasProficiencyChoices ||
+      hasLanguageChoices ||
+      hasSpellChoices
+    ) {
+      console.warn("Start response requires additional choices.", {
+        requires_choices: !!data.requires_choices,
+        requires_proficiency_choices: !!data.requires_proficiency_choices,
+        requires_language_choices: !!data.requires_language_choices,
+        requires_spell_choices: !!data.requires_spell_choices,
+      });
+    }
+    if (data.requires_proficiency_choices || hasProficiencyChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Class proficiency choices required.";
+      }
+      if (!hasProficiencyChoices) {
+        proficiencyErrorsEl.textContent = "Proficiency choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderProficiencyChoices(data.proficiency_choices);
+      proficiencyErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_language_choices || hasLanguageChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Language choices required.";
+      }
+      if (!hasLanguageChoices) {
+        languageErrorsEl.textContent = "Language choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderLanguageChoices(data.language_choices);
+      languageErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (data.requires_spell_choices || hasSpellChoices) {
+      messagesEl.innerHTML = "";
+      setSessionActive(false);
+      if (startErrorsEl) {
+        startErrorsEl.textContent = "Spell choices required.";
+      }
+      if (!hasSpellChoices) {
+        spellErrorsEl.textContent = "Spell choices were required but not provided. Please restart.";
+        showSetupScreen();
+        return;
+      }
+      renderSpellChoices(data.spell_choices);
+      spellErrorsEl.textContent = data.errors ? data.errors.join(" ") : "";
+      showSetupScreen();
+      return;
+    }
+    if (!data.session) {
+      proficiencyErrorsEl.textContent = data.error || "Unable to start session.";
+      if (startErrorsEl) {
+        startErrorsEl.textContent = data.error || "Unable to start session.";
+      }
+      setSessionActive(false);
+      showSetupScreen();
+      await checkPendingChoices();
+      return;
+    }
+    appState.session = data.session;
     messagesEl.innerHTML = "";
+    renderCharacter(data.character);
+    renderImages(data.images);
     addMessage("dm", data.narrative || "Adventure started.");
     setSessionActive(true, data.game_state?.mode || "exploration");
     renderCombat(data.combat);

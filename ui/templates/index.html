@@ -4,8 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Auto DnD</title>
-    <link rel="stylesheet" href="/static/app.css?v=20260401d" />
-    <script type="module" defer src="/static/app.js?v=20260401d"></script>
+    <link rel="stylesheet" href="/static/app.css?v=20260403n" />
+    <script>
+      fetch("/api/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level: "info", message: "INLINE: index loaded", data: {} }),
+        keepalive: true,
+      }).catch(() => {});
+    </script>
+    <script type="module" defer src="/static/app.js?v=20260403n"></script>
   </head>
   <body>
     <div id="setup-screen" class="setup-screen">
@@ -72,6 +80,7 @@
           </label>
           <button type="button" id="start-game">Start Adventure</button>
         </form>
+        <div id="start-errors" class="muted"></div>
       </section>
       <section class="setup-panel instructions">
         <h2>How It Works</h2>
@@ -197,6 +206,19 @@
         <form id="spell-choices-form" class="equipment-form"></form>
         <div class="modal-actions">
           <button type="button" id="spell-choices-submit">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="proficiency-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="proficiency-modal-title">
+        <h2 id="proficiency-modal-title">Choose Proficiencies</h2>
+        <p class="muted">Select your class proficiency choices to begin the adventure.</p>
+        <div id="proficiency-choices-errors" class="muted"></div>
+        <form id="proficiency-choices-form" class="equipment-form"></form>
+        <div class="modal-actions">
+          <button type="button" id="proficiency-choices-submit">Continue</button>
         </div>
       </div>
     </div>

@@ -2,9 +2,11 @@ import { appState, uiState } from "./state.js";
 import {
   startButton,
   equipmentSubmit,
+  proficiencySubmit,
   languageSubmit,
   spellSubmit,
   spellFormEl,
+  proficiencyFormEl,
   languageFormEl,
   newGameButton,
   chatForm,
@@ -26,14 +28,20 @@ import {
   updateTargetingHighlights,
   syncTargetSelect,
 } from "./combat.js";
-import { enforceSpellChoiceLimits, enforceLanguageChoiceLimits } from "./forms.js";
+import {
+  enforceSpellChoiceLimits,
+  enforceLanguageChoiceLimits,
+  enforceProficiencyChoiceLimits,
+} from "./forms.js";
 import { enforceMaxTargets } from "./rolls.js";
 import {
   resetUI,
   startGame,
   submitEquipmentChoices,
+  submitProficiencyChoices,
   submitLanguageChoices,
   submitSpellChoices,
+  checkPendingChoices,
   sendMessage,
   sendCombatAction,
   sendCombatEndTurn,
@@ -42,7 +50,7 @@ import {
   togglePrepare,
   rollAction,
   useResource,
-} from "./api.js";
+} from "./api.js?v=20260403n";
 
 function handleMoveCellClick(x, y) {
   const combat = getCurrentCombatPayload();
@@ -76,50 +84,85 @@ function handleMoveCellClick(x, y) {
 }
 
 export function boot() {
+  fetch("/api/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ level: "info", message: "BOOT: init", data: {} }),
+    keepalive: true,
+  }).catch(() => {});
   setMoveHandler(handleMoveCellClick);
 
-  startButton.addEventListener("click", () => {
-    startGame().catch((err) => {
-      addMessage("dm", `Failed to start: ${err}`);
+  if (startButton) {
+    startButton.addEventListener("click", () => {
+      startGame().catch((err) => {
+        addMessage("dm", `Failed to start: ${err}`);
+      });
     });
-  });
-  equipmentSubmit.addEventListener("click", () => {
-    submitEquipmentChoices().catch((err) => {
-      addMessage("dm", `Failed to start: ${err}`);
+  }
+  if (equipmentSubmit) {
+    equipmentSubmit.addEventListener("click", () => {
+      submitEquipmentChoices().catch((err) => {
+        addMessage("dm", `Failed to start: ${err}`);
+      });
     });
-  });
-  languageSubmit.addEventListener("click", () => {
-    submitLanguageChoices().catch((err) => {
-      addMessage("dm", `Failed to start: ${err}`);
+  }
+  if (proficiencySubmit) {
+    proficiencySubmit.addEventListener("click", () => {
+      submitProficiencyChoices().catch((err) => {
+        addMessage("dm", `Failed to start: ${err}`);
+      });
     });
-  });
-  spellSubmit.addEventListener("click", () => {
-    submitSpellChoices().catch((err) => {
-      addMessage("dm", `Failed to start: ${err}`);
+  }
+  if (languageSubmit) {
+    languageSubmit.addEventListener("click", () => {
+      submitLanguageChoices().catch((err) => {
+        addMessage("dm", `Failed to start: ${err}`);
+      });
     });
-  });
-  spellFormEl.addEventListener("change", (event) => {
-    enforceSpellChoiceLimits(event.target);
-  });
-  languageFormEl.addEventListener("change", (event) => {
-    enforceLanguageChoiceLimits(event.target);
-  });
-  newGameButton.addEventListener("click", () => {
-    resetUI();
-  });
-  chatForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const content = chatInput.value.trim();
-    if (!content) {
-      return;
-    }
-    addMessage("user", content);
-    chatInput.value = "";
-    sendMessage(content).catch((err) => {
-      addMessage("dm", `Failed to send: ${err}`);
+  }
+  if (spellSubmit) {
+    spellSubmit.addEventListener("click", () => {
+      submitSpellChoices().catch((err) => {
+        addMessage("dm", `Failed to start: ${err}`);
+      });
     });
-  });
-  sheetBody.addEventListener("click", (event) => {
+  }
+  if (spellFormEl) {
+    spellFormEl.addEventListener("change", (event) => {
+      enforceSpellChoiceLimits(event.target);
+    });
+  }
+  if (proficiencyFormEl) {
+    proficiencyFormEl.addEventListener("change", (event) => {
+      enforceProficiencyChoiceLimits(event.target);
+    });
+  }
+  if (languageFormEl) {
+    languageFormEl.addEventListener("change", (event) => {
+      enforceLanguageChoiceLimits(event.target);
+    });
+  }
+  if (newGameButton) {
+    newGameButton.addEventListener("click", () => {
+      resetUI();
+    });
+  }
+  if (chatForm) {
+    chatForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const content = chatInput.value.trim();
+      if (!content) {
+        return;
+      }
+      addMessage("user", content);
+      chatInput.value = "";
+      sendMessage(content).catch((err) => {
+        addMessage("dm", `Failed to send: ${err}`);
+      });
+    });
+  }
+  if (sheetBody) {
+    sheetBody.addEventListener("click", (event) => {
     const equipBtn = event.target.closest("[data-equip-toggle]");
     if (equipBtn) {
       const itemName = equipBtn.dataset.itemName;
@@ -166,8 +209,10 @@ export function boot() {
         addMessage("dm", `Failed to roll: ${err}`);
       });
     }
-  });
-  sheetBody.addEventListener("change", (event) => {
+    });
+  }
+  if (sheetBody) {
+    sheetBody.addEventListener("change", (event) => {
     const spellFilter = event.target.closest("[data-spell-filter]");
     if (spellFilter) {
       uiState.spellFilterPreparedOnly = !!spellFilter.checked;
@@ -184,8 +229,10 @@ export function boot() {
     if (targetSelect) {
       enforceMaxTargets(targetSelect);
     }
-  });
-  combatSubmit.addEventListener("click", () => {
+    });
+  }
+  if (combatSubmit) {
+    combatSubmit.addEventListener("click", () => {
     const actionId = combatActionSelect.value;
     const targetIds = uiState.selectedTargets.length
       ? uiState.selectedTargets
@@ -198,14 +245,18 @@ export function boot() {
     sendCombatAction(actionId, targetIds).catch((err) => {
       addMessage("dm", `Failed to resolve action: ${err}`);
     });
-  });
-  combatEndTurn.addEventListener("click", () => {
+    });
+  }
+  if (combatEndTurn) {
+    combatEndTurn.addEventListener("click", () => {
     addMessage("user", "End Turn");
     sendCombatEndTurn().catch((err) => {
       addMessage("dm", `Failed to end turn: ${err}`);
     });
-  });
-  sheetTabs.addEventListener("click", (event) => {
+    });
+  }
+  if (sheetTabs) {
+    sheetTabs.addEventListener("click", (event) => {
     const button = event.target.closest(".tab");
     if (!button) {
       return;
@@ -219,22 +270,28 @@ export function boot() {
       tab.classList.toggle("active", tab.dataset.tab === uiState.activeTab);
     });
     renderCharacter(appState.character);
-  });
-  combatActionSelect.addEventListener("change", () => {
+    });
+  }
+  if (combatActionSelect) {
+    combatActionSelect.addEventListener("change", () => {
     const actions = appState.character?.actions?.actions || [];
     uiState.selectedTargets = [];
     syncTargetSelect();
     const combat = getCurrentCombatPayload();
     updateTargetingHighlights(getCurrentMap(), actions, combat, combat.targets || []);
-  });
-  combatTargetSelect.addEventListener("change", () => {
+    });
+  }
+  if (combatTargetSelect) {
+    combatTargetSelect.addEventListener("change", () => {
     uiState.selectedTargets = Array.from(combatTargetSelect.selectedOptions).map((opt) => opt.value);
     syncTargetSelect();
-  });
+    });
+  }
 
   setSessionActive(false);
   renderCharacter(null);
   renderImages([]);
   renderCombat({ active: false });
   showSetupScreen();
+  checkPendingChoices();
 }
