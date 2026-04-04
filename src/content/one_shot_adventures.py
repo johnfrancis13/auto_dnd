@@ -3,39 +3,28 @@ one_shot_adventures = adventures = [
 {
     "title": "The Lighthouse That Forgot the Sea",
     "duration_min": 45,
-    "world": {
-        "problem": "An inland lighthouse shines nightly despite no coastline.",
-        "cause": "Reality distortion anchored to an old mariner's oath.",
-        "pressure": "Travelers vanish into the light."
-    },
-    "actors": {
-        "keeper_echo": {
-            "motivation": "Fulfill sworn duty eternally.",
-            "rules": [
-                "Speaks as if ships still sail nearby.",
-                "Resists accepting the sea is gone."
-            ]
-        },
-        "townsfolk": {
-            "motivation": "Stop disappearances.",
-            "risk": "May destroy lighthouse impulsively."
-        }
-    },
+    "hook": "The town council hires you after three travelers vanish in a beam of light from an inland lighthouse.",
+    "premise": "An oath-bound mariner echo keeps a lighthouse burning though the coast is long gone.",
+    "stakes": "More people disappear and the distortion spreads across the hill.",
     "scenes": [
         {"name": "Town Square", "tags": ["missing posters", "fear"]},
         {"name": "Hilltop Lighthouse", "tags": ["impossible horizon", "strange gravity"]},
         {"name": "Lantern Room", "tags": ["blinding light", "memory fragments"]}
     ],
+    "npcs": [
+        {"name": "Keeper Echo", "role": "oath-bound spirit", "motivation": "keep the light burning", "mannerisms": "speaks as if ships still sail"},
+        {"name": "Worried Townsfolk", "role": "mob", "motivation": "end disappearances quickly", "mannerisms": "impatient and afraid"}
+    ],
     "complications": [
-        "PC sees visions of distant ocean.",
-        "Light intensifies unpredictably.",
-        "Townsfolk approach with torches."
+        "The PC sees visions of a distant ocean.",
+        "The light intensifies unpredictably.",
+        "Townsfolk arrive with torches and pitchforks."
     ],
     "outcomes": [
-        "Oath resolved peacefully.",
-        "Light destroyed violently.",
-        "Distortion spreads.",
-        "Keeper freed."
+        "The oath is resolved peacefully.",
+        "The light is destroyed violently.",
+        "The distortion spreads.",
+        "The keeper is freed."
     ],
     "npc_options": ["Ghost", "Specter", "Will-o'-Wisp"],
     "reward": {
@@ -44,48 +33,37 @@ one_shot_adventures = adventures = [
         "reputation": "Trusted mediator."
     },
     "escalation": [
-        "Light grows brighter nightly.",
-        "More vanishings.",
-        "Reality warps around hill."
+        "The light grows brighter nightly.",
+        "More vanishings occur.",
+        "Reality warps around the hill."
     ]
 },
 
 {
     "title": "The Orchard That Ripens Overnight",
     "duration_min": 45,
-    "world": {
-        "problem": "Fruit appears overnight but causes vivid dreams.",
-        "cause": "Fey crossing beneath orchard.",
-        "pressure": "Villagers growing dependent."
-    },
-    "actors": {
-        "fey_emissary": {
-            "motivation": "Cultivate emotional energy.",
-            "rules": [
-                "Never lies directly.",
-                "Offers bargains disguised as gifts."
-            ]
-        },
-        "orchard_owner": {
-            "motivation": "Protect livelihood.",
-            "risk": "Already ate fruit repeatedly."
-        }
-    },
+    "hook": "The orchard owner begs you to investigate fruit that appears overnight and leaves villagers sleepwalking.",
+    "premise": "A fey crossing beneath the orchard feeds on emotions through enchanted fruit.",
+    "stakes": "The village becomes dependent and the crossing stabilizes permanently.",
     "scenes": [
         {"name": "Dreaming Orchard", "tags": ["glowing fruit", "whispers"]},
         {"name": "Root Hollow", "tags": ["thin veil", "fey sigils"]},
         {"name": "Twilight Crossing", "tags": ["mutable terrain"]}
     ],
+    "npcs": [
+        {"name": "Fey Emissary", "role": "deal-maker", "motivation": "cultivate emotional energy", "mannerisms": "never lies directly"},
+        {"name": "Orchard Owner", "role": "desperate local", "motivation": "save the orchard", "mannerisms": "already half-ensnared"}
+    ],
     "complications": [
-        "PC experiences dream vision.",
-        "Fruit rapidly overripens.",
-        "Villagers defend orchard."
+        "The PC experiences a vivid dream vision.",
+        "Fruit overripens rapidly.",
+        "Villagers defend the orchard."
     ],
     "outcomes": [
-        "Fey pact negotiated.",
-        "Crossing sealed.",
-        "Orchard transformed.",
-        "Village addicted."
+        "A fey pact is negotiated.",
+        "The crossing is sealed.",
+        "The orchard is transformed.",
+        "The village becomes addicted."
     ],
     "npc_options": ["Dryad", "Sprite", "Satyr", "Blink Dog"],
     "reward": {
@@ -95,46 +73,36 @@ one_shot_adventures = adventures = [
     },
     "escalation": [
         "Dreams intensify.",
-        "Sleepwalking incidents.",
-        "Permanent crossing forms."
+        "Sleepwalking incidents rise.",
+        "A permanent crossing forms."
     ]
 },
 
 {
     "title": "The Silent Bell Tower",
     "duration_min": 40,
-    "world": {
-        "problem": "Town bell no longer rings; time feels distorted.",
-        "cause": "Time spirit bound in mechanism.",
-        "pressure": "Market chaos; missed rituals."
-    },
-    "actors": {
-        "bound_spirit": {
-            "motivation": "Escape endless cycle.",
-            "rules": [
-                "Speaks in past and future tense.",
-                "Alters small time details."
-            ]
-        },
-        "priest": {
-            "motivation": "Maintain tradition."
-        }
-    },
+    "hook": "A priest asks you to restore the town bell before a sacred ritual, after time itself starts slipping.",
+    "premise": "A bound time spirit is trapped in the bell mechanism, distorting local time.",
+    "stakes": "Rituals fail, commerce collapses, and time fractures further.",
     "scenes": [
         {"name": "Bell Tower Base", "tags": ["confused townsfolk"]},
         {"name": "Clockwork Interior", "tags": ["moving gears", "temporal echoes"]},
         {"name": "Bell Chamber", "tags": ["frozen dust", "time loops"]}
     ],
+    "npcs": [
+        {"name": "Bound Spirit", "role": "time entity", "motivation": "escape the loop", "mannerisms": "speaks in past and future tense"},
+        {"name": "Local Priest", "role": "caretaker", "motivation": "maintain tradition", "mannerisms": "harried and sincere"}
+    ],
     "complications": [
-        "Short time rewind.",
-        "Aged object suddenly crumbles.",
-        "Bell rings prematurely."
+        "A short time rewind occurs.",
+        "An object suddenly ages and crumbles.",
+        "The bell rings prematurely."
     ],
     "outcomes": [
-        "Spirit freed.",
-        "Spirit rebound differently.",
-        "Tower dismantled.",
-        "Time stabilized partially."
+        "The spirit is freed.",
+        "The spirit is rebound differently.",
+        "The tower is dismantled.",
+        "Time stabilizes only partially."
     ],
     "npc_options": ["Shadow", "Specter", "Wraith"],
     "reward": {
@@ -145,182 +113,151 @@ one_shot_adventures = adventures = [
     "escalation": [
         "Time skips minutes.",
         "Objects age rapidly.",
-        "Day repeats fragment."
+        "The day repeats in fragments."
     ]
 },
-
 
 {
     "title": "The Map That Draws Itself",
     "duration_min": 45,
-    "world": {
-        "problem": "A map updates with unexplored locations nightly.",
-        "cause": "Sentient cartographic spirit.",
-        "pressure": "Map predicting disasters."
-    },
-    "actors": {
-        "map_spirit": {
-            "motivation": "Be completed.",
-            "rules": ["Adds locations when ignored."]
-        }
-    },
+    "hook": "A patron shows you a map that adds new streets each night and now predicts a disaster near your lodgings.",
+    "premise": "A sentient cartographic spirit is trying to complete itself by redrawing the city.",
+    "stakes": "Reality shifts to match the map and a neighborhood is overwritten.",
     "scenes": [
         {"name": "Study Room", "tags": ["animated ink"]},
         {"name": "Newly Drawn Alley", "tags": ["architecture mismatch"]},
         {"name": "Blank Space", "tags": ["reality thin"]}
     ],
-    "complications": ["Ink spreads.", "Location shifts."],
-    "outcomes": ["Map completed.", "Map burned.", "Map bonded to PC."],
+    "npcs": [
+        {"name": "Map Spirit", "role": "cartographic entity", "motivation": "be completed", "mannerisms": "adds locations when ignored"}
+    ],
+    "complications": ["Ink spreads.", "Locations shift."],
+    "outcomes": ["The map is completed.", "The map is burned.", "The map bonds to the PC."],
     "npc_options": ["Animated Armor", "Flying Sword", "Rug of Smothering"],
     "reward": {
         "gold": 75,
         "item": "Self-Updating Map (marks nearest settlement once/day)",
         "reputation": "Local curiosity."
     },
-    "escalation": ["More areas drawn.", "Warnings appear.", "Entire district redrawn."]
+    "escalation": ["More areas are drawn.", "Warnings appear.", "A district is redrawn overnight."]
 },
 
 {
     "title": "The House That Rearranges",
     "duration_min": 45,
-    "world": {
-        "problem": "Interior rooms shift unpredictably.",
-        "cause": "Lonely mimic-colony organism.",
-        "pressure": "Residents trapped inside."
-    },
-    "actors": {
-        "house_entity": {
-            "motivation": "Keep occupants forever.",
-            "rules": ["Rearranges when ignored."]
-        }
-    },
+    "hook": "A neighbor begs you to retrieve trapped residents from a house whose rooms keep moving.",
+    "premise": "A lonely mimic-colony rearranges the interior to keep occupants forever.",
+    "stakes": "Residents are lost and the house expands into the block.",
     "scenes": [
         {"name": "Entry Hall", "tags": ["familiar but wrong"]},
         {"name": "Moving Corridor", "tags": ["sliding walls"]},
         {"name": "Heart Room", "tags": ["organic beams"]}
     ],
-    "complications": ["Room seals.", "Furniture moves."],
-    "outcomes": ["Entity befriended.", "House escapes town.", "Entity dispersed."],
+    "npcs": [
+        {"name": "House Entity", "role": "mimic colony", "motivation": "keep occupants", "mannerisms": "rearranges when ignored"}
+    ],
+    "complications": ["A room seals shut.", "Furniture moves on its own."],
+    "outcomes": ["The entity is befriended.", "The house escapes town.", "The entity is dispersed."],
     "npc_options": ["Mimic", "Rug of Smothering", "Animated Armor"],
     "reward": {
         "gold": 75,
         "item": "Key of Familiar Doors (once: open known door within 60 ft)",
         "reputation": "Trusted rescuer."
     },
-    "escalation": ["Rooms duplicate.", "Exits vanish.", "Structure expands."]
+    "escalation": ["Rooms duplicate.", "Exits vanish.", "The structure expands."]
 },
 
 {
     "title": "The River That Flows Uphill",
     "duration_min": 45,
-    "world": {
-        "problem": "River reverses flow weekly.",
-        "cause": "Elemental imbalance upstream.",
-        "pressure": "Mill economy failing."
-    },
-    "actors": {
-        "water_spirit": {
-            "motivation": "Correct imbalance.",
-            "rules": ["Responds to respectful offerings."]
-        }
-    },
+    "hook": "Millers hire you after the river reverses, ruining their livelihoods.",
+    "premise": "An elemental imbalance upstream is reversing the river on a weekly cycle.",
+    "stakes": "Flooding and droughts devastate the region.",
     "scenes": [
         {"name": "Riverbank", "tags": ["floating debris upstream"]},
         {"name": "Abandoned Mill", "tags": ["waterwheel stalled"]},
         {"name": "Source Pool", "tags": ["elemental rift"]}
     ],
-    "complications": ["Sudden surge.", "Villagers argue."],
-    "outcomes": ["Balance restored.", "Permanent reversal.", "Spirit angered."],
+    "npcs": [
+        {"name": "Water Spirit", "role": "elemental mediator", "motivation": "correct the imbalance", "mannerisms": "responds to respectful offerings"}
+    ],
+    "complications": ["A sudden surge hits.", "Villagers argue over blame."],
+    "outcomes": ["Balance is restored.", "The reversal becomes permanent.", "The spirit is angered."],
     "npc_options": ["Water Elemental", "Steam Mephit", "Merfolk"],
     "reward": {
         "gold": 75,
         "item": "Vial of Reversed Water (1 use: reverse gravity on small object briefly)",
         "reputation": "River-friend."
     },
-    "escalation": ["Flooding.", "Drought downstream.", "Rift widens."]
+    "escalation": ["Flooding begins.", "Downstream droughts.", "The rift widens."]
 },
 
 {
     "title": "The Whispering Statue Garden",
     "duration_min": 40,
-    "world": {
-        "problem": "Statues whisper secrets at night.",
-        "cause": "Bound souls in marble.",
-        "pressure": "Secrets spreading chaos."
-    },
-    "actors": {
-        "stone_curator": {
-            "motivation": "Preserve collection.",
-            "rules": ["Denies wrongdoing."]
-        }
-    },
+    "hook": "A patron asks you to stop the statues that whisper secrets and are ruining reputations.",
+    "premise": "Bound souls trapped in marble reveal truths at night.",
+    "stakes": "Public panic and violence break out as secrets spread.",
     "scenes": [
         {"name": "Garden Path", "tags": ["soft whispers"]},
         {"name": "Workshop", "tags": ["unfinished sculpture"]},
         {"name": "Hidden Vault", "tags": ["soul-binding tools"]}
     ],
-    "complications": ["Statue cracks.", "Secret revealed."],
-    "outcomes": ["Souls freed.", "Garden destroyed.", "Curator exposed."],
+    "npcs": [
+        {"name": "Stone Curator", "role": "collector", "motivation": "preserve the collection", "mannerisms": "denies wrongdoing"}
+    ],
+    "complications": ["A statue cracks.", "A secret is revealed publicly."],
+    "outcomes": ["Souls are freed.", "The garden is destroyed.", "The curator is exposed."],
     "npc_options": ["Gargoyle", "Animated Armor", "Rug of Smothering"],
     "reward": {
         "gold": 75,
         "item": "Stone Whisper (1 use: ask a statue one question)",
         "reputation": "Seeker of truth."
     },
-    "escalation": ["Whispers louder.", "Statues animate briefly.", "Public panic."]
+    "escalation": ["Whispers grow louder.", "Statues animate briefly.", "Public panic rises."]
 },
 
 {
-    "title": "The Festival That Won’t End",
+    "title": "The Festival That Won't End",
     "duration_min": 45,
-    "world": {
-        "problem": "Village stuck in looping festival day.",
-        "cause": "Joy spirit feeding on repetition.",
-        "pressure": "Villagers unaware of loop."
-    },
-    "actors": {
-        "joy_spirit": {
-            "motivation": "Sustain celebration.",
-            "rules": ["Resets day if confronted violently."]
-        }
-    },
+    "hook": "You arrive in a village caught in a looping festival day and the innkeeper begs for help.",
+    "premise": "A joy spirit sustains celebration by resetting the day.",
+    "stakes": "The village is trapped in an endless loop and memories fracture.",
     "scenes": [
         {"name": "Festival Grounds", "tags": ["repeating events"]},
         {"name": "Quiet Alley", "tags": ["memories flicker"]},
         {"name": "Center Stage", "tags": ["time anchor"]}
     ],
-    "complications": ["Memory bleed.", "Time stutter."],
-    "outcomes": ["Loop ended.", "Loop refined.", "PC trapped temporarily."],
+    "npcs": [
+        {"name": "Joy Spirit", "role": "time anchor", "motivation": "sustain celebration", "mannerisms": "resets day if confronted violently"}
+    ],
+    "complications": ["Memory bleed occurs.", "Time stutters."],
+    "outcomes": ["The loop ends.", "The loop is refined.", "The PC is trapped temporarily."],
     "npc_options": ["Satyr", "Sprite", "Blink Dog"],
     "reward": {
         "gold": 75,
-        "item": "Ribbon of Recall (1 use: remember prior failed interaction)",
+        "item": "Ribbon of Recall (1 use: remember a prior failed interaction)",
         "reputation": "Festival friend."
     },
-    "escalation": ["Glitches visible.", "Day shortens.", "Loop destabilizes."]
+    "escalation": ["Glitches become visible.", "The day shortens.", "The loop destabilizes."]
 },
 
 {
     "title": "The Library With No Exit",
     "duration_min": 45,
-    "world": {
-        "problem": "Visitors vanish in endless archive.",
-        "cause": "Knowledge-hungry extradimensional space.",
-        "pressure": "Scholars missing."
-    },
-    "actors": {
-        "archive_entity": {
-            "motivation": "Acquire stories.",
-            "rules": ["Trades safe exit for secrets."]
-        }
-    },
+    "hook": "Scholars hire you after several colleagues vanish inside the old archive.",
+    "premise": "An extradimensional library consumes visitors to harvest their stories.",
+    "stakes": "More scholars vanish and the archive expands into the city.",
     "scenes": [
         {"name": "Grand Stacks", "tags": ["infinite shelves"]},
         {"name": "Reading Alcove", "tags": ["books rewrite themselves"]},
         {"name": "Catalog Chamber", "tags": ["living index"]}
     ],
-    "complications": ["Exit disappears.", "Book traps reader."],
-    "outcomes": ["Entity bargained with.", "Library collapsed.", "PC marked as author."],
+    "npcs": [
+        {"name": "Archive Entity", "role": "librarian horror", "motivation": "acquire stories", "mannerisms": "trades safe exit for secrets"}
+    ],
+    "complications": ["The exit disappears.", "A book traps the reader."],
+    "outcomes": ["The entity is bargained with.", "The library collapses.", "The PC is marked as an author."],
     "npc_options": ["Specter", "Ghost", "Mimic"],
     "reward": {
         "gold": 75,
@@ -333,372 +270,389 @@ one_shot_adventures = adventures = [
 {
     "title": "The Mirror That Reflects Tomorrow",
     "duration_min": 45,
-    "world": {
-        "problem": "Mirror shows future events inaccurately.",
-        "cause": "Fragmented prophecy spirit.",
-        "pressure": "Town acting on flawed visions."
-    },
-    "actors": {
-        "mirror_spirit": {
-            "motivation": "Be understood correctly.",
-            "rules": ["Shows symbolic truths."]
-        }
-    },
+    "hook": "The mayor asks you to calm panic caused by a mirror that shows the future.",
+    "premise": "A fragmented prophecy spirit speaks through a mirror in symbolic visions.",
+    "stakes": "People act on flawed visions and unrest grows.",
     "scenes": [
         {"name": "Mayor's Hall", "tags": ["crowded anxiety"]},
         {"name": "Mirror Chamber", "tags": ["distorted reflections"]},
         {"name": "Vision Space", "tags": ["symbolic landscape"]}
     ],
-    "complications": ["False vision spreads.", "Reflection acts independently."],
-    "outcomes": ["Spirit clarified.", "Mirror shattered.", "Visions embraced."],
+    "npcs": [
+        {"name": "Mirror Spirit", "role": "prophetic echo", "motivation": "be understood correctly", "mannerisms": "shows symbolic truths"}
+    ],
+    "complications": ["A false vision spreads.", "A reflection acts independently."],
+    "outcomes": ["The spirit is clarified.", "The mirror is shattered.", "The visions are embraced."],
     "npc_options": ["Doppelganger", "Shadow", "Specter"],
     "reward": {
         "gold": 75,
         "item": "Shard of Foresight (1 use: glimpse likely outcome of action)",
         "reputation": "Voice of reason."
     },
-    "escalation": ["Visions worsen.", "Public unrest.", "Prophecy manifests wrongly."]
+    "escalation": ["Visions worsen.", "Public unrest grows.", "Prophecy manifests wrongly."]
 },
 
 {
     "title": "The Bridge That Demands Stories",
     "duration_min": 40,
-    "world": {
-        "problem": "Bridge refuses passage without tales.",
-        "cause": "Ancient narrative guardian.",
-        "pressure": "Trade halted."
-    },
-    "actors": {
-        "bridge_entity": {
-            "motivation": "Collect meaningful stories.",
-            "rules": ["Rejects lies instantly."]
-        }
-    },
+    "hook": "Merchants hire you when the bridge refuses passage unless travelers tell a tale.",
+    "premise": "An ancient narrative guardian demands meaningful stories before allowing trade.",
+    "stakes": "Trade halts and tempers rise at the crossing.",
     "scenes": [
         {"name": "Bridge Span", "tags": ["echoing voice"]},
         {"name": "River Below", "tags": ["deep current"]},
         {"name": "Memory Echo", "tags": ["story made real briefly"]}
     ],
-    "complications": ["Story manifests.", "Listener interrupts."],
-    "outcomes": ["Guardian satisfied.", "Guardian tricked.", "Bridge collapses."],
+    "npcs": [
+        {"name": "Bridge Guardian", "role": "narrative spirit", "motivation": "collect meaningful stories", "mannerisms": "rejects lies instantly"}
+    ],
+    "complications": ["A story manifests.", "A listener interrupts."],
+    "outcomes": ["The guardian is satisfied.", "The guardian is tricked.", "The bridge collapses."],
     "npc_options": ["Ogre", "Troll", "Bandit"],
     "reward": {
         "gold": 75,
-        "item": "Token of Telling (1 use: compel honest answer to a question)",
+        "item": "Token of Telling (1 use: compel an honest answer)",
         "reputation": "Silver-tongued traveler."
     },
-    "escalation": ["Demands deepen.", "Stories turn hostile.", "Bridge seals fully."]
+    "escalation": ["Demands deepen.", "Stories turn hostile.", "The bridge seals fully."]
 },
+
 {
-    "title": "The Clockmaker’s Secret",
+    "title": "The Clockmaker's Secret",
     "duration_min": 45,
-    "world": {
-        "problem": "A town’s clock tower chimes randomly, causing confusion.",
-        "cause": "Clockmaker embedded a hidden mechanism to hide a secret.",
-        "pressure": "Time-sensitive festival approaching."
-    },
-    "actors": {
-        "clockmaker": {"motivation": "Hide past transgression.", "rules": ["Misleads politely.", "Guards workshop."]},
-        "townsfolk": {"motivation": "Keep festival on time.", "risk": "Intervene impulsively."}
-    },
+    "hook": "The festival organizer begs you to fix the clock tower before the opening ceremony.",
+    "premise": "A clockmaker hid a mechanism that scrambles the chimes to conceal a secret.",
+    "stakes": "The festival fails and the town turns on the clockmaker.",
     "scenes": [
         {"name": "Workshop", "tags": ["gears", "blueprints"]},
         {"name": "Clock Tower", "tags": ["hidden hatch", "spinning cogs"]},
         {"name": "Festival Square", "tags": ["confused crowd", "temporal glitches"]}
     ],
-    "complications": ["Clock chimes out of sequence.", "Blueprint missing.", "Clockmaker evades."],
-    "outcomes": ["Secret revealed.", "Clock repaired.", "Tower sealed."],
+    "npcs": [
+        {"name": "Clockmaker", "role": "artisan", "motivation": "hide a past transgression", "mannerisms": "misleads politely"},
+        {"name": "Townsfolk", "role": "crowd", "motivation": "keep the festival on time", "mannerisms": "impatient"}
+    ],
+    "complications": ["The chimes go out of sequence.", "A blueprint goes missing.", "The clockmaker evades questions."],
+    "outcomes": ["The secret is revealed.", "The clock is repaired.", "The tower is sealed."],
     "npc_options": ["Animated Armor", "Flying Sword", "Thug"],
-    "reward": {"gold": 75, "item": "Pocket Cog (1 use: slow small moving mechanism briefly)", "reputation": "Respected problem-solver."},
-    "escalation": ["Chimes desynchronize.", "Crowd panics.", "Festival disrupted."]
+    "reward": {
+        "gold": 75,
+        "item": "Pocket Cog (1 use: slow a small mechanism briefly)",
+        "reputation": "Respected problem-solver."
+    },
+    "escalation": ["Chimes desynchronize.", "Crowd panic rises.", "The festival is disrupted."]
 },
 
 {
     "title": "The Lighthouse of Echoes",
     "duration_min": 50,
-    "world": {
-        "problem": "A coastal lighthouse transmits strange whispers.",
-        "cause": "Residual psychic energy from shipwreck survivors.",
-        "pressure": "Mariners report hallucinations; accidents rising."
-    },
-    "actors": {
-        "ghosts": {"motivation": "Relive past events.", "rules": ["Interact subtly; no direct harm."]},
-        "coastguard": {"motivation": "Protect sailors.", "risk": "Block access."}
-    },
+    "hook": "Coastguard hires you after sailors report hallucinations near the lighthouse.",
+    "premise": "Psychic residue from a shipwreck lingers and repeats its final moments.",
+    "stakes": "Accidents increase and the harbor closes.",
     "scenes": [
         {"name": "Beach", "tags": ["wreckage", "broken masts"]},
         {"name": "Lighthouse Base", "tags": ["strange sounds", "weathered stones"]},
-        {"name": "Lantern Room", "tags": ["psychic resonance", "flickering light"]},
+        {"name": "Lantern Room", "tags": ["psychic resonance", "flickering light"]}
     ],
-    "complications": ["Whispers mislead PC.", "Fog rolls in.", "Coastguard interrupts."],
-    "outcomes": ["Spirits guided to peace.", "Energy dissipates.", "Whispers amplified."],
+    "npcs": [
+        {"name": "Shipwreck Ghosts", "role": "echoing survivors", "motivation": "relive the past", "mannerisms": "subtle, not directly harmful"},
+        {"name": "Coastguard Captain", "role": "authority", "motivation": "protect sailors", "mannerisms": "blocks access without cause"}
+    ],
+    "complications": ["Whispers mislead the PC.", "Fog rolls in.", "Coastguard interrupts."],
+    "outcomes": ["Spirits are guided to peace.", "The energy dissipates.", "Whispers are amplified."],
     "npc_options": ["Ghost", "Specter", "Will-o'-Wisp"],
-    "reward": {"gold": 75, "item": "Shell of Calm (1 use: quiet mental interference for 1 minute)", "reputation": "Mariners trust you."},
-    "escalation": ["Whispers intensify.", "Sailors endangered.", "Light malfunctions."]
+    "reward": {
+        "gold": 75,
+        "item": "Shell of Calm (1 use: quiet mental interference for 1 minute)",
+        "reputation": "Mariners trust you."
+    },
+    "escalation": ["Whispers intensify.", "Sailors are endangered.", "The light malfunctions."]
 },
 
 {
     "title": "The Clockwork Menagerie",
     "duration_min": 45,
-    "world": {
-        "problem": "Mechanical animals in a noble’s garden have gone missing.",
-        "cause": "Automaton caretaker malfunction.",
-        "pressure": "Garden in disarray; social embarrassment imminent."
-    },
-    "actors": {
-        "caretaker": {"motivation": "Repair systems.", "rules": ["Denies negligence.", "Redirects blame."]},
-        "noble": {"motivation": "Maintain appearances.", "risk": "Fire PC for failure."}
-    },
+    "hook": "A noble hires you after mechanical animals vanish from the garden.",
+    "premise": "An automaton caretaker is malfunctioning and hiding missing constructs.",
+    "stakes": "The garden collapses and the noble loses face.",
     "scenes": [
         {"name": "Garden Entrance", "tags": ["damaged automata", "broken hedges"]},
         {"name": "Workshop", "tags": ["spare parts", "schematics"]},
         {"name": "Fountain", "tags": ["water-activated gears", "lost automaton"]}
     ],
-    "complications": ["Parts scattered.", "Automaton behaves oddly.", "Caretaker misleads."] ,
-    "outcomes": ["Menagerie repaired.", "Automata escape.", "Noble satisfied or displeased."],
+    "npcs": [
+        {"name": "Caretaker Automaton", "role": "malfunctioning guardian", "motivation": "repair systems", "mannerisms": "denies negligence"},
+        {"name": "Noble Patron", "role": "employer", "motivation": "maintain appearances", "mannerisms": "threatens dismissal"}
+    ],
+    "complications": ["Parts are scattered.", "An automaton behaves oddly.", "The caretaker misleads."],
+    "outcomes": ["The menagerie is repaired.", "Automata escape.", "The noble is satisfied or displeased."],
     "npc_options": ["Animated Armor", "Flying Sword", "Rug of Smothering"],
-    "reward": {"gold": 75, "item": "Clockwork Key (1 use: temporarily control small automaton)", "reputation": "Respected tinker."},
-    "escalation": ["Automata malfunction.", "Garden damages escalate.", "Noble pressures PC."]
+    "reward": {
+        "gold": 75,
+        "item": "Clockwork Key (1 use: control a small automaton briefly)",
+        "reputation": "Respected tinker."
+    },
+    "escalation": ["Automata malfunction.", "Garden damage escalates.", "Noble pressure increases."]
 },
 
 {
     "title": "The Deserted Carnival",
     "duration_min": 45,
-    "world": {
-        "problem": "A carnival appears abandoned but lights and music persist.",
-        "cause": "Residual magical glamour anchored to a forgotten pact.",
-        "pressure": "Nearby town children lured in nightly."
-    },
-    "actors": {
-        "carnival_spirit": {"motivation": "Maintain festivity.", "rules": ["Cannot lie; playful misdirection only."]},
-        "town_guard": {"motivation": "Rescue children.", "risk": "Blocks paths aggressively."}
-    },
+    "hook": "Town guards ask you to rescue children lured into a silent carnival that glows at night.",
+    "premise": "A lingering glamour keeps the carnival alive under a forgotten pact.",
+    "stakes": "Children vanish and the town panics.",
     "scenes": [
         {"name": "Entrance Gate", "tags": ["glittering lights", "phantom music"]},
         {"name": "Carousel", "tags": ["moving animals", "illusion"]},
-        {"name": "Big Tent", "tags": ["distorted size", "echoing laughter"]},
+        {"name": "Big Tent", "tags": ["distorted size", "echoing laughter"]}
     ],
-    "complications": ["Music hypnotizes.", "Tent shifts.", "Guard misfires."] ,
-    "outcomes": ["Glamour removed.", "Children rescued.", "Spirit placated."],
+    "npcs": [
+        {"name": "Carnival Spirit", "role": "glamour keeper", "motivation": "maintain festivity", "mannerisms": "cannot lie, misdirects playfully"},
+        {"name": "Town Guard", "role": "rescuer", "motivation": "save children", "mannerisms": "blocks paths aggressively"}
+    ],
+    "complications": ["Music hypnotizes.", "Tents shift.", "A guard misfires."],
+    "outcomes": ["Glamour is removed.", "Children are rescued.", "The spirit is placated."],
     "npc_options": ["Owlbear", "Doppelganger", "Sprite"],
-    "reward": {"gold": 75, "item": "Carnival Coin (1 use: charm one creature briefly)", "reputation": "Hero to children."},
-    "escalation": ["Illusions intensify.", "Children lost.", "Town panic."]
+    "reward": {
+        "gold": 75,
+        "item": "Carnival Coin (1 use: charm one creature briefly)",
+        "reputation": "Hero to children."
+    },
+    "escalation": ["Illusions intensify.", "Children are lost.", "Town panic rises."]
 },
 
 {
     "title": "The Ship That Never Docked",
     "duration_min": 50,
-    "world": {
-        "problem": "A ghost ship circles the harbor nightly.",
-        "cause": "Captain’s soul tethered to incomplete voyage.",
-        "pressure": "Sailors refuse to work; trade stops."
-    },
-    "actors": {
-        "ghost_captain": {"motivation": "Complete journey.", "rules": ["Only communicates cryptically."]},
-        "harbormaster": {"motivation": "Resume trade.", "risk": "Refuses PC cooperation."}
-    },
+    "hook": "The harbormaster hires you when a ghost ship circles nightly and sailors refuse to work.",
+    "premise": "A captain's soul is tethered to an unfinished voyage.",
+    "stakes": "Trade stops and the harbor shuts down.",
     "scenes": [
         {"name": "Dock", "tags": ["fog", "water reflections"]},
-        {"name": "Captain’s Cabin", "tags": ["floating charts", "spectral logs"]},
-        {"name": "Deck", "tags": ["windy deck", "phantom rigging"]},
+        {"name": "Captain's Cabin", "tags": ["floating charts", "spectral logs"]},
+        {"name": "Deck", "tags": ["windy deck", "phantom rigging"]}
     ],
-    "complications": ["Ship drifts unpredictably.", "Crew reacts emotionally.", "Fog reduces visibility."],
-    "outcomes": ["Captain freed.", "Ship dissipates.", "Tether remains partially."],
+    "npcs": [
+        {"name": "Ghost Captain", "role": "tethered soul", "motivation": "complete the journey", "mannerisms": "communicates cryptically"},
+        {"name": "Harbormaster", "role": "employer", "motivation": "resume trade", "mannerisms": "refuses help at first"}
+    ],
+    "complications": ["The ship drifts unpredictably.", "The crew reacts emotionally.", "Fog reduces visibility."],
+    "outcomes": ["The captain is freed.", "The ship dissipates.", "The tether remains partially."],
     "npc_options": ["Ghost", "Specter", "Wraith", "Skeleton"],
-    "reward": {"gold": 75, "item": "Nautical Compass (1 use: detect ghostly presence)", "reputation": "Sailors trust you."},
-    "escalation": ["Ship drifts into harbor.", "Mariners panic.", "Trade delayed further."]
+    "reward": {
+        "gold": 75,
+        "item": "Nautical Compass (1 use: detect ghostly presence)",
+        "reputation": "Sailors trust you."
+    },
+    "escalation": ["The ship drifts into the harbor.", "Mariners panic.", "Trade is delayed further."]
 },
 
 {
     "title": "The Tower of Forgotten Letters",
     "duration_min": 45,
-    "world": {
-        "problem": "Old letters appear, detailing events that never happened.",
-        "cause": "Poltergeist binds memory to parchment.",
-        "pressure": "Nobles misled by false claims."
-    },
-    "actors": {
-        "poltergeist": {"motivation": "Record its story.", "rules": ["Cannot harm physically.", "Alters letters unpredictably."]},
-        "noble": {"motivation": "Recover true history.", "risk": "Demands immediate solutions."}
-    },
+    "hook": "A noble hires you after old letters appear, accusing families of crimes that never happened.",
+    "premise": "A poltergeist binds memory to parchment, rewriting history.",
+    "stakes": "Political chaos erupts among noble houses.",
     "scenes": [
         {"name": "Archive Room", "tags": ["piles of letters", "ink flies"]},
         {"name": "Study", "tags": ["misleading documents"]},
-        {"name": "Tower Top", "tags": ["letter windstorm"]},
+        {"name": "Tower Top", "tags": ["letter windstorm"]}
     ],
-    "complications": ["Letters rearrange.", "Pages vanish.", "Poltergeist appears visibly."],
-    "outcomes": ["Poltergeist placated.", "History corrected.", "Tower sealed."],
+    "npcs": [
+        {"name": "Poltergeist", "role": "restless recorder", "motivation": "record its story", "mannerisms": "alters letters unpredictably"},
+        {"name": "Noble Patron", "role": "employer", "motivation": "recover true history", "mannerisms": "demands immediate solutions"}
+    ],
+    "complications": ["Letters rearrange.", "Pages vanish.", "The poltergeist appears visibly."],
+    "outcomes": ["The poltergeist is placated.", "History is corrected.", "The tower is sealed."],
     "npc_options": ["Ghost", "Specter", "Shadow"],
-    "reward": {"gold": 75, "item": "Ink of Truth (1 use: detect written lies once)", "reputation": "Trusted historian."},
-    "escalation": ["Letters proliferate.", "False claims spread.", "Poltergeist agitation rises."]
+    "reward": {
+        "gold": 75,
+        "item": "Ink of Truth (1 use: detect written lies once)",
+        "reputation": "Trusted historian."
+    },
+    "escalation": ["Letters proliferate.", "False claims spread.", "The poltergeist grows agitated."]
 },
 
 {
     "title": "The Floating Market",
     "duration_min": 50,
-    "world": {
-        "problem": "Market stalls drift across a lake unpredictably.",
-        "cause": "Elemental currents unbalanced.",
-        "pressure": "Merchants lose goods; town economy suffers."
-    },
-    "actors": {
-        "water_elemental": {"motivation": "Restore currents.", "rules": ["React to offerings; resists force."]},
-        "merchants": {"motivation": "Protect inventory.", "risk": "Block or sabotage PC actions."}
-    },
+    "hook": "Merchants hire you after the floating market drifts and collides, losing goods daily.",
+    "premise": "Unbalanced elemental currents are pushing the stalls across the lake.",
+    "stakes": "The town's economy collapses and merchants turn violent.",
     "scenes": [
         {"name": "Dockside", "tags": ["floating planks", "waves"]},
         {"name": "Central Pier", "tags": ["colliding stalls"]},
-        {"name": "Market Heart", "tags": ["elemental currents", "floating goods"]},
+        {"name": "Market Heart", "tags": ["elemental currents", "floating goods"]}
     ],
-    "complications": ["Goods tumble.", "Current shifts.", "Elemental tests PC."] ,
-    "outcomes": ["Currents stabilized.", "Market floats freely.", "Partial goods lost."],
+    "npcs": [
+        {"name": "Water Elemental", "role": "current keeper", "motivation": "restore balance", "mannerisms": "reacts to offerings"},
+        {"name": "Merchants", "role": "stakeholders", "motivation": "protect inventory", "mannerisms": "threaten sabotage"}
+    ],
+    "complications": ["Goods tumble.", "Currents shift.", "The elemental tests the PC."],
+    "outcomes": ["Currents are stabilized.", "The market floats freely.", "Partial goods are lost."],
     "npc_options": ["Water Elemental", "Merfolk", "Sahuagin"],
-    "reward": {"gold": 75, "item": "Water Token (1 use: calm moving water briefly)", "reputation": "Trusted by merchants."},
-    "escalation": ["Currents strengthen.", "Goods lost.", "Merchant panic."]
+    "reward": {
+        "gold": 75,
+        "item": "Water Token (1 use: calm moving water briefly)",
+        "reputation": "Trusted by merchants."
+    },
+    "escalation": ["Currents strengthen.", "More goods are lost.", "Merchant panic spreads."]
 },
 
 {
     "title": "The Library of Living Shadows",
     "duration_min": 45,
-    "world": {
-        "problem": "Shadows detach and wander the library.",
-        "cause": "Magical experiment gone awry.",
-        "pressure": "Visitors trapped; books destroyed."
-    },
-    "actors": {
-        "library_guardian": {"motivation": "Recover shadows.", "rules": ["Does not harm PC."]},
-        "scholars": {"motivation": "Preserve knowledge.", "risk": "Interfere recklessly."}
-    },
+    "hook": "A librarian pleads for help after visitors report their shadows walking away.",
+    "premise": "A magical experiment caused shadows to detach and roam the stacks.",
+    "stakes": "Visitors are trapped and books are destroyed.",
     "scenes": [
         {"name": "Entrance Hall", "tags": ["shadows move independently"]},
         {"name": "Stacks", "tags": ["animated books", "obscured paths"]},
-        {"name": "Archivist Office", "tags": ["shadow swarm"]},
+        {"name": "Archivist Office", "tags": ["shadow swarm"]}
     ],
-    "complications": ["Shadows hide books.", "PC gets lost.", "Shadows merge."],
-    "outcomes": ["Shadows returned.", "Experiment contained.", "Library partially ruined."],
+    "npcs": [
+        {"name": "Library Guardian", "role": "protector", "motivation": "recover shadows", "mannerisms": "avoids harming the PC"},
+        {"name": "Scholars", "role": "bystanders", "motivation": "preserve knowledge", "mannerisms": "interfere recklessly"}
+    ],
+    "complications": ["Shadows hide books.", "The PC gets lost.", "Shadows merge."],
+    "outcomes": ["Shadows are returned.", "The experiment is contained.", "The library is partially ruined."],
     "npc_options": ["Shadow", "Specter", "Ghost"],
-    "reward": {"gold": 75, "item": "Shadow Thread (1 use: control shadow briefly)", "reputation": "Keeper of knowledge."},
-    "escalation": ["Shadows grow.", "Books lost.", "Visitors panic."]
+    "reward": {
+        "gold": 75,
+        "item": "Shadow Thread (1 use: control a shadow briefly)",
+        "reputation": "Keeper of knowledge."
+    },
+    "escalation": ["Shadows grow.", "Books are lost.", "Visitors panic."]
 },
 
 {
     "title": "The Lantern Festival in Peril",
     "duration_min": 45,
-    "world": {
-        "problem": "Festival lanterns refuse to float; magic falters.",
-        "cause": "Sky spirit distracted by earthly conflict.",
-        "pressure": "Festival may fail; town morale drops."
-    },
-    "actors": {
-        "sky_spirit": {"motivation": "Attend own realm.", "rules": ["Distracted; reacts if approached."]},
-        "festival_organizer": {"motivation": "Launch lanterns.", "risk": "Forces unsafe shortcuts."}
-    },
+    "hook": "The festival organizer asks you to intervene when the lanterns refuse to float.",
+    "premise": "A distracted sky spirit has pulled its magic away from the town.",
+    "stakes": "The festival fails and morale collapses.",
     "scenes": [
         {"name": "Festival Grounds", "tags": ["lantern racks", "crowd"]},
         {"name": "Riverside", "tags": ["floating lanterns", "water reflections"]},
-        {"name": "Spirit Gate", "tags": ["visible aura", "ethereal tether"]},
+        {"name": "Spirit Gate", "tags": ["visible aura", "ethereal tether"]}
     ],
-    "complications": ["Lanterns fall.", "Spirit moves away.", "Crowd panics."],
-    "outcomes": ["Spirit appeased.", "Lanterns float.", "Festival partial success."],
+    "npcs": [
+        {"name": "Sky Spirit", "role": "aerial entity", "motivation": "attend its own realm", "mannerisms": "distracted and distant"},
+        {"name": "Festival Organizer", "role": "community leader", "motivation": "launch lanterns", "mannerisms": "pushes unsafe shortcuts"}
+    ],
+    "complications": ["Lanterns fall.", "The spirit moves away.", "The crowd panics."],
+    "outcomes": ["The spirit is appeased.", "Lanterns float.", "The festival partially succeeds."],
     "npc_options": ["Invisible Stalker", "Air Elemental", "Will-o'-Wisp"],
-    "reward": {"gold": 75, "item": "Lantern Charm (1 use: levitate small object 1 min)", "reputation": "Festival hero."},
-    "escalation": ["Lanterns fail.", "Spirit leaves.", "Crowd frustrated."]
+    "reward": {
+        "gold": 75,
+        "item": "Lantern Charm (1 use: levitate a small object for 1 min)",
+        "reputation": "Festival hero."
+    },
+    "escalation": ["Lanterns keep failing.", "The spirit leaves.", "Crowd frustration rises."]
 },
 
 {
     "title": "The Abandoned Observatory",
     "duration_min": 50,
-    "world": {
-        "problem": "Stars shift unpredictably; telescopes malfunction.",
-        "cause": "Ancient starbound artifact misaligned.",
-        "pressure": "Navigation errors affecting trade."
-    },
-    "actors": {
-        "astronomer_ghost": {"motivation": "Restore observation.", "rules": ["Only gives cryptic guidance."]},
-        "traders": {"motivation": "Ensure routes.", "risk": "Ignore PC advice."}
-    },
+    "hook": "Traders hire you after navigation errors start wrecking shipments.",
+    "premise": "A starbound artifact in the old observatory is misaligned.",
+    "stakes": "Trade routes fail and ships go missing.",
     "scenes": [
         {"name": "Observatory Tower", "tags": ["broken telescope", "rotating lenses"]},
         {"name": "Star Deck", "tags": ["erratic readings", "astral patterns"]},
-        {"name": "Artifact Chamber", "tags": ["floating orbs", "celestial alignment"]},
+        {"name": "Artifact Chamber", "tags": ["floating orbs", "celestial alignment"]}
     ],
-    "complications": ["Artifact shifts.", "Astral energy flares.", "Ghost misleads."],
-    "outcomes": ["Alignment restored.", "Artifact neutralized.", "Ghost remains."],
+    "npcs": [
+        {"name": "Astronomer Ghost", "role": "restless scholar", "motivation": "restore observation", "mannerisms": "gives cryptic guidance"},
+        {"name": "Trade Representative", "role": "employer", "motivation": "ensure routes", "mannerisms": "ignores warnings"}
+    ],
+    "complications": ["The artifact shifts.", "Astral energy flares.", "The ghost misleads."],
+    "outcomes": ["Alignment is restored.", "The artifact is neutralized.", "The ghost remains bound."],
     "npc_options": ["Will-o'-Wisp", "Specter", "Gargoyle"],
-    "reward": {"gold": 75, "item": "Star Shard (1 use: glimpse direction at night)", "reputation": "Trusted navigator."},
+    "reward": {
+        "gold": 75,
+        "item": "Star Shard (1 use: glimpse direction at night)",
+        "reputation": "Trusted navigator."
+    },
     "escalation": ["Stars shift.", "Telescopes break.", "Traders panic."]
 },
 
 {
     "title": "The Market of Forgotten Things",
     "duration_min": 45,
-    "world": {
-        "problem": "Items with unusual properties appear and vanish at market.",
-        "cause": "Temporal pocket overlaps.",
-        "pressure": "Traders confused; trade disrupted."
-    },
-    "actors": {
-        "temporal_keeper": {"motivation": "Recover items.", "rules": ["Appears at random times.", "Does not harm PC."]},
-        "traders": {"motivation": "Secure goods.", "risk": "Attempt to seize items improperly."}
-    },
+    "hook": "A merchant guild hires you after rare items appear and vanish mid-sale.",
+    "premise": "A temporal pocket overlaps the market, swapping goods across moments.",
+    "stakes": "The market collapses under chaos and theft.",
     "scenes": [
         {"name": "Market Entrance", "tags": ["floating wares"]},
-        {"name": "Stall Rows", "tags": ["items appear/disappear"]},
-        {"name": "Hidden Pocket", "tags": ["temporal anomaly"]},
+        {"name": "Stall Rows", "tags": ["items appear or disappear"]},
+        {"name": "Hidden Pocket", "tags": ["temporal anomaly"]}
     ],
-    "complications": ["Goods vanish mid-trade.", "Stalls shift.", "Temporal anomaly spreads."],
-    "outcomes": ["Items retrieved.", "Anomaly sealed.", "Pocket remains unstable."],
+    "npcs": [
+        {"name": "Temporal Keeper", "role": "anomaly steward", "motivation": "recover items", "mannerisms": "appears at random times"},
+        {"name": "Traders", "role": "stakeholders", "motivation": "secure goods", "mannerisms": "attempt to seize items"}
+    ],
+    "complications": ["Goods vanish mid-trade.", "Stalls shift.", "The anomaly spreads."],
+    "outcomes": ["Items are retrieved.", "The anomaly is sealed.", "The pocket remains unstable."],
     "npc_options": ["Dust Mephit", "Ice Mephit", "Magma Mephit", "Steam Mephit"],
-    "reward": {"gold": 75, "item": "Time Coin (1 use: retrieve object lost in last minute)", "reputation": "Curator of lost things."},
-    "escalation": ["Items vanish more frequently.", "Market chaos.", "Pocket grows."]
+    "reward": {
+        "gold": 75,
+        "item": "Time Coin (1 use: retrieve an object lost in the last minute)",
+        "reputation": "Curator of lost things."
+    },
+    "escalation": ["Items vanish more frequently.", "Market chaos rises.", "The pocket grows."]
 },
 
 {
     "title": "The Catacombs of Whispers",
     "duration_min": 50,
-    "world": {
-        "problem": "Underground tomb whispers secrets from past rulers.",
-        "cause": "Residual memory imprinted in walls.",
-        "pressure": "Historians risk misinterpreting."
-    },
-    "actors": {
-        "tomb_echo": {"motivation": "Preserve memory.", "rules": ["Repeats fragments; misleads if ignored."]},
-        "historians": {"motivation": "Document history.", "risk": "Disturb structures."}
-    },
+    "hook": "Historians hire you to escort them after whispers in the catacombs begin revealing forbidden truths.",
+    "premise": "Residual memories in the tomb walls repeat and distort the past.",
+    "stakes": "The catacombs collapse and sacred relics are lost.",
     "scenes": [
         {"name": "Entry Passage", "tags": ["faint whispers", "narrow corridor"]},
         {"name": "Hall of Kings", "tags": ["statues whisper", "collapsed areas"]},
-        {"name": "Memory Vault", "tags": ["fragments of events", "illusion"]},
+        {"name": "Memory Vault", "tags": ["fragments of events", "illusion"]}
     ],
-    "complications": ["Echoes mislead.", "Structures unstable.", "Fragments animate."],
-    "outcomes": ["Memories preserved.", "Echo fades.", "Artifacts lost."],
+    "npcs": [
+        {"name": "Tomb Echo", "role": "memory spirit", "motivation": "preserve memory", "mannerisms": "repeats fragments"},
+        {"name": "Historians", "role": "clients", "motivation": "document history", "mannerisms": "disturb structures"}
+    ],
+    "complications": ["Echoes mislead.", "Structures become unstable.", "Fragments animate."],
+    "outcomes": ["Memories are preserved.", "The echo fades.", "Artifacts are lost."],
     "npc_options": ["Skeleton", "Zombie", "Ghoul", "Wight", "Specter"],
-    "reward": {"gold": 75, "item": "Whisper Gem (1 use: hear one past event clearly)", "reputation": "Trusted historian."},
-    "escalation": ["Whispers intensify.", "Corridors collapse.", "Artifacts damaged."]
+    "reward": {
+        "gold": 75,
+        "item": "Whisper Gem (1 use: hear one past event clearly)",
+        "reputation": "Trusted historian."
+    },
+    "escalation": ["Whispers intensify.", "Corridors collapse.", "Artifacts are damaged."]
 },
 
 {
     "title": "The Garden of Mirrors",
     "duration_min": 45,
-    "world": {
-        "problem": "Reflections act independently.",
-        "cause": "Magic trapped in glass panes.",
-        "pressure": "Visitors disoriented; garden dangerous."
-    },
-    "actors": {
-        "mirror_spirit": {"motivation": "Express trapped magic.", "rules": ["Shadows PC; cannot directly attack."]},
-        "gardener": {"motivation": "Restore garden.", "risk": "Moves panes recklessly."}
-    },
+    "hook": "A gardener begs you to stop the mirror maze where reflections are harming visitors.",
+    "premise": "Trapped magic in the mirrors produces independent reflections.",
+    "stakes": "Visitors panic and the garden shuts down.",
     "scenes": [
         {"name": "Entrance Arch", "tags": ["distorted reflections"]},
         {"name": "Central Fountain", "tags": ["mirrored water", "walking reflections"]},
-        {"name": "Maze of Mirrors", "tags": ["paths shift", "illusion triggers"]},
+        {"name": "Maze of Mirrors", "tags": ["paths shift", "illusion triggers"]}
     ],
-    "complications": ["Reflections mislead.", "Maze shifts.", "Water mirror floods."],
-    "outcomes": ["Magic freed.", "Garden stabilized.", "Some mirrors remain enchanted."],
+    "npcs": [
+        {"name": "Mirror Spirit", "role": "trapped magic", "motivation": "express itself", "mannerisms": "shadows the PC"},
+        {"name": "Head Gardener", "role": "caretaker", "motivation": "restore the garden", "mannerisms": "moves panes recklessly"}
+    ],
+    "complications": ["Reflections mislead.", "The maze shifts.", "The water mirror floods."],
+    "outcomes": ["Magic is freed.", "The garden is stabilized.", "Some mirrors remain enchanted."],
     "npc_options": ["Doppelganger", "Shadow", "Specter"],
-    "reward": {"gold": 75, "item": "Mirror Shard (1 use: see reflection of distant area)", "reputation": "Master of perception."},
-    "escalation": ["Reflections act independently.", "Paths rearrange.", "Visitors panic."]
+    "reward": {
+        "gold": 75,
+        "item": "Mirror Shard (1 use: see a reflection of a distant area)",
+        "reputation": "Master of perception."
+    },
+    "escalation": ["Reflections grow bolder.", "Paths rearrange.", "Visitors panic."]
 }
 
 ]

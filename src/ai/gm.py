@@ -138,11 +138,20 @@ class gm_llm:
                  'content': f'{character_introduction} Lets start the adventure!'}
                  ]
         # Create the initial prompt to start the adventure
+        opening_brief = (
+            f"\nADVENTURE HOOK: {self.adventure_data.get('hook')}"
+            f"\nADVENTURE PREMISE: {self.adventure_data.get('premise')}"
+            f"\nADVENTURE STAKES: {self.adventure_data.get('stakes')}"
+        )
         response = chat(
             model=self.model_name,
             messages=[{
                 "role": "system",
-                "content": self.narrator_system_prompt + "\nBegin by introducing the setting and hook naturally, assuming the player knows nothing. Explain why they are here, and what they are doing without revealing any plot twists."
+                "content": (
+                    self.narrator_system_prompt
+                    + opening_brief
+                    + "\n After the character starts the adventure, introduce the one-shot naturally, assuming the player knows nothing about the setting/hook. Explain why their character is here, and what their goal is without revealing any plot twists."
+                )
                 },
                 {'role': 'user', 
                  'content': f'{character_introduction} Lets start the adventure!'}
@@ -177,7 +186,7 @@ class gm_llm:
             Your top priorities are player enjoyment and 5e rule following. You are responsible for narration, NPC behavior/roleplay, and scene progression.
 
             ### Instructions
-            - Describe scenes vividly but concisely.
+            - Describe scenes vividly but concisely, addressing the player in second person.
             - Play NPCs dynamically.
             - Maintain tension and pacing.
             - Respect player autonomy, DON'T provide the player specific choices unless they ask for it, allow them to drive the story
