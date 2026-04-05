@@ -237,6 +237,20 @@ body {
   box-shadow: 0 6px 14px rgba(27, 27, 27, 0.12);
 }
 
+.image-action {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.image-action:hover {
+  box-shadow: 0 6px 14px rgba(27, 27, 27, 0.12);
+}
+
 .panel {
   border-top: 1px solid var(--border);
   padding-top: 12px;

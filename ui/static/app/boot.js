@@ -15,6 +15,7 @@ import {
   sheetTabs,
   collapseButtons,
   imagesPanel,
+  regenerateSceneButton,
   chatMain,
   combatPanel,
   combatSubmit,
@@ -55,6 +56,7 @@ import {
   togglePrepare,
   rollAction,
   useResource,
+  regenerateSceneImage,
 } from "./api.js?v=20260403n";
 
 function setupCollapseToggles() {
@@ -175,6 +177,13 @@ export function boot() {
   if (newGameButton) {
     newGameButton.addEventListener("click", () => {
       resetUI();
+    });
+  }
+  if (regenerateSceneButton) {
+    regenerateSceneButton.addEventListener("click", () => {
+      regenerateSceneImage().catch((err) => {
+        addMessage("dm", `Failed to regenerate scene: ${err}`);
+      });
     });
   }
   if (chatForm) {

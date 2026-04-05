@@ -24,6 +24,10 @@ os.chdir(ROOT)
 
 import systems.character as char
 from ai.gm import gm_llm
+try:
+    from ai.image_generator import generate_scene_image
+except Exception:
+    generate_scene_image = None
 from data.npcs import NPCRepository
 from systems.equipment_choices import (
     build_class_equipment_choices,
@@ -151,6 +155,7 @@ class GameSession:
             npc_names=self.npc_repo.list_names(),
         )
         self.gm.start_adventure()
+        self._generate_opening_scene_image()
 
     def _build_pc(self, cfg: CharacterConfig):
         pc = char.PCFactory().create_basic(
@@ -171,6 +176,38 @@ class GameSession:
             if turn.get("role") == "Dungeon Master":
                 return turn.get("content", "")
         return ""
+
+    def _generate_opening_scene_image(self) -> None:
+        if generate_scene_image is None:
+            logger.info("Scene image generation skipped: image generator not available.")
+            return
+        try:
+            setting = self.gm.create_setting_prompt()
+            image_url = generate_scene_image(
+                setting.prompt,
+                negative_prompt=setting.negative_prompt,
+            )
+            if image_url:
+                self.images = [image_url]
+        except Exception as exc:
+            logger.exception("Scene image generation failed: %s", exc)
+
+    def regenerate_scene_image(self) -> bool:
+        if generate_scene_image is None:
+            logger.info("Scene image regeneration skipped: image generator not available.")
+            return False
+        try:
+            setting = self.gm.create_setting_prompt_from_state()
+            image_url = generate_scene_image(
+                setting.prompt,
+                negative_prompt=setting.negative_prompt,
+            )
+            if image_url:
+                self.images = [image_url]
+                return True
+        except Exception as exc:
+            logger.exception("Scene image regeneration failed: %s", exc)
+        return False
 
     def _consume_latest_combat_log(self) -> Optional[List[Dict[str, Any]]]:
         for turn in reversed(self.gm.turns):
@@ -943,6 +980,19 @@ def send_message(payload: MessageRequest) -> JSONResponse:
     return JSONResponse(result)
 
 
+@app.post("/api/images/regenerate")
+def regenerate_scene_image() -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    ok = SESSION.regenerate_scene_image()
+    if not ok:
+        return JSONResponse({"error": "Scene image generation failed."}, status_code=500)
+    return JSONResponse({
+        "images": SESSION.images,
+        "message": "Scene image updated.",
+    })
+
+
 @app.post("/api/combat_action")
 def combat_action(payload: CombatActionRequest) -> JSONResponse:
     if SESSION is None:
@@ -959,7 +1009,7 @@ def combat_action(payload: CombatActionRequest) -> JSONResponse:
 
 
 @app.post("/api/combat_move")
-    def combat_move(payload: CombatMoveRequest) -> JSONResponse:
+def combat_move(payload: CombatMoveRequest) -> JSONResponse:
     if SESSION is None:
         return JSONResponse({"error": "Session not started"}, status_code=400)
     error = SESSION.gm.run_combat_move(payload.x, payload.y)

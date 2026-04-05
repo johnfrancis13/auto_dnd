@@ -5,6 +5,7 @@ export const startButton = document.getElementById("start-game");
 export const newGameButton = document.getElementById("new-game");
 export const charForm = document.getElementById("char-form");
 export const imageGrid = document.getElementById("image-grid");
+export const regenerateSceneButton = document.getElementById("regenerate-scene");
 export const sessionIndicator = document.getElementById("session-indicator");
 export const gameStateEl = document.getElementById("game-state");
 export const sheetTabs = document.getElementById("sheet-tabs");

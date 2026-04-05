@@ -68,6 +68,11 @@ class GMResponse(BaseModel):
     game_state: GameState
     narrative: str
 
+
+class SettingPrompt(BaseModel):
+    prompt: str
+    negative_prompt: str
+
 def wrap_text(text, width=175):
     print("\n".join(textwrap.fill(p, width) for p in text.split("\n")))
 
@@ -170,6 +175,86 @@ class gm_llm:
               })
         self.story_summary = "The story has just begun"
         self.game_state = parsed.game_state
+
+    def create_setting_prompt(self) -> SettingPrompt:
+        opening_brief = (
+            f"\nADVENTURE HOOK: {self.adventure_data.get('hook')}"
+            f"\nADVENTURE PREMISE: {self.adventure_data.get('premise')}"
+            f"\nADVENTURE STAKES: {self.adventure_data.get('stakes')}"
+        )
+        system_prompt = (
+            "You are creating a visual prompt for a fantasy scene image.\n"
+            "Return a single vivid sentence (25-40 words) describing ONLY the environment, "
+            "lighting, mood, and key set pieces. No characters, no text, no UI, no map, no logos.\n"
+            "Output JSON that matches the schema."
+        )
+        user_prompt = (
+            f"Player: {self.pc.identity.name}, {self.pc.identity.race} "
+            f"{self.pc.classes.classes[0]} ({self.pc.identity.background}). "
+            f"{self.pc.short_character_description}\n"
+            f"{opening_brief}"
+        )
+        default_negative = (
+            "blurry, low quality, bad perspective, distorted, watermark, text, logo, "
+            "characters, people, faces, UI, map, diagram"
+        )
+        try:
+            response = chat(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                think=self.think,
+                options={"num_ctx": 1024},
+                format=SettingPrompt.model_json_schema(),
+            )
+            return SettingPrompt.model_validate_json(response.message.content)
+        except Exception:
+            fallback = (
+                f"Atmospheric fantasy landscape establishing shot inspired by {self.adventure_data.get('premise')}, "
+                f"with moody lighting, rich textures, and a sense of impending adventure, no characters, no text."
+            )
+            return SettingPrompt(prompt=fallback, negative_prompt=default_negative)
+
+    def create_setting_prompt_from_state(self) -> SettingPrompt:
+        system_prompt = (
+            "You are creating a visual prompt for a fantasy scene image.\n"
+            "Return a single vivid sentence (25-40 words) describing ONLY the environment, "
+            "lighting, mood, and key set pieces. No characters, no text, no UI, no map, no logos.\n"
+            "Reflect the CURRENT scene based on the story summary and latest turns.\n"
+            "Output JSON that matches the schema."
+        )
+        recent_turns = ""
+        if getattr(self, "turns", None):
+            recent_turns = format_recent_turns(self.turns[-6:])
+        user_prompt = (
+            f"Story summary: {self.story_summary}\n"
+            f"Game state: {self.game_state}\n"
+            f"Recent turns:\n{recent_turns}"
+        )
+        default_negative = (
+            "blurry, low quality, bad perspective, distorted, watermark, text, logo, "
+            "characters, people, faces, UI, map, diagram"
+        )
+        try:
+            response = chat(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                think=self.think,
+                options={"num_ctx": 1024},
+                format=SettingPrompt.model_json_schema(),
+            )
+            return SettingPrompt.model_validate_json(response.message.content)
+        except Exception:
+            fallback = (
+                "Atmospheric fantasy location matching the current scene, with dramatic lighting, "
+                "rich textures, and a sense of tension, no characters, no text."
+            )
+            return SettingPrompt(prompt=fallback, negative_prompt=default_negative)
     
     def create_prompts(self):
         npc_hint = ""

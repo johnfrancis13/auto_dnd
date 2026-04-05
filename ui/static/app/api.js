@@ -817,6 +817,30 @@ export async function sendMessage(content) {
   }
 }
 
+export async function regenerateSceneImage() {
+  setLlmPending(true);
+  try {
+    const res = await fetch("/api/images/regenerate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    if (data.images) {
+      renderImages(data.images);
+    }
+    if (data.message) {
+      addMessage("dm", data.message);
+    }
+  } finally {
+    setLlmPending(false);
+  }
+}
+
 export async function sendCombatAction(actionId, targetIds) {
   const res = await fetch("/api/combat_action", {
     method: "POST",
