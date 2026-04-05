@@ -10,7 +10,7 @@ import {
   sheetTabs,
   thinkingIndicator,
 } from "./dom.js";
-import { addMessage, setLlmPending, setSessionActive, showGameScreen, showSetupScreen } from "./ui.js";
+import { addMessage, addCombatLogEntries, setLlmPending, setSessionActive, showGameScreen, showSetupScreen } from "./ui.js";
 import { renderCharacter, renderImages } from "./render.js";
 import { renderCombat } from "./combat.js";
 import {
@@ -794,6 +794,9 @@ export async function sendMessage(content) {
       return;
     }
     appState.session = true;
+    if (data.combat_log) {
+      addCombatLogEntries(data.combat_log, data.combat_log_meta);
+    }
     if (data.narrative) {
       addMessage("dm", data.narrative);
     }
@@ -825,6 +828,9 @@ export async function sendCombatAction(actionId, targetIds) {
     addMessage("dm", data.error);
     return;
   }
+  if (data.combat_log) {
+    addCombatLogEntries(data.combat_log, data.combat_log_meta);
+  }
   if (data.narrative) {
     addMessage("dm", data.narrative);
   }
@@ -850,6 +856,9 @@ export async function sendCombatEndTurn() {
     addMessage("dm", data.error);
     return;
   }
+  if (data.combat_log) {
+    addCombatLogEntries(data.combat_log, data.combat_log_meta);
+  }
   if (data.narrative) {
     addMessage("dm", data.narrative);
   }
@@ -874,6 +883,9 @@ export async function sendCombatMove(x, y) {
   if (data.error) {
     addMessage("dm", data.error);
     return;
+  }
+  if (data.combat_log) {
+    addCombatLogEntries(data.combat_log, data.combat_log_meta);
   }
   if (data.narrative) {
     addMessage("dm", data.narrative);

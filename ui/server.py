@@ -1,6 +1,8 @@
 ﻿from __future__ import annotations
 
 import os
+import hashlib
+import json
 import logging
 import sys
 from pathlib import Path
@@ -139,6 +141,7 @@ class GameSession:
         self.config = config
         self.images: List[str] = []
         self.pc = pc or self._build_pc(config.character)
+        self._last_combat_log_hash: Optional[str] = None
         self.npc_repo = NPCRepository()
         self.gm = gm_llm(
             model_name=config.model_name,
@@ -168,6 +171,33 @@ class GameSession:
             if turn.get("role") == "Dungeon Master":
                 return turn.get("content", "")
         return ""
+
+    def _consume_latest_combat_log(self) -> Optional[List[Dict[str, Any]]]:
+        for turn in reversed(self.gm.turns):
+            if turn.get("role") != "tool" or turn.get("tool_name") != "combat_engine":
+                continue
+            content = turn.get("content") or ""
+            if not content:
+                return None
+            digest = hashlib.sha1(content.encode("utf-8")).hexdigest()
+            if digest == self._last_combat_log_hash:
+                return None
+            self._last_combat_log_hash = digest
+            try:
+                parsed = json.loads(content)
+            except Exception:
+                return None
+            return parsed if isinstance(parsed, list) else None
+        return None
+
+    def _combat_log_meta(self) -> Optional[Dict[str, Any]]:
+        if not self.gm or not self.gm.combat or not self.gm.combat.combat_handler.engine:
+            return None
+        tracker = self.gm.combat.combat_handler.engine.tracker
+        return {
+            "round": getattr(tracker, "round_number", None),
+            "current_turn": self.gm.combat.combat_handler.current_turn_id(),
+        }
 
     def _serialize_features(self) -> List[Dict[str, Any]]:
         return [
@@ -345,22 +375,51 @@ class GameSession:
         if not self.gm.game_state or self.gm.game_state.mode != "combat":
             return {"active": False}
         targets = []
+        targets_detail: List[Dict[str, Any]] = []
         current_turn = None
         initiative_order = []
         move_remaining = None
         move_max = None
+        round_number = None
         if self.gm.combat and self.gm.combat.combat_handler.engine:
             targets = self.gm.combat.combat_handler.enemy_ids
             current_turn = self.gm.combat.combat_handler.current_turn_id()
             initiative_order = self.gm.combat.combat_handler.engine.tracker.initiative_order
+            round_number = self.gm.combat.combat_handler.engine.tracker.round_number
+            engine = self.gm.combat.combat_handler.engine
+            for target_id in targets:
+                combatant = engine.combatants.get(target_id)
+                if not combatant:
+                    continue
+                hp_current = engine._get_hp(combatant)
+                hp_max = None
+                if hasattr(combatant, "resources"):
+                    hp_max = getattr(combatant.resources, "max_hit_points", None)
+                elif hasattr(combatant, "hp"):
+                    hp_max = engine._coerce_hp(getattr(combatant, "hp", None))
+                ac = None
+                if hasattr(combatant, "stats"):
+                    try:
+                        ac = combatant.stats.armor_class()
+                    except Exception:
+                        ac = None
+                targets_detail.append({
+                    "id": target_id,
+                    "name": target_id,
+                    "hp_current": hp_current,
+                    "hp_max": hp_max,
+                    "ac": ac,
+                })
             if current_turn == self.pc.identity.name:
                 move_remaining = self.gm.combat.turn_movement.get(self.pc.identity.name, 0)
                 move_max = self.gm.combat._token_speed(self.pc.identity.name)
         return {
             "active": True,
             "targets": targets,
+            "targets_detail": targets_detail,
             "current_turn": current_turn,
             "initiative_order": initiative_order,
+            "round_number": round_number,
             "player_name": self.pc.identity.name,
             "turn_state": self.gm.combat.player_turn_state if current_turn == self.pc.identity.name else {
                 "action": False,
@@ -374,36 +433,48 @@ class GameSession:
 
     def handle_message(self, content: str) -> Dict[str, Any]:
         self.gm.run_turn(content)
+        combat_log = self._consume_latest_combat_log()
+        combat_log_meta = self._combat_log_meta() if combat_log else None
         return {
             "narrative": self.last_narrative(),
             "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
             "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
             "character": self.character_summary(),
             "combat": self.combat_payload(),
+            "combat_log": combat_log,
+            "combat_log_meta": combat_log_meta,
         }
 
     def handle_combat_action(self, action_id: str, target_ids: List[str]) -> Dict[str, Any]:
         error = self.gm.run_combat_action(action_id, target_ids, end_turn=False)
         if error:
             return {"error": error}
+        combat_log = self._consume_latest_combat_log()
+        combat_log_meta = self._combat_log_meta() if combat_log else None
         return {
             "narrative": self.last_narrative(),
             "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
             "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
             "character": self.character_summary(),
             "combat": self.combat_payload(),
+            "combat_log": combat_log,
+            "combat_log_meta": combat_log_meta,
         }
 
     def handle_combat_end_turn(self) -> Dict[str, Any]:
         error = self.gm.run_combat_action(None, None, end_turn=True)
         if error:
             return {"error": error}
+        combat_log = self._consume_latest_combat_log()
+        combat_log_meta = self._combat_log_meta() if combat_log else None
         return {
             "narrative": self.last_narrative(),
             "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
             "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
             "character": self.character_summary(),
             "combat": self.combat_payload(),
+            "combat_log": combat_log,
+            "combat_log_meta": combat_log_meta,
         }
 
     def handle_toggle_equip(self, item_name: str, equipped: bool) -> Dict[str, Any]:
@@ -888,18 +959,22 @@ def combat_action(payload: CombatActionRequest) -> JSONResponse:
 
 
 @app.post("/api/combat_move")
-def combat_move(payload: CombatMoveRequest) -> JSONResponse:
+    def combat_move(payload: CombatMoveRequest) -> JSONResponse:
     if SESSION is None:
         return JSONResponse({"error": "Session not started"}, status_code=400)
     error = SESSION.gm.run_combat_move(payload.x, payload.y)
     if error:
         return JSONResponse({"error": error})
+    combat_log = SESSION._consume_latest_combat_log()
+    combat_log_meta = SESSION._combat_log_meta() if combat_log else None
     return JSONResponse({
         "narrative": SESSION.last_narrative(),
         "game_state": SESSION.gm.game_state.model_dump() if SESSION.gm.game_state else None,
         "story_summary": SESSION.gm.story_summary if hasattr(SESSION.gm, "story_summary") else None,
         "character": SESSION.character_summary(),
         "combat": SESSION.combat_payload(),
+        "combat_log": combat_log,
+        "combat_log_meta": combat_log_meta,
     })
 
 

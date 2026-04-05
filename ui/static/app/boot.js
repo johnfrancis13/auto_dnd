@@ -13,6 +13,10 @@ import {
   chatInput,
   sheetBody,
   sheetTabs,
+  collapseButtons,
+  imagesPanel,
+  chatMain,
+  combatPanel,
   combatSubmit,
   combatEndTurn,
   combatActionSelect,
@@ -27,6 +31,7 @@ import {
   getCurrentMap,
   updateTargetingHighlights,
   syncTargetSelect,
+  updateTargetCount,
 } from "./combat.js";
 import {
   enforceSpellChoiceLimits,
@@ -51,6 +56,31 @@ import {
   rollAction,
   useResource,
 } from "./api.js?v=20260403n";
+
+function setupCollapseToggles() {
+  const targets = {
+    images: { el: imagesPanel, className: "collapsed" },
+    combat: { el: combatPanel, className: "collapsed" },
+    chat: { el: chatMain, className: "chat-collapsed" },
+  };
+
+  collapseButtons.forEach((button) => {
+    const key = button.dataset.collapse;
+    const target = targets[key];
+    if (!target || !target.el) {
+      return;
+    }
+    const applyState = (collapsed) => {
+      button.setAttribute("aria-expanded", String(!collapsed));
+      button.textContent = collapsed ? "Expand" : "Collapse";
+    };
+    applyState(target.el.classList.contains(target.className));
+    button.addEventListener("click", () => {
+      const collapsed = target.el.classList.toggle(target.className);
+      applyState(collapsed);
+    });
+  });
+}
 
 function handleMoveCellClick(x, y) {
   const combat = getCurrentCombatPayload();
@@ -277,6 +307,7 @@ export function boot() {
     const actions = appState.character?.actions?.actions || [];
     uiState.selectedTargets = [];
     syncTargetSelect();
+    updateTargetCount(actions);
     const combat = getCurrentCombatPayload();
     updateTargetingHighlights(getCurrentMap(), actions, combat, combat.targets || []);
     });
@@ -285,8 +316,12 @@ export function boot() {
     combatTargetSelect.addEventListener("change", () => {
     uiState.selectedTargets = Array.from(combatTargetSelect.selectedOptions).map((opt) => opt.value);
     syncTargetSelect();
+    const actions = appState.character?.actions?.actions || [];
+    updateTargetCount(actions);
     });
   }
+
+  setupCollapseToggles();
 
   setSessionActive(false);
   renderCharacter(null);

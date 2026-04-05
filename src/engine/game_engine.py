@@ -1,6 +1,6 @@
 import random as random
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
 from systems.proficiency import ProficiencyType
 from enum import Enum, auto
@@ -402,14 +402,17 @@ class CombatActionLog:
     hit: Optional[bool] = None
     critical: bool = False
     attack_total: Optional[int] = None
+    attack_roll_detail: Optional[Dict[str, Any]] = None
     damage_total: int = 0
     damage_breakdown: Optional[Dict[str, int]] = None
+    damage_rolls_detail: Optional[List[Dict[str, Any]]] = None
     target_hp_before: Optional[int] = None
     target_hp_after: Optional[int] = None
     save_ability: Optional[str] = None
     save_total: Optional[int] = None
     save_dc: Optional[int] = None
     save_success: Optional[bool] = None
+    save_roll_detail: Optional[Dict[str, Any]] = None
     notes: Optional[str] = None
 
 
@@ -521,6 +524,7 @@ class CombatEngine:
         log.hit = attack_result.hit
         log.critical = attack_result.is_critical
         log.attack_total = attack_result.attack_roll.total
+        log.attack_roll_detail = self._roll_result_detail(attack_result.attack_roll)
 
         if attack_result.damage:
             log.damage_total = attack_result.damage.total
@@ -528,6 +532,7 @@ class CombatEngine:
                 str(dmg_type): subtotal
                 for dmg_type, subtotal in attack_result.damage.breakdown().items()
             }
+            log.damage_rolls_detail = self._build_damage_rolls_detail(scaled_action, attack_result.damage)
             self.apply_damage(target, log.damage_total)
             log.target_hp_after = self._get_hp(target)
         else:
@@ -585,6 +590,7 @@ class CombatEngine:
         save_mod = self._get_save_modifier(target, save_ability)
         save_roll = DiceHandler().roll(dice_specs=[(20, 1)], modifiers=save_mod)
         log.save_total = save_roll.total
+        log.save_roll_detail = self._roll_result_detail(save_roll)
 
         save_success = save_dc is not None and save_roll.total >= save_dc
         log.save_success = save_success
@@ -622,6 +628,7 @@ class CombatEngine:
                 str(dmg_type): subtotal
                 for dmg_type, subtotal in dmg_result.breakdown().items()
             }
+            log.damage_rolls_detail = self._build_damage_rolls_detail(scaled_action, dmg_result)
             if total_damage:
                 self.apply_damage(target, total_damage)
             log.target_hp_after = self._get_hp(target)
@@ -708,6 +715,49 @@ class CombatEngine:
             ability_mod = 0
         prof = getattr(getattr(source, "proficiencies", None), "proficiency_bonus", 0)
         return 8 + prof + ability_mod
+
+    def _roll_result_detail(self, roll: RollResult) -> Dict[str, Any]:
+        return {
+            "dice": roll.dice,
+            "modifiers": roll.modifiers,
+            "total": roll.total,
+            "advantage": roll.advantage,
+            "critical": roll.is_critical,
+        }
+
+    def _lookup_damage_rolls(self, dmg_result: DamageResult, dmg_type) -> List[RollResult]:
+        if dmg_type in dmg_result.damage:
+            return dmg_result.damage[dmg_type]
+        desired = str(dmg_type).lower()
+        for key, rolls in dmg_result.damage.items():
+            if str(key).lower() == desired:
+                return rolls
+        return []
+
+    def _build_damage_rolls_detail(self, action, dmg_result: DamageResult) -> Optional[List[Dict[str, Any]]]:
+        specs = getattr(action, "damage_roll", None) or []
+        if not specs or not dmg_result:
+            return None
+        indices: Dict[str, int] = {}
+        details: List[Dict[str, Any]] = []
+        for spec in specs:
+            dmg_type = spec.get("dmg_type")
+            rolls = self._lookup_damage_rolls(dmg_result, dmg_type)
+            key = str(dmg_type).lower()
+            idx = indices.get(key, 0)
+            roll = rolls[idx] if idx < len(rolls) else None
+            indices[key] = idx + 1
+            if not roll:
+                continue
+            details.append({
+                "type": str(dmg_type),
+                "dice_type": spec.get("dice_type"),
+                "dice_amount": spec.get("dice_amount"),
+                "dice": roll.dice,
+                "modifiers": roll.modifiers,
+                "total": roll.total,
+            })
+        return details or None
 
     def _with_scaled_damage(
         self,

@@ -6,9 +6,12 @@ import {
   combatSubmit,
   combatEndTurn,
   combatTurn,
+  chatMain,
   initiativeOrderEl,
+  currentTurnChipEl,
   turnStateEl,
   combatMapEl,
+  combatTargetCountEl,
 } from "./dom.js";
 
 let moveHandler = null;
@@ -20,28 +23,49 @@ export function setMoveHandler(handler) {
 export function renderCombat(combat) {
   if (!combat || !combat.active) {
     combatPanel.classList.add("hidden");
+    combatPanel.classList.remove("your-turn");
+    if (chatMain) {
+      chatMain.classList.remove("combat-active");
+    }
     appState.combat = combat || null;
     uiState.selectedTargets = [];
     return;
   }
   combatPanel.classList.remove("hidden");
+  if (chatMain) {
+    chatMain.classList.add("combat-active");
+  }
   appState.combat = combat;
   const playerName = appState.character?.identity?.name || "";
   const currentTurn = combat.current_turn || "";
+  const isPlayerTurn = !currentTurn || currentTurn === playerName;
+  combatPanel.classList.toggle("your-turn", isPlayerTurn);
   combatTurn.textContent = currentTurn
     ? `Current turn: ${currentTurn}`
     : "Current turn: Unknown";
+  if (currentTurnChipEl) {
+    const roundText = combat.round_number ? `Round ${combat.round_number}` : "Round ?";
+    const turnLabel = currentTurn || "Unknown";
+    currentTurnChipEl.innerHTML = `${roundText} - <strong>${turnLabel}</strong>`;
+    currentTurnChipEl.classList.toggle("active", isPlayerTurn);
+  }
   const initiative = combat.initiative_order || [];
-  initiativeOrderEl.innerHTML = initiative.length
-    ? initiative.map((entry) => {
+  const orderedInitiative = currentTurn
+    ? [currentTurn, ...initiative.filter((entry) => entry !== currentTurn)]
+    : initiative;
+  initiativeOrderEl.innerHTML = orderedInitiative.length
+    ? orderedInitiative.map((entry) => {
         const active = entry === currentTurn ? "initiative-chip active" : "initiative-chip";
-        return `<span class="${active}">${entry}</span>`;
+        const playerClass = entry === playerName ? " player" : "";
+        const position = initiative.indexOf(entry) + 1;
+        return `<span class="${active}${playerClass}"><span class="initiative-index">${position}</span>${entry}</span>`;
       }).join("")
     : "<span class=\"muted\">Initiative not set</span>";
   const turnState = combat.turn_state || { action: false, bonus: false, reaction: false };
   const moveRemaining = combat.move_remaining ?? null;
   const moveMax = combat.move_max ?? null;
   turnStateEl.innerHTML = [
+    `<span class="turn-status">${isPlayerTurn ? "Your turn" : `Waiting for ${currentTurn || "..."}`}</span>`,
     `<span>Action: ${turnState.action ? "Available" : "Used"}</span>`,
     `<span>Bonus: ${turnState.bonus ? "Available" : "Used"}</span>`,
     `<span>Reaction: ${turnState.reaction ? "Available" : "Used"}</span>`,
@@ -62,8 +86,19 @@ export function renderCombat(combat) {
       }).join("")
     : "<option value=\"\">No actions available</option>";
   const targets = combat.targets || [];
+  const targetDetails = Array.isArray(combat.targets_detail) ? combat.targets_detail : [];
+  const detailLookup = new Map(targetDetails.map((entry) => [entry.id || entry.name, entry]));
   combatTargetSelect.innerHTML = targets.length
-    ? targets.map((target) => `<option value="${target}">${target}</option>`).join("")
+    ? targets.map((target) => {
+        const detail = detailLookup.get(target) || {};
+        const hasDetail = detail.hp_current !== undefined || detail.hp_max !== undefined || detail.ac !== undefined;
+        const hpCurrent = detail.hp_current ?? "?";
+        const hpMax = detail.hp_max ?? "?";
+        const ac = detail.ac ?? "?";
+        const suffix = hasDetail ? ` (HP ${hpCurrent}/${hpMax}, AC ${ac})` : "";
+        const label = hasDetail ? `${target}${suffix}` : target;
+        return `<option value="${target}" title="${label}">${label}</option>`;
+      }).join("")
     : "<option value=\"\">No targets available</option>";
   const playerTurn = !currentTurn || currentTurn === playerName;
   const canAct = playerTurn && actions.length > 0;
@@ -71,8 +106,35 @@ export function renderCombat(combat) {
   combatTargetSelect.disabled = !canAct || targets.length === 0;
   combatSubmit.disabled = !canAct || targets.length === 0;
   combatEndTurn.disabled = !playerTurn;
+  if (canAct && uiState.selectedTargets.length === 0 && targets.length > 0) {
+    uiState.selectedTargets = [targets[0]];
+  }
+  syncTargetSelect();
+  updateTargetCount(actions);
   renderCombatMap(combat.map, combat);
   updateTargetingHighlights(combat.map, actions, combat, targets);
+}
+
+export function updateTargetCount(actions) {
+  if (!combatTargetCountEl) {
+    return;
+  }
+  const selectedCount = uiState.selectedTargets.length;
+  const selectedAction = getSelectedAction(actions);
+  const maxTargets = selectedAction?.max_targets ?? null;
+  if (!actions || actions.length === 0) {
+    combatTargetCountEl.textContent = "";
+    return;
+  }
+  if (combatTargetSelect.disabled) {
+    combatTargetCountEl.textContent = "No targets";
+    return;
+  }
+  if (maxTargets) {
+    combatTargetCountEl.textContent = `${selectedCount}/${maxTargets} selected`;
+    return;
+  }
+  combatTargetCountEl.textContent = `${selectedCount} selected`;
 }
 
 export function renderCombatMap(map, combat) {
@@ -83,27 +145,41 @@ export function renderCombatMap(map, combat) {
   const currentTurn = combat?.current_turn || "";
   const playerName = combat?.player_name || "";
   const moveRemaining = combat?.move_remaining ?? 0;
+  const targetDetails = Array.isArray(combat?.targets_detail) ? combat.targets_detail : [];
+  const detailLookup = new Map(targetDetails.map((entry) => [entry.id || entry.name, entry]));
+  const playerStats = appState.character?.stats || {};
+  if (playerName && playerStats?.hp) {
+    detailLookup.set(playerName, {
+      id: playerName,
+      name: playerName,
+      hp_current: playerStats.hp.current,
+      hp_max: playerStats.hp.max,
+      ac: playerStats.ac,
+    });
+  }
   uiState.selectedTargets = uiState.selectedTargets.filter((id) => map.tokens.some((t) => t.id === id));
   const width = map.width || 12;
   const height = map.height || 8;
   combatMapEl.style.gridTemplateColumns = `repeat(${width}, 28px)`;
   combatMapEl.innerHTML = "";
   const cellIndex = {};
+  const origin = map.tokens.find((token) => token.id === playerName) || null;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const cell = document.createElement("div");
       cell.className = "combat-cell";
       cell.dataset.x = x;
       cell.dataset.y = y;
-      if (playerName && currentTurn === playerName) {
-        const origin = map.tokens.find((token) => token.id === playerName);
-        if (origin) {
-          const squares = Math.max(Math.abs(origin.x - x), Math.abs(origin.y - y));
-          const distance = squares * (map.grid_size || 5);
-          if (distance <= moveRemaining) {
-            cell.classList.add("reachable");
-          }
+      const distance = origin
+        ? Math.max(Math.abs(origin.x - x), Math.abs(origin.y - y)) * (map.grid_size || 5)
+        : 0;
+      if (playerName && currentTurn === playerName && origin) {
+        if (distance <= moveRemaining) {
+          cell.classList.add("reachable");
         }
+      }
+      if (playerName && currentTurn === playerName) {
+        cell.title = `Move: ${distance} ft`;
       }
       cell.addEventListener("click", () => {
         if (moveHandler) {
@@ -128,7 +204,15 @@ export function renderCombatMap(map, combat) {
       div.classList.add("selected");
     }
     div.textContent = token.name.charAt(0).toUpperCase();
-    div.title = token.name;
+    const detail = detailLookup.get(token.id);
+    if (detail && (detail.hp_current !== undefined || detail.hp_max !== undefined || detail.ac !== undefined)) {
+      const hpCurrent = detail.hp_current ?? "?";
+      const hpMax = detail.hp_max ?? "?";
+      const ac = detail.ac ?? "?";
+      div.title = `${token.name} (HP ${hpCurrent}/${hpMax}, AC ${ac})`;
+    } else {
+      div.title = token.name;
+    }
     if (token.faction === "enemy") {
       div.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -187,6 +271,7 @@ export function toggleTargetSelection(tokenId) {
   }
   syncTargetSelect();
   const actions = appState.character?.actions?.actions || [];
+  updateTargetCount(actions);
   updateTargetingHighlights(getCurrentMap(), actions, getCurrentCombatPayload(), appState.combat?.targets || []);
 }
 

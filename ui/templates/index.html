@@ -123,7 +123,12 @@
 
       <main class="chat">
         <section class="images inline">
-          <h2>Scene Images</h2>
+          <div class="section-header">
+            <h2>Scene Images</h2>
+            <button type="button" class="collapse-toggle" data-collapse="images" aria-expanded="true">
+              Collapse
+            </button>
+          </div>
           <div id="image-grid" class="image-grid">
             <div class="empty">No images yet</div>
           </div>
@@ -133,27 +138,46 @@
             <h1>Session</h1>
             <div id="game-state" class="muted">No session running</div>
           </div>
-          <div class="pill" id="session-indicator">Idle</div>
+          <div class="header-actions">
+            <div class="pill" id="session-indicator">Idle</div>
+            <button type="button" class="collapse-toggle" data-collapse="chat" aria-expanded="true">
+              Collapse
+            </button>
+          </div>
         </header>
 
-        <section id="messages" class="messages"></section>
-        <div id="thinking-indicator" class="thinking hidden" aria-live="polite">
-          <span class="thinking-label">DM is thinking</span>
-          <span class="thinking-dots" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
+        <div class="chat-stream">
+          <section id="messages" class="messages"></section>
+          <div id="thinking-indicator" class="thinking hidden" aria-live="polite">
+            <span class="thinking-label">DM is thinking</span>
+            <span class="thinking-dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </div>
         </div>
 
         <section id="combat-panel" class="combat-panel hidden">
           <div class="combat-header">
             <h2>Combat Actions</h2>
-            <div class="muted" id="combat-turn">Waiting for turn...</div>
+            <div class="combat-header-actions">
+              <div class="muted" id="combat-turn">Waiting for turn...</div>
+              <button type="button" class="collapse-toggle" data-collapse="combat" aria-expanded="true">
+                Collapse
+              </button>
+            </div>
           </div>
           <div class="combat-meta">
-            <div class="initiative-order" id="initiative-order"></div>
-            <div class="turn-state" id="turn-state"></div>
+            <div class="combat-section">
+              <div class="combat-section-title">Initiative Order</div>
+              <div class="current-turn-chip" id="current-turn-chip"></div>
+              <div class="initiative-order" id="initiative-order"></div>
+            </div>
+            <div class="combat-section">
+              <div class="combat-section-title">Turn Status</div>
+              <div class="turn-state" id="turn-state"></div>
+            </div>
           </div>
           <div class="combat-map-wrap">
             <div class="combat-map" id="combat-map"></div>
@@ -164,13 +188,20 @@
               <select id="combat-action"></select>
             </label>
             <label>
-              Target
+              <div class="label-row">
+                <span>Target</span>
+                <span class="muted" id="combat-target-count"></span>
+              </div>
               <select id="combat-target" multiple size="4"></select>
             </label>
             <div class="combat-buttons">
               <button type="button" id="combat-submit">Resolve</button>
               <button type="button" id="combat-end-turn" class="ghost">End Turn</button>
             </div>
+          </div>
+          <div class="muted combat-instructions">
+            To move: click a highlighted square on the grid. To act: choose an action, select target(s), then press
+            Resolve. End Turn when you're done.
           </div>
           <div class="muted combat-hint">Tip: Hold Ctrl (Windows) or Cmd (Mac) to select multiple targets.</div>
         </section>
