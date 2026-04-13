@@ -86,7 +86,7 @@ class CharacterConfig(BaseModel):
 
 class StartRequest(BaseModel):
     character: CharacterConfig
-    model_name: str = "qwen3:8b"
+    model_name: str = "igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K"
     think: bool = False
     equipment_choices: Optional[Dict[str, List[str]]] = None
     proficiency_choices: Optional[Dict[str, List[str]]] = None

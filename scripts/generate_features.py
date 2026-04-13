@@ -95,7 +95,7 @@ def _build_feature_list() -> List[Dict]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="qwen3:8b")
+    parser.add_argument("--model", default="igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K")
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
 

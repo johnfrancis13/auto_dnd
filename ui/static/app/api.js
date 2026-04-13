@@ -123,7 +123,7 @@ export async function startGame() {
   const formData = new FormData(charForm);
   const payload = {
     character: Object.fromEntries(formData.entries()),
-    model_name: "qwen3:8b",
+    model_name: "igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K",
     think: false,
   };
   try {

@@ -89,7 +89,7 @@ def format_recent_turns(turns):
 
 
 class gm_llm:
-    def __init__(self,model_name="qwen3:8b",pc=None, think=False, npc_index=None, npc_factory=None, npc_names=None):
+    def __init__(self,model_name="igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K",pc=None, think=False, npc_index=None, npc_factory=None, npc_names=None):
         self.model_name = model_name
         self.pc= pc
         self.think=think
@@ -283,6 +283,24 @@ class gm_llm:
 
             ### Session 0
             The user is a consenting adult. Your session 0 has allowed adult topics such as violence, religion, politics, alchohol, drugs, and sex. 
+            
+            ### Response Format
+            - Always Return strict JSON (RFC 8259): double quotes only, no Python values (None, True, False), no trailing commas
+            - Do NOT wrap the output in ``` or any formatting.
+            - Your response will be parsed with json.loads(). If it is invalid JSON, it will fail.
+            - You must output JSON that conforms to this schema:
+
+            {{
+              "game_state": {{
+                "mode": "string", # ["exploration", "combat"]
+                "player": "string",
+                "enemy": "string or null",
+                "enemies": "array or null",
+                "combat": "object or null", # {{initiative_order:"array",'current_turn':"string"}}
+                "game_over": "boolean"
+              }},
+              "narrative": "string"
+            }}
 
             ### GAME PARAMETERS
             - Short one-shot, with a length of 30 minutes to 1 hour.
@@ -462,7 +480,7 @@ class gm_llm:
                {formatted_turns}
                 """}]
         response = chat(
-            model='qwen3:8b',
+            model='igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K',
             messages=summary_messages,
             think=self.think,
              options = {"num_ctx": 8192})
@@ -1384,7 +1402,7 @@ class GMActionHandler:
 
 
 class GmCombatHandler:
-    def __init__(self, model_name="qwen3:8b", pc=None, think=False, npc_index=None, npc_factory=None):
+    def __init__(self, model_name="igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K", pc=None, think=False, npc_index=None, npc_factory=None):
         self.model_name = model_name
         self.pc = pc
         self.think = think
