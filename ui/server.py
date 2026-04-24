@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Literal
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -127,6 +127,38 @@ class ActionRollRequest(BaseModel):
     advantage: Optional[str] = None  # adv | dis
     narrate: bool = False
     player_text: Optional[str] = None
+
+
+class ActionExecuteRequest(BaseModel):
+    action_id: str
+    target_id: Optional[str] = None
+    target_ids: Optional[List[str]] = None
+    target_text: Optional[str] = None
+    advantage: Optional[str] = None  # adv | dis
+    player_text: Optional[str] = None
+
+
+class CheckExecuteRequest(BaseModel):
+    check_type: Literal["skill", "ability", "save", "initiative"]
+    skill: Optional[str] = None
+    ability: Optional[str] = None
+    advantage: Optional[str] = None  # adv | dis
+    player_text: Optional[str] = None
+    expected_request_id: Optional[str] = None
+
+
+class IntentExecuteRequest(BaseModel):
+    intent_type: Literal["action", "check"]
+    action_id: Optional[str] = None
+    target_id: Optional[str] = None
+    target_ids: Optional[List[str]] = None
+    target_text: Optional[str] = None
+    check_type: Optional[Literal["skill", "ability", "save", "initiative"]] = None
+    skill: Optional[str] = None
+    ability: Optional[str] = None
+    advantage: Optional[str] = None  # adv | dis
+    player_text: Optional[str] = None
+    expected_request_id: Optional[str] = None
 
 
 class ResourceUseRequest(BaseModel):
@@ -406,6 +438,7 @@ class GameSession:
             "turns": self.gm.turns,
             "images": self.images,
             "combat": combat_payload,
+            "roll_request": self.gm.pending_roll_request,
         }
 
     def combat_payload(self) -> Dict[str, Any]:
@@ -470,49 +503,40 @@ class GameSession:
 
     def handle_message(self, content: str) -> Dict[str, Any]:
         self.gm.run_turn(content)
-        combat_log = self._consume_latest_combat_log()
-        combat_log_meta = self._combat_log_meta() if combat_log else None
-        return {
+        return self._session_update_payload(include_combat_log=True)
+
+    def _session_update_payload(self, include_combat_log: bool = False) -> Dict[str, Any]:
+        payload = {
             "narrative": self.last_narrative(),
             "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
             "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
             "character": self.character_summary(),
             "combat": self.combat_payload(),
-            "combat_log": combat_log,
-            "combat_log_meta": combat_log_meta,
+            "roll_request": self.gm.pending_roll_request,
         }
+        if include_combat_log:
+            combat_log = self._consume_latest_combat_log()
+            payload["combat_log"] = combat_log
+            payload["combat_log_meta"] = self._combat_log_meta() if combat_log else None
+        return payload
 
     def handle_combat_action(self, action_id: str, target_ids: List[str]) -> Dict[str, Any]:
         error = self.gm.run_combat_action(action_id, target_ids, end_turn=False)
         if error:
             return {"error": error}
-        combat_log = self._consume_latest_combat_log()
-        combat_log_meta = self._combat_log_meta() if combat_log else None
-        return {
-            "narrative": self.last_narrative(),
-            "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
-            "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
-            "character": self.character_summary(),
-            "combat": self.combat_payload(),
-            "combat_log": combat_log,
-            "combat_log_meta": combat_log_meta,
-        }
+        return self._session_update_payload(include_combat_log=True)
 
     def handle_combat_end_turn(self) -> Dict[str, Any]:
         error = self.gm.run_combat_action(None, None, end_turn=True)
         if error:
             return {"error": error}
-        combat_log = self._consume_latest_combat_log()
-        combat_log_meta = self._combat_log_meta() if combat_log else None
-        return {
-            "narrative": self.last_narrative(),
-            "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
-            "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
-            "character": self.character_summary(),
-            "combat": self.combat_payload(),
-            "combat_log": combat_log,
-            "combat_log_meta": combat_log_meta,
-        }
+        return self._session_update_payload(include_combat_log=True)
+
+    def handle_combat_move(self, x: int, y: int) -> Dict[str, Any]:
+        error = self.gm.run_combat_move(x, y)
+        if error:
+            return {"error": error}
+        return self._session_update_payload(include_combat_log=True)
 
     def handle_toggle_equip(self, item_name: str, equipped: bool) -> Dict[str, Any]:
         item = self.pc.inventory.get(item_name)
@@ -706,6 +730,201 @@ class GameSession:
             "game_state": self.gm.game_state.model_dump() if self.gm.game_state else None,
             "story_summary": self.gm.story_summary if hasattr(self.gm, "story_summary") else None,
         }
+
+    def handle_action_execute(
+        self,
+        action_id: str,
+        target_id: Optional[str],
+        target_ids: Optional[List[str]],
+        target_text: Optional[str],
+        advantage: Optional[str],
+        player_text: Optional[str],
+    ) -> Dict[str, Any]:
+        # In combat, action execution should go through the combat engine for deterministic resolution.
+        if self.gm.game_state and self.gm.game_state.mode == "combat":
+            resolved_targets = target_ids or ([target_id] if target_id else [])
+            if not resolved_targets:
+                return {"error": "No targets selected."}
+            return self.handle_combat_action(action_id, resolved_targets)
+
+        # Outside combat, resolve deterministic rolls first, then always narrate.
+        roll_result = self.handle_action_roll(action_id, target_id, target_ids, target_text, advantage)
+        if roll_result.get("error"):
+            return roll_result
+
+        try:
+            action = self.pc.actions.get(action_id)
+        except Exception:
+            action = None
+        if action:
+            base_text = player_text or f"I use {action.name}."
+        else:
+            base_text = player_text or "I take an action."
+
+        self.gm.run_turn(base_text)
+        return {
+            "result": roll_result.get("result"),
+            **self._session_update_payload(include_combat_log=True),
+        }
+
+    def handle_check_execute(
+        self,
+        check_type: str,
+        skill: Optional[str],
+        ability: Optional[str],
+        advantage: Optional[str],
+        player_text: Optional[str],
+        expected_request_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        check_type = (check_type or "").lower()
+        ability = (ability or "").upper() or None
+        skill = (skill or "").lower() or None
+        pending_request = self.gm.pending_roll_request or None
+        if pending_request:
+            pending_id = str(pending_request.get("request_id") or "").strip() or None
+            if pending_id and expected_request_id != pending_id:
+                return {"error": "This roll request is stale. Use the currently requested roll from the sheet."}
+            if not self._requested_check_matches_pending(pending_request, check_type, skill, ability):
+                return {"error": self._pending_roll_mismatch_message(pending_request)}
+        if check_type == "skill":
+            if not skill:
+                return {"error": "Skill is required for skill checks."}
+            try:
+                roll = self.pc.actions.roll_skill_check(skill, advantage=advantage)
+            except Exception as exc:
+                return {"error": str(exc)}
+            label = f"{skill} skill check"
+            result_payload = {
+                "check_type": "skill",
+                "skill": skill,
+                "total": roll.total,
+                "dice": roll.dice,
+                "modifiers": roll.modifiers,
+                "advantage": roll.advantage,
+            }
+        elif check_type == "ability":
+            if not ability:
+                return {"error": "Ability is required for ability checks."}
+            try:
+                roll = self.pc.actions.roll_ability_check(ability, advantage=advantage)
+            except Exception as exc:
+                return {"error": str(exc)}
+            label = f"{ability} ability check"
+            result_payload = {
+                "check_type": "ability",
+                "ability": ability,
+                "total": roll.total,
+                "dice": roll.dice,
+                "modifiers": roll.modifiers,
+                "advantage": roll.advantage,
+            }
+        elif check_type == "save":
+            if not ability:
+                return {"error": "Ability is required for saving throws."}
+            try:
+                roll = self.pc.actions.roll_saving_throw(ability, advantage=advantage)
+            except Exception as exc:
+                return {"error": str(exc)}
+            label = f"{ability} saving throw"
+            result_payload = {
+                "check_type": "save",
+                "ability": ability,
+                "total": roll.total,
+                "dice": roll.dice,
+                "modifiers": roll.modifiers,
+                "advantage": roll.advantage,
+            }
+        elif check_type == "initiative":
+            try:
+                roll = self.pc.actions.roll_ability_check("DEX", advantage=advantage)
+            except Exception as exc:
+                return {"error": str(exc)}
+            label = "initiative roll"
+            result_payload = {
+                "check_type": "initiative",
+                "ability": "DEX",
+                "total": roll.total,
+                "dice": roll.dice,
+                "modifiers": roll.modifiers,
+                "advantage": roll.advantage,
+            }
+        else:
+            return {"error": f"Unsupported check type: {check_type}"}
+
+        tool_text = (
+            f"The player rolled a {result_payload['total']} on a requested {label}. "
+            f"(dice={result_payload['dice']}, modifiers={result_payload['modifiers']})"
+        )
+        self.gm.turns.append({
+            "role": "tool",
+            "tool_name": "check_roll",
+            "content": tool_text,
+        })
+        if pending_request:
+            self.gm.pending_roll_request = None
+        user_input = player_text or f"I rolled a {result_payload['total']} for the {label}."
+        self.gm.run_turn(user_input)
+        return {
+            "result": result_payload,
+            **self._session_update_payload(include_combat_log=True),
+        }
+
+    def _requested_check_matches_pending(
+        self,
+        pending_request: Dict[str, Any],
+        check_type: str,
+        skill: Optional[str],
+        ability: Optional[str],
+    ) -> bool:
+        req_type = str(pending_request.get("type") or "").lower()
+        if req_type != check_type:
+            return False
+        if req_type == "skill":
+            req_skill = str(pending_request.get("skill") or "").lower()
+            return req_skill == str(skill or "").lower()
+        if req_type in {"ability", "save"}:
+            req_ability = str(pending_request.get("ability") or "").upper()
+            return req_ability == str(ability or "").upper()
+        if req_type == "initiative":
+            return True
+        return False
+
+    def _pending_roll_mismatch_message(self, pending_request: Dict[str, Any]) -> str:
+        req_type = str(pending_request.get("type") or "").lower()
+        if req_type == "skill":
+            return f"Pending request: {pending_request.get('skill')} skill check."
+        if req_type == "ability":
+            return f"Pending request: {pending_request.get('ability')} ability check."
+        if req_type == "save":
+            return f"Pending request: {pending_request.get('ability')} saving throw."
+        if req_type == "initiative":
+            return "Pending request: initiative roll."
+        return "Pending roll request must be resolved first."
+
+    def handle_intent_execute(self, payload: IntentExecuteRequest) -> Dict[str, Any]:
+        if payload.intent_type == "action":
+            if not payload.action_id:
+                return {"error": "action_id is required for action intent."}
+            return self.handle_action_execute(
+                payload.action_id,
+                payload.target_id,
+                payload.target_ids,
+                payload.target_text,
+                payload.advantage,
+                payload.player_text,
+            )
+        if payload.intent_type == "check":
+            if not payload.check_type:
+                return {"error": "check_type is required for check intent."}
+            return self.handle_check_execute(
+                payload.check_type,
+                payload.skill,
+                payload.ability,
+                payload.advantage,
+                payload.player_text,
+                payload.expected_request_id,
+            )
+        return {"error": f"Unsupported intent type: {payload.intent_type}"}
 
     def _add_manual_combat_log(self, roll_payload: Dict[str, Any]):
         combat = getattr(self.gm, "combat", None)
@@ -1012,20 +1231,10 @@ def combat_action(payload: CombatActionRequest) -> JSONResponse:
 def combat_move(payload: CombatMoveRequest) -> JSONResponse:
     if SESSION is None:
         return JSONResponse({"error": "Session not started"}, status_code=400)
-    error = SESSION.gm.run_combat_move(payload.x, payload.y)
-    if error:
-        return JSONResponse({"error": error})
-    combat_log = SESSION._consume_latest_combat_log()
-    combat_log_meta = SESSION._combat_log_meta() if combat_log else None
-    return JSONResponse({
-        "narrative": SESSION.last_narrative(),
-        "game_state": SESSION.gm.game_state.model_dump() if SESSION.gm.game_state else None,
-        "story_summary": SESSION.gm.story_summary if hasattr(SESSION.gm, "story_summary") else None,
-        "character": SESSION.character_summary(),
-        "combat": SESSION.combat_payload(),
-        "combat_log": combat_log,
-        "combat_log_meta": combat_log_meta,
-    })
+    result = SESSION.handle_combat_move(payload.x, payload.y)
+    if result.get("error"):
+        return JSONResponse(result)
+    return JSONResponse(result)
 
 
 @app.post("/api/inventory/equip")
@@ -1052,23 +1261,59 @@ def toggle_spell(payload: SpellToggleRequest) -> JSONResponse:
 def roll_action(payload: ActionRollRequest) -> JSONResponse:
     if SESSION is None:
         return JSONResponse({"error": "Session not started"}, status_code=400)
-    if payload.narrate:
-        result = SESSION.handle_action_roll_and_narrate(
-            payload.action_id,
-            payload.target_id,
-            payload.target_ids,
-            payload.target_text,
-            payload.advantage,
-            payload.player_text,
-        )
-    else:
-        result = SESSION.handle_action_roll(
-            payload.action_id,
-            payload.target_id,
-            payload.target_ids,
-            payload.target_text,
-            payload.advantage,
-        )
+    # Backward-compatible route: deterministic execution always includes narration.
+    result = SESSION.handle_action_execute(
+        payload.action_id,
+        payload.target_id,
+        payload.target_ids,
+        payload.target_text,
+        payload.advantage,
+        payload.player_text,
+    )
+    if result.get("error"):
+        return JSONResponse(result, status_code=400)
+    return JSONResponse(result)
+
+
+@app.post("/api/action/execute")
+def execute_action(payload: ActionExecuteRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    result = SESSION.handle_action_execute(
+        payload.action_id,
+        payload.target_id,
+        payload.target_ids,
+        payload.target_text,
+        payload.advantage,
+        payload.player_text,
+    )
+    if result.get("error"):
+        return JSONResponse(result, status_code=400)
+    return JSONResponse(result)
+
+
+@app.post("/api/intent/execute")
+def execute_intent(payload: IntentExecuteRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    result = SESSION.handle_intent_execute(payload)
+    if result.get("error"):
+        return JSONResponse(result, status_code=400)
+    return JSONResponse(result)
+
+
+@app.post("/api/check/execute")
+def execute_check(payload: CheckExecuteRequest) -> JSONResponse:
+    if SESSION is None:
+        return JSONResponse({"error": "Session not started"}, status_code=400)
+    result = SESSION.handle_check_execute(
+        payload.check_type,
+        payload.skill,
+        payload.ability,
+        payload.advantage,
+        payload.player_text,
+        payload.expected_request_id,
+    )
     if result.get("error"):
         return JSONResponse(result, status_code=400)
     return JSONResponse(result)

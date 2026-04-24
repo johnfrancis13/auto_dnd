@@ -308,6 +308,43 @@ button:hover {
   overflow: hidden;
   border: 1px solid var(--border);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  position: relative;
+  isolation: isolate;
+}
+
+.chat.scene-overlay-active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--scene-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+}
+
+.chat.scene-overlay-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(24, 20, 16, 0.25) 0%, rgba(24, 20, 16, 0.08) 40%, rgba(24, 20, 16, 0.3) 100%);
+  z-index: -1;
+}
+
+.chat.scene-overlay-active {
+  background: transparent;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.chat header > div:first-child {
+  display: none;
+}
+
+.chat header {
+  justify-content: flex-end;
+  margin-bottom: 0;
 }
 
 .chat-stream {
@@ -486,11 +523,10 @@ button:hover {
 }
 
 .images.inline {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 10px 24px var(--shadow);
-  padding: 12px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
   margin-bottom: 12px;
 }
 
@@ -597,9 +633,7 @@ details.entry .detail-body {
 }
 
 .combat-panel.collapsed .combat-meta,
-.combat-panel.collapsed .combat-map-wrap,
-.combat-panel.collapsed .combat-controls,
-.combat-panel.collapsed .combat-hint {
+.combat-panel.collapsed .combat-map-wrap {
   display: none;
 }
 
@@ -614,7 +648,8 @@ details.entry .detail-body {
 }
 
 .chat.chat-collapsed .chat-stream,
-.chat.chat-collapsed .composer {
+.chat.chat-collapsed .composer,
+.chat.chat-collapsed .images.inline {
   display: none;
 }
 
@@ -628,11 +663,6 @@ details.entry .detail-body {
 
 .chat.chat-collapsed header > div:not(.header-actions) {
   display: none;
-}
-
-.chat.chat-collapsed .header-actions {
-  flex-direction: column;
-  gap: 8px;
 }
 
 .chat.combat-active .images {
@@ -776,25 +806,6 @@ details.entry .detail-body {
   line-height: 1.4;
 }
 
-.combat-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 10px;
-  align-items: end;
-}
-
-.combat-controls label {
-  margin: 0;
-}
-
-.combat-controls button {
-  height: 38px;
-}
-
-.combat-controls select[multiple] {
-  min-height: 120px;
-}
-
 .combat-buttons {
   display: grid;
   gap: 8px;
@@ -808,10 +819,6 @@ details.entry .detail-body {
 
 .combat-buttons .ghost:hover {
   box-shadow: 0 6px 14px rgba(27, 27, 27, 0.12);
-}
-
-.combat-hint {
-  font-size: 12px;
 }
 
 .combat-map-wrap {

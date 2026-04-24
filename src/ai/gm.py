@@ -9,6 +9,7 @@ import random
 import json
 import textwrap
 import subprocess
+import uuid
 
 # Load in the testing pydantic classes
 
@@ -24,7 +25,7 @@ AbilityLiteral = Literal["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 class Mechanics(BaseModel):
     player_intent: str
     requires_roll: bool
-    roll_type: Optional[Literal["skill", "ability", "save"]] = None
+    roll_type: Optional[Literal["skill", "ability", "save", "initiative"]] = None
     skill: Optional[SkillLiteral] = None
     ability: Optional[AbilityLiteral] = None
 
@@ -126,6 +127,7 @@ class gm_llm:
             npc_index=npc_index,
             npc_factory=npc_factory,
         )
+        self.pending_roll_request = None
     def choose_new_adventure(self):
         self.adventure_data = random.choice(one_shot_adventures)
         self.adventure_npc_names = self.adventure_data.get("npc_options") or []
@@ -276,7 +278,9 @@ class gm_llm:
             - Maintain tension and pacing.
             - Respect player autonomy, DON'T provide the player specific choices unless they ask for it, allow them to drive the story
             - Never decide player actions, never speak on behalf of the player.
-            - If a skill check is provided, determine an appropriate DC based on the context and explain what happens given the value of the roll.
+            - If a ROLL REQUEST tool message is present, ask the player to make that specific roll and wait for their result.
+            - When waiting for a requested roll, do not narrate the outcome yet.
+            - If a roll result tool message is provided, explain what happens given the value of the roll.
             - If combat is active, use the COMBAT LOG for outcomes. Do not invent rolls or change mechanical results.
             - If combat begins and you know the exact NPCs involved, set game_state.enemies to their names; otherwise leave it null.
             - Keep the game in exploration mode unless the player or an NPC initiates combat explicitly
@@ -332,6 +336,7 @@ class gm_llm:
             - "skill": choose one of the allowed skills.
             - "ability": choose one of STR, DEX, CON, INT, WIS, CHA.
             - "save": choose one of STR, DEX, CON, INT, WIS, CHA.
+            - "initiative": use this when combat begins and initiative should be rolled.
 
             Use "ability" for raw ability checks not tied to a trained skill.
             Use "save" for resisting effects.
@@ -350,6 +355,7 @@ class gm_llm:
             - If requires_roll is false, roll_type, skill, and ability must be null.
             - If roll_type is "skill", skill must be one of the allowed skills and ability must be null.
             - If roll_type is "ability" or "save", ability must be one of STR/DEX/CON/INT/WIS/CHA and skill must be null.
+            - If roll_type is "initiative", skill and ability must be null.
 
             --------------------------------
             Examples:
@@ -384,6 +390,14 @@ class gm_llm:
               "roll_type": "save",
               "skill": null,
               "ability": "CON"
+            }
+
+            {
+              "player_intent": "combat starts and initiative should be rolled",
+              "requires_roll": true,
+              "roll_type": "initiative",
+              "skill": null,
+              "ability": null
             }
             """
         self.combat_rules_prompt = """
@@ -521,11 +535,12 @@ class gm_llm:
         if self.game_state.mode == "combat":
             return self.combat.run_combat_turn(user_input)
 
+        last_dm_turn = next((turn for turn in reversed(self.turns) if turn.get("role") == "Dungeon Master"), self.turns[-1])
         intent_messages = [{
             "role": "system",
             "content": self.rules_system_prompt
             },
-            self.turns[-1], # add in the last DM narration to give context to the players action
+            last_dm_turn, # add in the last DM narration to give context to the players action
             {'role': 'user', 
              'content': f"""
                          Current Game State:
@@ -542,18 +557,39 @@ class gm_llm:
         print(player_intent)
         if player_intent.requires_roll:
             roll_type = player_intent.roll_type or ("skill" if player_intent.skill else None)
+            request_payload = None
             if roll_type == "skill" and player_intent.skill:
-                result = self.actions.roll_skill_check(player_intent.skill)
-                formatted_result = f"The player rolled a {result} on the requested {player_intent.skill} skill check."
-                self.turns.append({'role': 'tool', 'tool_name': "roll_skill_check", 'content': str(formatted_result)})
+                request_payload = {
+                    "request_id": uuid.uuid4().hex,
+                    "type": "skill",
+                    "skill": player_intent.skill,
+                }
             elif roll_type == "ability" and player_intent.ability:
-                result = self.actions.roll_ability_check(player_intent.ability)
-                formatted_result = f"The player rolled a {result} on the requested {player_intent.ability} ability check."
-                self.turns.append({'role': 'tool', 'tool_name': "roll_ability_check", 'content': str(formatted_result)})
+                request_payload = {
+                    "request_id": uuid.uuid4().hex,
+                    "type": "ability",
+                    "ability": player_intent.ability,
+                }
             elif roll_type == "save" and player_intent.ability:
-                result = self.actions.roll_saving_throw(player_intent.ability)
-                formatted_result = f"The player rolled a {result} on the requested {player_intent.ability} saving throw."
-                self.turns.append({'role': 'tool', 'tool_name': "roll_saving_throw", 'content': str(formatted_result)})
+                request_payload = {
+                    "request_id": uuid.uuid4().hex,
+                    "type": "save",
+                    "ability": player_intent.ability,
+                }
+            elif roll_type == "initiative":
+                request_payload = {
+                    "request_id": uuid.uuid4().hex,
+                    "type": "initiative",
+                }
+            if request_payload:
+                self.pending_roll_request = request_payload
+                self.turns.append({
+                    "role": "tool",
+                    "tool_name": "roll_request",
+                    "content": json.dumps(request_payload),
+                })
+        else:
+            self.pending_roll_request = None
 
         # Rebuild the prompt each turn to avoid long conversation history
         messages = self.build_messages(
@@ -1467,7 +1503,7 @@ class GmCombatHandler:
     def resolve_action(self, attacker_id: str, action_id: str, target_id: str):
         if not self.engine:
             return None
-        return self.engine.resolve_attack_action(attacker_id, action_id, target_id)
+        return self.engine.resolve_spell_action(attacker_id, action_id, target_id)
 
     def advance_turn(self):
         if self.engine:

@@ -26,6 +26,85 @@ import {
 } from "./forms.js";
 import { setRollPending } from "./rolls.js";
 
+function syncRollRequest(data) {
+  if (!data || !Object.prototype.hasOwnProperty.call(data, "roll_request")) {
+    return;
+  }
+  appState.pendingRollRequest = data.roll_request || null;
+}
+
+function applySessionResponse(data, options = {}) {
+  const {
+    markSession = false,
+    announceRollRequest = true,
+  } = options;
+
+  if (!data) {
+    return;
+  }
+  if (markSession) {
+    appState.session = true;
+  }
+  syncRollRequest(data);
+  const incomingRequestId = String(data?.roll_request?.request_id || "");
+  const shouldAnnounce =
+    announceRollRequest &&
+    data.roll_request &&
+    (!incomingRequestId || incomingRequestId !== appState.lastAnnouncedRollRequestId);
+  if (shouldAnnounce) {
+    addMessage("dm", formatRollRequest(data.roll_request));
+    if (incomingRequestId) {
+      appState.lastAnnouncedRollRequestId = incomingRequestId;
+    }
+  }
+  if (data.combat_log) {
+    addCombatLogEntries(data.combat_log, data.combat_log_meta);
+  }
+  if (data.narrative) {
+    addMessage("dm", data.narrative);
+  }
+  if (data.character) {
+    renderCharacter(data.character);
+  }
+  if (data.combat) {
+    renderCombat(data.combat);
+  }
+  if (data.game_state) {
+    setSessionActive(true, data.game_state.mode || "exploration");
+  }
+  if (data.images) {
+    renderImages(data.images);
+  }
+}
+
+async function executeIntent(payload) {
+  const res = await fetch("/api/intent/execute", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+
+function formatRollRequest(request) {
+  if (!request) {
+    return "";
+  }
+  if (request.type === "skill") {
+    return `Roll requested: ${String(request.skill || "").replace(/_/g, " ")} skill check. Resolve it in the Abilities tab.`;
+  }
+  if (request.type === "ability") {
+    return `Roll requested: ${request.ability || "Ability"} ability check. Resolve it in the Abilities tab.`;
+  }
+  if (request.type === "save") {
+    return `Roll requested: ${request.ability || "Ability"} saving throw. Resolve it in the Abilities tab.`;
+  }
+  if (request.type === "initiative") {
+    return "Roll requested: initiative. Resolve it in the Abilities tab.";
+  }
+  return "A roll was requested.";
+}
+
 function logClient(message, data = {}, level = "info") {
   try {
     const payload = JSON.stringify({ message, data, level });
@@ -51,6 +130,8 @@ export async function resetUI() {
   appState.session = false;
   appState.character = null;
   appState.actionRolls = {};
+  appState.pendingRollRequest = null;
+  appState.lastAnnouncedRollRequestId = null;
   appState.pendingRolls = new Set();
   appState.pendingRollGlobal = false;
   messagesEl.innerHTML = "";
@@ -793,25 +874,7 @@ export async function sendMessage(content) {
       addMessage("dm", data.error);
       return;
     }
-    appState.session = true;
-    if (data.combat_log) {
-      addCombatLogEntries(data.combat_log, data.combat_log_meta);
-    }
-    if (data.narrative) {
-      addMessage("dm", data.narrative);
-    }
-    if (data.character) {
-      renderCharacter(data.character);
-    }
-    if (data.combat) {
-      renderCombat(data.combat);
-    }
-    if (data.game_state) {
-      setSessionActive(true, data.game_state.mode || "exploration");
-    }
-    if (data.images) {
-      renderImages(data.images);
-    }
+    applySessionResponse(data, { markSession: true });
   } finally {
     setLlmPending(false);
   }
@@ -842,30 +905,20 @@ export async function regenerateSceneImage() {
 }
 
 export async function sendCombatAction(actionId, targetIds) {
-  const res = await fetch("/api/combat_action", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action_id: actionId, target_ids: targetIds }),
-  });
-  const data = await res.json();
-  if (data.error) {
-    addMessage("dm", data.error);
-    return;
-  }
-  if (data.combat_log) {
-    addCombatLogEntries(data.combat_log, data.combat_log_meta);
-  }
-  if (data.narrative) {
-    addMessage("dm", data.narrative);
-  }
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  if (data.game_state) {
-    setSessionActive(true, data.game_state.mode || "exploration");
+  setLlmPending(true);
+  try {
+    const data = await executeIntent({
+      intent_type: "action",
+      action_id: actionId,
+      target_ids: targetIds,
+    });
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    applySessionResponse(data);
+  } finally {
+    setLlmPending(false);
   }
 }
 
@@ -880,21 +933,7 @@ export async function sendCombatEndTurn() {
     addMessage("dm", data.error);
     return;
   }
-  if (data.combat_log) {
-    addCombatLogEntries(data.combat_log, data.combat_log_meta);
-  }
-  if (data.narrative) {
-    addMessage("dm", data.narrative);
-  }
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  if (data.game_state) {
-    setSessionActive(true, data.game_state.mode || "exploration");
-  }
+  applySessionResponse(data);
 }
 
 export async function sendCombatMove(x, y) {
@@ -908,21 +947,7 @@ export async function sendCombatMove(x, y) {
     addMessage("dm", data.error);
     return;
   }
-  if (data.combat_log) {
-    addCombatLogEntries(data.combat_log, data.combat_log_meta);
-  }
-  if (data.narrative) {
-    addMessage("dm", data.narrative);
-  }
-  if (data.character) {
-    renderCharacter(data.character);
-  }
-  if (data.combat) {
-    renderCombat(data.combat);
-  }
-  if (data.game_state) {
-    setSessionActive(true, data.game_state.mode || "exploration");
-  }
+  applySessionResponse(data);
 }
 
 export async function toggleEquip(itemName, equipped) {
@@ -965,24 +990,16 @@ export async function togglePrepare(spellName, prepared) {
 
 export async function rollAction(actionId, options = {}) {
   setRollPending(actionId, true);
-  const shouldShowThinking = !!options.narrate;
-  if (shouldShowThinking) {
-    setLlmPending(true);
-  }
+  setLlmPending(true);
   try {
-    const payload = {
+    const data = await executeIntent({
+      intent_type: "action",
       action_id: actionId,
       advantage: options.advantage || null,
       target_ids: options.targetIds || [],
       target_text: options.targetText || null,
-      narrate: !!options.narrate,
-    };
-    const res = await fetch("/api/action/roll", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      player_text: options.playerText || null,
     });
-    const data = await res.json();
     if (data.error) {
       addMessage("dm", data.error);
       return;
@@ -990,25 +1007,50 @@ export async function rollAction(actionId, options = {}) {
     if (data.result?.summary) {
       addMessage("user", data.result.summary);
     } else {
-      addMessage("user", `Rolled ${actionId}.`);
+      addMessage("user", `Executed ${actionId}.`);
     }
     if (data.result) {
       appState.actionRolls[actionId] = data.result;
     }
-    if (data.narrative) {
-      addMessage("dm", data.narrative);
-    }
-    if (data.character) {
-      renderCharacter(data.character);
-    }
-    if (data.combat) {
-      renderCombat(data.combat);
-    }
+    applySessionResponse(data);
   } finally {
-    if (shouldShowThinking) {
-      setLlmPending(false);
-    }
+    setLlmPending(false);
     setRollPending(actionId, false);
+  }
+}
+
+export async function executeCheck(checkType, options = {}) {
+  const pendingKey = `check_${checkType}`;
+  setRollPending(pendingKey, true);
+  setLlmPending(true);
+  try {
+    const data = await executeIntent({
+      intent_type: "check",
+      check_type: checkType,
+      skill: options.skill || null,
+      ability: options.ability || null,
+      advantage: options.advantage || null,
+      player_text: options.playerText || null,
+      expected_request_id: appState.pendingRollRequest?.request_id || null,
+    });
+    if (data.error) {
+      addMessage("dm", data.error);
+      return;
+    }
+    if (data.result) {
+      const result = data.result;
+      const label = result.check_type === "skill"
+        ? `${result.skill} check`
+        : result.check_type === "initiative"
+          ? "initiative"
+          : `${result.ability} ${result.check_type}`;
+      addMessage("user", `[CHECK] ${label}: ${result.total}`);
+      appState.actionRolls[pendingKey] = result;
+    }
+    applySessionResponse(data);
+  } finally {
+    setLlmPending(false);
+    setRollPending(pendingKey, false);
   }
 }
 

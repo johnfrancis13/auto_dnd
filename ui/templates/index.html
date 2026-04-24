@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Auto DnD</title>
-    <link rel="stylesheet" href="/static/app.css?v=20260403n" />
+    <link rel="stylesheet" href="/static/app.css?v=20260420a" />
     <script>
       fetch("/api/log", {
         method: "POST",
@@ -13,7 +13,7 @@
         keepalive: true,
       }).catch(() => {});
     </script>
-    <script type="module" defer src="/static/app.js?v=20260403n"></script>
+    <script type="module" defer src="/static/app.js?v=20260420a"></script>
   </head>
   <body>
     <div id="setup-screen" class="setup-screen">
@@ -122,18 +122,7 @@
       </aside>
 
       <main class="chat">
-        <section class="images inline">
-          <div class="section-header">
-            <h2>Scene Images</h2>
-            <div class="header-actions">
-              <button type="button" id="regenerate-scene" class="image-action">
-                Regenerate
-              </button>
-              <button type="button" class="collapse-toggle" data-collapse="images" aria-expanded="true">
-                Collapse
-              </button>
-            </div>
-          </div>
+        <section class="images inline collapsed">
           <div id="image-grid" class="image-grid">
             <div class="empty">No images yet</div>
           </div>
@@ -144,7 +133,9 @@
             <div id="game-state" class="muted">No session running</div>
           </div>
           <div class="header-actions">
-            <div class="pill" id="session-indicator">Idle</div>
+            <button type="button" id="regenerate-scene" class="image-action">
+              Regenerate Image
+            </button>
             <button type="button" class="collapse-toggle" data-collapse="chat" aria-expanded="true">
               Collapse
             </button>
@@ -165,7 +156,7 @@
 
         <section id="combat-panel" class="combat-panel hidden">
           <div class="combat-header">
-            <h2>Combat Actions</h2>
+            <h2>Combat</h2>
             <div class="combat-header-actions">
               <div class="muted" id="combat-turn">Waiting for turn...</div>
               <button type="button" class="collapse-toggle" data-collapse="combat" aria-expanded="true">
@@ -187,28 +178,13 @@
           <div class="combat-map-wrap">
             <div class="combat-map" id="combat-map"></div>
           </div>
-          <div class="combat-controls">
-            <label>
-              Action
-              <select id="combat-action"></select>
-            </label>
-            <label>
-              <div class="label-row">
-                <span>Target</span>
-                <span class="muted" id="combat-target-count"></span>
-              </div>
-              <select id="combat-target" multiple size="4"></select>
-            </label>
-            <div class="combat-buttons">
-              <button type="button" id="combat-submit">Resolve</button>
-              <button type="button" id="combat-end-turn" class="ghost">End Turn</button>
-            </div>
+          <div class="combat-buttons">
+            <button type="button" id="combat-end-turn" class="ghost">End Turn</button>
           </div>
           <div class="muted combat-instructions">
-            To move: click a highlighted square on the grid. To act: choose an action, select target(s), then press
-            Resolve. End Turn when you're done.
+            To move: click a highlighted square on the grid. To act: use your Sheet actions and choose targets there.
+            End Turn when you're done.
           </div>
-          <div class="muted combat-hint">Tip: Hold Ctrl (Windows) or Cmd (Mac) to select multiple targets.</div>
         </section>
 
         <form id="chat-form" class="composer">

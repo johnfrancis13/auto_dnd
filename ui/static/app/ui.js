@@ -20,8 +20,10 @@ export function setLlmPending(active) {
 }
 
 export function setSessionActive(active, mode = "exploration") {
-  sessionIndicator.textContent = active ? "Live" : "Idle";
-  sessionIndicator.style.background = active ? "#e2b091" : "#e6e0d8";
+  if (sessionIndicator) {
+    sessionIndicator.textContent = active ? "Live" : "Idle";
+    sessionIndicator.style.background = active ? "#e2b091" : "#e6e0d8";
+  }
   if (!active) {
     gameStateEl.textContent = "No session running";
   } else {
@@ -138,7 +140,7 @@ export function addCombatLogEntries(logs, meta = null) {
       return;
     }
     const target = log.target || (Array.isArray(log.targets) ? log.targets.join(", ") : "Unknown");
-    const header = `${log.actor || "Unknown"} → ${target}: ${log.action_name || log.action_id || "Action"}`;
+    const header = `${log.actor || "Unknown"} -> ${target}: ${log.action_name || log.action_id || "Action"}`;
     const lines = [`---- ${timestamp} ----`, header];
     if (log.attack_total !== null || log.attack_roll_detail) {
       lines.push(formatAttackLine(log));
@@ -148,7 +150,7 @@ export function addCombatLogEntries(logs, meta = null) {
     }
     lines.push(...formatDamageLines(log));
     if (log.target_hp_before !== null && log.target_hp_after !== null) {
-      lines.push(`HP: ${log.target_hp_before} → ${log.target_hp_after}`);
+      lines.push(`HP: ${log.target_hp_before} -> ${log.target_hp_after}`);
     }
     if (log.notes) {
       lines.push(`Note: ${log.notes}`);
@@ -164,3 +166,4 @@ export function addCombatLogEntries(logs, meta = null) {
     addLogMessage(lines.filter(Boolean).join("\n"), tone);
   });
 }
+

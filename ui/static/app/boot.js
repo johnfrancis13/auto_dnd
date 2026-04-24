@@ -1,4 +1,4 @@
-import { appState, uiState } from "./state.js";
+﻿import { appState, uiState } from "./state.js";
 import {
   startButton,
   equipmentSubmit,
@@ -18,22 +18,11 @@ import {
   regenerateSceneButton,
   chatMain,
   combatPanel,
-  combatSubmit,
   combatEndTurn,
-  combatActionSelect,
-  combatTargetSelect,
 } from "./dom.js";
 import { addMessage, setSessionActive, showSetupScreen } from "./ui.js";
 import { renderCharacter, renderImages } from "./render.js";
-import {
-  renderCombat,
-  setMoveHandler,
-  getCurrentCombatPayload,
-  getCurrentMap,
-  updateTargetingHighlights,
-  syncTargetSelect,
-  updateTargetCount,
-} from "./combat.js";
+import { renderCombat, setMoveHandler, getCurrentCombatPayload } from "./combat.js";
 import {
   enforceSpellChoiceLimits,
   enforceLanguageChoiceLimits,
@@ -49,15 +38,15 @@ import {
   submitSpellChoices,
   checkPendingChoices,
   sendMessage,
-  sendCombatAction,
   sendCombatEndTurn,
   sendCombatMove,
   toggleEquip,
   togglePrepare,
   rollAction,
+  executeCheck,
   useResource,
   regenerateSceneImage,
-} from "./api.js?v=20260403n";
+} from "./api.js?v=20260420a";
 
 function setupCollapseToggles() {
   const targets = {
@@ -200,133 +189,124 @@ export function boot() {
       });
     });
   }
+
   if (sheetBody) {
     sheetBody.addEventListener("click", (event) => {
-    const equipBtn = event.target.closest("[data-equip-toggle]");
-    if (equipBtn) {
-      const itemName = equipBtn.dataset.itemName;
-      const equipped = equipBtn.dataset.equipped === "true";
-      toggleEquip(itemName, !equipped).catch((err) => {
-        addMessage("dm", `Failed to equip: ${err}`);
-      });
-      return;
-    }
-    const resourceBtn = event.target.closest("[data-resource-use]");
-    if (resourceBtn) {
-      const resourceId = resourceBtn.dataset.resourceId;
-      const resourceName = resourceBtn.dataset.resourceName || "Resource";
-      useResource(resourceId, resourceName).catch((err) => {
-        addMessage("dm", `Failed to use resource: ${err}`);
-      });
-      return;
-    }
-    const prepareBtn = event.target.closest("[data-prepare-toggle]");
-    if (prepareBtn) {
-      const spellName = prepareBtn.dataset.spellName;
-      const prepared = prepareBtn.dataset.prepared === "true";
-      togglePrepare(spellName, !prepared).catch((err) => {
-        addMessage("dm", `Failed to prepare: ${err}`);
-      });
-      return;
-    }
-    const rollBtn = event.target.closest("[data-roll-action]");
-    if (rollBtn) {
+      const equipBtn = event.target.closest("[data-equip-toggle]");
+      if (equipBtn) {
+        const itemName = equipBtn.dataset.itemName;
+        const equipped = equipBtn.dataset.equipped === "true";
+        toggleEquip(itemName, !equipped).catch((err) => {
+          addMessage("dm", `Failed to equip: ${err}`);
+        });
+        return;
+      }
+
+      const resourceBtn = event.target.closest("[data-resource-use]");
+      if (resourceBtn) {
+        const resourceId = resourceBtn.dataset.resourceId;
+        const resourceName = resourceBtn.dataset.resourceName || "Resource";
+        useResource(resourceId, resourceName).catch((err) => {
+          addMessage("dm", `Failed to use resource: ${err}`);
+        });
+        return;
+      }
+
+      const prepareBtn = event.target.closest("[data-prepare-toggle]");
+      if (prepareBtn) {
+        const spellName = prepareBtn.dataset.spellName;
+        const prepared = prepareBtn.dataset.prepared === "true";
+        togglePrepare(spellName, !prepared).catch((err) => {
+          addMessage("dm", `Failed to prepare: ${err}`);
+        });
+        return;
+      }
+
+      const rollBtn = event.target.closest("[data-roll-action]");
+      if (rollBtn) {
       const actionId = rollBtn.dataset.rollAction;
       if (appState.pendingRollGlobal || appState.pendingRolls.has(actionId)) {
         return;
       }
-      const narrate = rollBtn.dataset.rollNarrate === "true";
+      uiState.selectedActionId = actionId;
       const advSelect = sheetBody.querySelector(`[data-roll-advantage="${actionId}"]`);
-      const targetSelect = sheetBody.querySelector(`[data-roll-target="${actionId}"]`);
-      const targetTextEl = sheetBody.querySelector(`[data-roll-target-text="${actionId}"]`);
-      const advantage = advSelect ? advSelect.value : "";
-      const targetIds = targetSelect
-        ? Array.from(targetSelect.selectedOptions).map((opt) => opt.value)
-        : [];
-      const targetText = targetTextEl ? targetTextEl.value.trim() : "";
-      rollAction(actionId, { advantage, targetIds, targetText, narrate }).catch((err) => {
-        addMessage("dm", `Failed to roll: ${err}`);
-      });
-    }
+        const targetSelect = sheetBody.querySelector(`[data-roll-target="${actionId}"]`);
+        const targetTextEl = sheetBody.querySelector(`[data-roll-target-text="${actionId}"]`);
+        const advantage = advSelect ? advSelect.value : "";
+        const targetIds = targetSelect
+          ? Array.from(targetSelect.selectedOptions).map((opt) => opt.value)
+          : [];
+        const targetText = targetTextEl ? targetTextEl.value.trim() : "";
+        rollAction(actionId, { advantage, targetIds, targetText }).catch((err) => {
+          addMessage("dm", `Failed to execute action: ${err}`);
+        });
+        return;
+      }
+
+      const checkBtn = event.target.closest("[data-check-execute]");
+      if (checkBtn) {
+        if (appState.pendingRollGlobal) {
+          return;
+        }
+        const checkType = checkBtn.dataset.checkExecute;
+        const advantageEl = sheetBody.querySelector(`[data-check-advantage="${checkType}"]`);
+        const skillEl = sheetBody.querySelector("[data-check-skill]");
+        const abilityEl = sheetBody.querySelector(`[data-check-ability="${checkType}"]`);
+        const advantage = advantageEl ? advantageEl.value : "";
+        const skill = checkType === "skill" && skillEl ? skillEl.value : null;
+        const ability = (checkType === "ability" || checkType === "save") && abilityEl ? abilityEl.value : null;
+        executeCheck(checkType, { skill, ability, advantage }).catch((err) => {
+          addMessage("dm", `Failed to execute check: ${err}`);
+        });
+      }
     });
   }
+
   if (sheetBody) {
     sheetBody.addEventListener("change", (event) => {
-    const spellFilter = event.target.closest("[data-spell-filter]");
-    if (spellFilter) {
-      uiState.spellFilterPreparedOnly = !!spellFilter.checked;
-      renderCharacter(appState.character);
-      return;
-    }
-    const spellFilterLevelSelect = event.target.closest("[data-spell-filter-level]");
-    if (spellFilterLevelSelect) {
-      uiState.spellFilterLevel = spellFilterLevelSelect.value || "all";
-      renderCharacter(appState.character);
-      return;
-    }
-    const targetSelect = event.target.closest("[data-roll-target]");
-    if (targetSelect) {
-      enforceMaxTargets(targetSelect);
-    }
+      const spellFilter = event.target.closest("[data-spell-filter]");
+      if (spellFilter) {
+        uiState.spellFilterPreparedOnly = !!spellFilter.checked;
+        renderCharacter(appState.character);
+        return;
+      }
+      const spellFilterLevelSelect = event.target.closest("[data-spell-filter-level]");
+      if (spellFilterLevelSelect) {
+        uiState.spellFilterLevel = spellFilterLevelSelect.value || "all";
+        renderCharacter(appState.character);
+        return;
+      }
+      const targetSelect = event.target.closest("[data-roll-target]");
+      if (targetSelect) {
+        enforceMaxTargets(targetSelect);
+      }
     });
   }
-  if (combatSubmit) {
-    combatSubmit.addEventListener("click", () => {
-    const actionId = combatActionSelect.value;
-    const targetIds = uiState.selectedTargets.length
-      ? uiState.selectedTargets
-      : Array.from(combatTargetSelect.selectedOptions).map((opt) => opt.value);
-    if (!actionId || targetIds.length === 0) {
-      return;
-    }
-    const targetsLabel = targetIds.join(", ");
-    addMessage("user", `${combatActionSelect.options[combatActionSelect.selectedIndex].text} → ${targetsLabel}`);
-    sendCombatAction(actionId, targetIds).catch((err) => {
-      addMessage("dm", `Failed to resolve action: ${err}`);
-    });
-    });
-  }
+
   if (combatEndTurn) {
     combatEndTurn.addEventListener("click", () => {
-    addMessage("user", "End Turn");
-    sendCombatEndTurn().catch((err) => {
-      addMessage("dm", `Failed to end turn: ${err}`);
-    });
+      addMessage("user", "End Turn");
+      sendCombatEndTurn().catch((err) => {
+        addMessage("dm", `Failed to end turn: ${err}`);
+      });
     });
   }
+
   if (sheetTabs) {
     sheetTabs.addEventListener("click", (event) => {
-    const button = event.target.closest(".tab");
-    if (!button) {
-      return;
-    }
-    const nextTab = button.dataset.tab;
-    if (!nextTab || nextTab === uiState.activeTab) {
-      return;
-    }
-    uiState.activeTab = nextTab;
-    sheetTabs.querySelectorAll(".tab").forEach((tab) => {
-      tab.classList.toggle("active", tab.dataset.tab === uiState.activeTab);
-    });
-    renderCharacter(appState.character);
-    });
-  }
-  if (combatActionSelect) {
-    combatActionSelect.addEventListener("change", () => {
-    const actions = appState.character?.actions?.actions || [];
-    uiState.selectedTargets = [];
-    syncTargetSelect();
-    updateTargetCount(actions);
-    const combat = getCurrentCombatPayload();
-    updateTargetingHighlights(getCurrentMap(), actions, combat, combat.targets || []);
-    });
-  }
-  if (combatTargetSelect) {
-    combatTargetSelect.addEventListener("change", () => {
-    uiState.selectedTargets = Array.from(combatTargetSelect.selectedOptions).map((opt) => opt.value);
-    syncTargetSelect();
-    const actions = appState.character?.actions?.actions || [];
-    updateTargetCount(actions);
+      const button = event.target.closest(".tab");
+      if (!button) {
+        return;
+      }
+      const nextTab = button.dataset.tab;
+      if (!nextTab || nextTab === uiState.activeTab) {
+        return;
+      }
+      uiState.activeTab = nextTab;
+      sheetTabs.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.tab === uiState.activeTab);
+      });
+      renderCharacter(appState.character);
     });
   }
 

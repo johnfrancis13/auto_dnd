@@ -1,9 +1,6 @@
 import { appState, uiState } from "./state.js";
 import {
   combatPanel,
-  combatActionSelect,
-  combatTargetSelect,
-  combatSubmit,
   combatEndTurn,
   combatTurn,
   chatMain,
@@ -11,7 +8,6 @@ import {
   currentTurnChipEl,
   turnStateEl,
   combatMapEl,
-  combatTargetCountEl,
 } from "./dom.js";
 
 let moveHandler = null;
@@ -38,7 +34,7 @@ export function renderCombat(combat) {
   appState.combat = combat;
   const playerName = appState.character?.identity?.name || "";
   const currentTurn = combat.current_turn || "";
-  const isPlayerTurn = !currentTurn || currentTurn === playerName;
+  const isPlayerTurn = Boolean(currentTurn) && currentTurn === playerName;
   combatPanel.classList.toggle("your-turn", isPlayerTurn);
   combatTurn.textContent = currentTurn
     ? `Current turn: ${currentTurn}`
@@ -73,68 +69,12 @@ export function renderCombat(combat) {
       ? `<span>Move: ${moveRemaining}/${moveMax} ft</span>`
       : `<span>Move: --</span>`,
   ].join("");
-  const actions = appState.character?.actions?.actions || [];
-  combatActionSelect.innerHTML = actions.length
-    ? actions.map((action) => {
-        const typeLabel = action.type.charAt(0).toUpperCase() + action.type.slice(1);
-        const label = `${typeLabel}: ${action.name}`;
-        const disabled =
-          (action.type === "action" && !turnState.action) ||
-          (action.type === "bonus" && !turnState.bonus) ||
-          (action.type === "reaction" && !turnState.reaction);
-        return `<option value="${action.id}" ${disabled ? "disabled" : ""}>${label}</option>`;
-      }).join("")
-    : "<option value=\"\">No actions available</option>";
   const targets = combat.targets || [];
-  const targetDetails = Array.isArray(combat.targets_detail) ? combat.targets_detail : [];
-  const detailLookup = new Map(targetDetails.map((entry) => [entry.id || entry.name, entry]));
-  combatTargetSelect.innerHTML = targets.length
-    ? targets.map((target) => {
-        const detail = detailLookup.get(target) || {};
-        const hasDetail = detail.hp_current !== undefined || detail.hp_max !== undefined || detail.ac !== undefined;
-        const hpCurrent = detail.hp_current ?? "?";
-        const hpMax = detail.hp_max ?? "?";
-        const ac = detail.ac ?? "?";
-        const suffix = hasDetail ? ` (HP ${hpCurrent}/${hpMax}, AC ${ac})` : "";
-        const label = hasDetail ? `${target}${suffix}` : target;
-        return `<option value="${target}" title="${label}">${label}</option>`;
-      }).join("")
-    : "<option value=\"\">No targets available</option>";
-  const playerTurn = !currentTurn || currentTurn === playerName;
-  const canAct = playerTurn && actions.length > 0;
-  combatActionSelect.disabled = !canAct;
-  combatTargetSelect.disabled = !canAct || targets.length === 0;
-  combatSubmit.disabled = !canAct || targets.length === 0;
+  const playerTurn = Boolean(currentTurn) && currentTurn === playerName;
   combatEndTurn.disabled = !playerTurn;
-  if (canAct && uiState.selectedTargets.length === 0 && targets.length > 0) {
-    uiState.selectedTargets = [targets[0]];
-  }
-  syncTargetSelect();
-  updateTargetCount(actions);
+  const actions = appState.character?.actions?.actions || [];
+  normalizeSelectedTargets(actions, combat, targets);
   renderCombatMap(combat.map, combat);
-  updateTargetingHighlights(combat.map, actions, combat, targets);
-}
-
-export function updateTargetCount(actions) {
-  if (!combatTargetCountEl) {
-    return;
-  }
-  const selectedCount = uiState.selectedTargets.length;
-  const selectedAction = getSelectedAction(actions);
-  const maxTargets = selectedAction?.max_targets ?? null;
-  if (!actions || actions.length === 0) {
-    combatTargetCountEl.textContent = "";
-    return;
-  }
-  if (combatTargetSelect.disabled) {
-    combatTargetCountEl.textContent = "No targets";
-    return;
-  }
-  if (maxTargets) {
-    combatTargetCountEl.textContent = `${selectedCount}/${maxTargets} selected`;
-    return;
-  }
-  combatTargetCountEl.textContent = `${selectedCount} selected`;
 }
 
 export function renderCombatMap(map, combat) {
@@ -224,7 +164,10 @@ export function renderCombatMap(map, combat) {
 }
 
 export function getSelectedAction(actions) {
-  const actionId = combatActionSelect.value;
+  if (!actions || actions.length === 0) {
+    return null;
+  }
+  const actionId = uiState.selectedActionId || "";
   return actions.find((action) => action.id === actionId) || null;
 }
 
@@ -264,25 +207,19 @@ export function toggleTargetSelection(tokenId) {
   if (!tokenId) {
     return;
   }
+  const combat = getCurrentCombatPayload();
+  const allowedTargets = combat.targets || [];
+  if (!allowedTargets.includes(tokenId)) {
+    return;
+  }
   if (uiState.selectedTargets.includes(tokenId)) {
     uiState.selectedTargets = uiState.selectedTargets.filter((id) => id !== tokenId);
   } else {
     uiState.selectedTargets = [...uiState.selectedTargets, tokenId];
   }
-  syncTargetSelect();
   const actions = appState.character?.actions?.actions || [];
-  updateTargetCount(actions);
-  updateTargetingHighlights(getCurrentMap(), actions, getCurrentCombatPayload(), appState.combat?.targets || []);
-}
-
-export function syncTargetSelect() {
-  const select = combatTargetSelect;
-  if (!select) {
-    return;
-  }
-  Array.from(select.options).forEach((opt) => {
-    opt.selected = uiState.selectedTargets.includes(opt.value);
-  });
+  normalizeSelectedTargets(actions, combat, allowedTargets);
+  updateTargetingHighlights(getCurrentMap(), actions, combat, allowedTargets);
 }
 
 export function computeTargetableTokens(action, origin, targets, primaryId, gridSize) {
@@ -307,6 +244,41 @@ export function computeTargetableTokens(action, origin, targets, primaryId, grid
     return targets.filter((token) => withinLinearShape(originPos, primaryTarget, token, targeting, shape, length, gridSize)).map((t) => t.id);
   }
   return targets.map((token) => token.id);
+}
+
+export function normalizeSelectedTargets(actions, combat, allowedTargets = []) {
+  const uniqueAllowed = Array.isArray(allowedTargets) ? Array.from(new Set(allowedTargets)) : [];
+  const selectedAction = getSelectedAction(actions || []);
+  let targetableSet = new Set(uniqueAllowed);
+  if (selectedAction && combat?.map?.tokens && combat?.player_name) {
+    const playerToken = combat.map.tokens.find((token) => token.id === combat.player_name);
+    const targetTokens = combat.map.tokens.filter((token) => uniqueAllowed.includes(token.id));
+    if (playerToken && targetTokens.length > 0) {
+      const primaryId = uiState.selectedTargets[0] || uniqueAllowed[0] || null;
+      targetableSet = new Set(
+        computeTargetableTokens(
+          selectedAction,
+          playerToken,
+          targetTokens,
+          primaryId,
+          combat.map.grid_size || 5
+        )
+      );
+    }
+  }
+
+  let selected = uiState.selectedTargets.filter((id) => uniqueAllowed.includes(id) && targetableSet.has(id));
+  const maxTargets = selectedAction?.max_targets ?? null;
+  if (maxTargets && selected.length > maxTargets) {
+    selected = selected.slice(-maxTargets);
+  }
+  if (selected.length === 0) {
+    const fallback = uniqueAllowed.find((id) => targetableSet.has(id));
+    if (fallback) {
+      selected = [fallback];
+    }
+  }
+  uiState.selectedTargets = selected;
 }
 
 export function withinRange(origin, token, range, gridSize) {

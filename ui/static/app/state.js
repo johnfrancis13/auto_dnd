@@ -2,6 +2,8 @@ export const appState = {
   session: false,
   character: null,
   combat: null,
+  pendingRollRequest: null,
+  lastAnnouncedRollRequestId: null,
   actionRolls: {},
   pendingRolls: new Set(),
   pendingRollGlobal: false,
@@ -9,6 +11,7 @@ export const appState = {
 
 export const uiState = {
   selectedTargets: [],
+  selectedActionId: null,
   activeTab: "about",
   pendingStartPayload: null,
   pendingEquipmentChoices: [],

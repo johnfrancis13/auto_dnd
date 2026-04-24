@@ -1,5 +1,5 @@
 import { appState, uiState } from "./state.js";
-import { sheetBody, imageGrid } from "./dom.js";
+import { sheetBody, imageGrid, chatMain } from "./dom.js";
 
 export function renderCharacter(character) {
   appState.character = character;
@@ -53,6 +53,7 @@ export function renderCharacter(character) {
     <ul>
       ${Object.entries(character.abilities.saving_throws).map(([k, v]) => `<li><span>${k}</span><strong>${v}</strong></li>`).join("")}
     </ul>
+    ${renderCheckTools(character)}
   `;
   const inventoryHtml = `
     ${character.inventory.items.length === 0 ? "<p>No items.</p>" : character.inventory.items.map(item => `
@@ -248,9 +249,6 @@ export function renderActionControls(action, character) {
       </label>
     `
     : "";
-  const narrateButton = !inCombat
-    ? `<button type="button" class="roll-button primary" data-roll-action="${action.id}" data-roll-narrate="true">Roll + Narrate</button>`
-    : "";
   const slotNote = action.spell_level && slotResource
     ? `<div class="muted">Spell slots (Level ${action.spell_level}): ${slotResource.current}/${slotResource.maximum}</div>`
     : (action.spell_level ? `<div class="muted">Spell slots (Level ${action.spell_level}): 0/0</div>` : "");
@@ -269,8 +267,7 @@ export function renderActionControls(action, character) {
       <div class="roll-status" data-roll-status="${action.id}"></div>
       ${slotNote}
       <div class="roll-buttons">
-        <button type="button" class="roll-button" data-roll-action="${action.id}" ${hasSlots ? "" : "disabled"}>Roll</button>
-        ${hasSlots ? narrateButton : ""}
+        <button type="button" class="roll-button primary" data-roll-action="${action.id}" ${hasSlots ? "" : "disabled"}>Execute Action</button>
       </div>
     </div>
   `;
@@ -306,14 +303,135 @@ export function getSpellSlotResource(character, spellLevel) {
   return slots.find((slot) => slot.name === name) || null;
 }
 
+export function renderCheckTools(character) {
+  const skills = Object.keys(character.abilities.skill_scores || {});
+  const abilities = Object.keys(character.abilities.ability_scores || {});
+  const firstSkill = skills[0] || "";
+  const firstAbility = abilities[0] || "STR";
+  const pending = appState.pendingRollRequest;
+  const lockToRequested = !!pending;
+  const pendingType = String(pending?.type || "");
+  const pendingRequestId = pending?.request_id ? String(pending.request_id).slice(0, 8) : "";
+  const disableSkill = lockToRequested && pendingType !== "skill";
+  const disableAbility = lockToRequested && pendingType !== "ability";
+  const disableSave = lockToRequested && pendingType !== "save";
+  const disableInitiative = lockToRequested && pendingType !== "initiative";
+  const pendingLabel = pending
+    ? (
+      pending.type === "skill" ? `Requested roll: ${String(pending.skill || "").replace(/_/g, " ")} skill check`
+      : pending.type === "ability" ? `Requested roll: ${pending.ability} ability check`
+      : pending.type === "save" ? `Requested roll: ${pending.ability} saving throw`
+      : pending.type === "initiative" ? "Requested roll: initiative"
+      : "Requested roll"
+    )
+    : "";
+
+  return `
+    <h3>Checks</h3>
+    ${pending ? `<div class="entry"><strong>${pendingLabel}</strong><div class="muted">Request ${pendingRequestId ? `#${pendingRequestId}` : ""}. Only the matching check will clear this request.</div></div>` : ""}
+    <div class="entry">
+      <div class="roll-controls" data-roll-controls="check_skill">
+        <label class="roll-control">
+          Skill
+          <select data-check-skill ${disableSkill ? "disabled" : ""}>
+            ${skills.map((skill) => `<option value="${skill}" ${pending?.type === "skill" && pending.skill === skill ? "selected" : ""}>${skill.replace(/_/g, " ")}</option>`).join("")}
+          </select>
+        </label>
+        <label class="roll-control">
+          Advantage
+          <select data-check-advantage="skill" ${disableSkill ? "disabled" : ""}>
+            <option value="">Normal</option>
+            <option value="adv">Advantage</option>
+            <option value="dis">Disadvantage</option>
+          </select>
+        </label>
+        <div class="roll-status" data-roll-status="check_skill"></div>
+        <div class="roll-buttons">
+          <button type="button" class="roll-button primary" data-check-execute="skill" ${(firstSkill && !disableSkill) ? "" : "disabled"}>Roll Skill Check</button>
+        </div>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="roll-controls" data-roll-controls="check_ability">
+        <label class="roll-control">
+          Ability
+          <select data-check-ability="ability" ${disableAbility ? "disabled" : ""}>
+            ${abilities.map((ability) => `<option value="${ability}" ${pending?.type === "ability" && pending.ability === ability ? "selected" : ""}>${ability}</option>`).join("")}
+          </select>
+        </label>
+        <label class="roll-control">
+          Advantage
+          <select data-check-advantage="ability" ${disableAbility ? "disabled" : ""}>
+            <option value="">Normal</option>
+            <option value="adv">Advantage</option>
+            <option value="dis">Disadvantage</option>
+          </select>
+        </label>
+        <div class="roll-status" data-roll-status="check_ability"></div>
+        <div class="roll-buttons">
+          <button type="button" class="roll-button primary" data-check-execute="ability" ${(firstAbility && !disableAbility) ? "" : "disabled"}>Roll Ability Check</button>
+        </div>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="roll-controls" data-roll-controls="check_save">
+        <label class="roll-control">
+          Save Ability
+          <select data-check-ability="save" ${disableSave ? "disabled" : ""}>
+            ${abilities.map((ability) => `<option value="${ability}" ${pending?.type === "save" && pending.ability === ability ? "selected" : ""}>${ability}</option>`).join("")}
+          </select>
+        </label>
+        <label class="roll-control">
+          Advantage
+          <select data-check-advantage="save" ${disableSave ? "disabled" : ""}>
+            <option value="">Normal</option>
+            <option value="adv">Advantage</option>
+            <option value="dis">Disadvantage</option>
+          </select>
+        </label>
+        <div class="roll-status" data-roll-status="check_save"></div>
+        <div class="roll-buttons">
+          <button type="button" class="roll-button primary" data-check-execute="save" ${(firstAbility && !disableSave) ? "" : "disabled"}>Roll Saving Throw</button>
+        </div>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="roll-controls" data-roll-controls="check_initiative">
+        <label class="roll-control">
+          Advantage
+          <select data-check-advantage="initiative" ${disableInitiative ? "disabled" : ""}>
+            <option value="">Normal</option>
+            <option value="adv">Advantage</option>
+            <option value="dis">Disadvantage</option>
+          </select>
+        </label>
+        <div class="roll-status" data-roll-status="check_initiative"></div>
+        <div class="roll-buttons">
+          <button type="button" class="roll-button primary" data-check-execute="initiative" ${disableInitiative ? "disabled" : ""}>Roll Initiative</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export function renderImages(images) {
   imageGrid.innerHTML = "";
   if (!images || images.length === 0) {
+    if (chatMain) {
+      chatMain.classList.remove("scene-overlay-active");
+      chatMain.style.removeProperty("--scene-image");
+    }
     const empty = document.createElement("div");
     empty.className = "empty";
     empty.textContent = "No images yet";
     imageGrid.appendChild(empty);
     return;
+  }
+  const latestImage = images[images.length - 1];
+  const escapedUrl = String(latestImage).replace(/"/g, '\\"');
+  if (chatMain) {
+    chatMain.style.setProperty("--scene-image", `url("${escapedUrl}")`);
+    chatMain.classList.add("scene-overlay-active");
   }
   images.forEach((url) => {
     const card = document.createElement("div");

@@ -45,7 +45,7 @@ export function updateRollPendingUI(activeActionId, pending) {
       return;
     }
     if (pending && isActive) {
-      status.innerHTML = `<span class="spinner"></span> Rolling...`;
+      status.innerHTML = `<span class="spinner"></span> Executing...`;
     } else {
       status.textContent = "";
     }
